@@ -13,7 +13,9 @@ SOURCES += main.cpp \
     ccellarray.cpp \
     cscreen.cpp \
     cemulation.cpp \
-    cemulationVT102.cpp
+    cemulationVT102.cpp \
+    Win32Serial.cpp
+unix:SOURCES -= Win32Serial.cpp
 HEADERS += komport.h \
     cserial.h \
     cdevicelock.h \
@@ -22,7 +24,9 @@ HEADERS += komport.h \
     cscreen.h \
     cemulation.h \
     cemulationVT102.h \
-    cemulationVT102.h
+    cemulationVT102.h \
+    Win32Serial.h
+unix:HEADERS -= Win32Serial.h
 FORMS += komport.ui \
     settingsdialog.ui
 RESOURCES += komport.qrc
