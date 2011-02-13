@@ -164,9 +164,7 @@ void Komport::writeSettings()
 	settings.endGroup();
 }
 
-/**
- * Open the serial port and notify of there was any trouble */
-*/
+/** Open the serial port and notify of there was any trouble */
 bool Komport::openSerial()
 {
 	if ( serial()->open() )
