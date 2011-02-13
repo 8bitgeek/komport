@@ -26,3 +26,4 @@ HEADERS += komport.h \
 FORMS += komport.ui \
     settingsdialog.ui
 RESOURCES += komport.qrc
+OTHER_FILES += README.TXT
