@@ -427,6 +427,14 @@ void CSerial::timerEvent(QTimerEvent* e)
 		if ( mWin32Serial->ReadDataWaiting() )
 		{
 			emit readyRead();
+			if ( emitChars() )
+			{
+				char c;
+				while ( getChar(&c) )
+				{
+					emit rx(c);
+				}
+			}
 		}
 	}
 }
