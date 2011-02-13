@@ -43,6 +43,15 @@ Komport::Komport(QWidget *parent)
 	QObject::connect(settingsUi->ForegroundColorButton,SIGNAL(clicked()),this,SLOT(openForegroundColorDialog()));
 	QObject::connect(settingsUi->buttonHelp,SIGNAL(clicked()),this,SLOT(settingsHelp()));
 
+	#ifdef Q_OS_WIN32
+		settingsUi->DeviceComboBox->clear();
+		settingsUi->DeviceComboBox->addItem("COM1:");
+		settingsUi->DeviceComboBox->addItem("COM2:");
+		settingsUi->DeviceComboBox->addItem("COM3:");
+		settingsUi->DeviceComboBox->addItem("COM4:");
+		settingsUi->DeviceComboBox->setCurrentIndex(0);
+	#endif
+
 	readSettings();
 
 	createActions();
