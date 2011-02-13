@@ -1,0 +1,366 @@
+/**************************************************************************
+*   Author <mike@pikeaero.com> Mike Sharkey                               *
+*   Copyright (C) 2010 by Pike Aerospace Research Corporation             *
+*                                                                         *
+*   This program is free software: you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation, either version 3 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
+**************************************************************************/
+#include "komport.h"
+#include "ui_komport.h"
+#include "ui_settingsdialog.h"
+
+#include "cemulationVT102.h"
+
+#include <QMessageBox>
+#include <QSettings>
+#include <QColorDialog>
+#include <QClipboard>
+
+#define BANNER "Komport V0.8 Serial Communications"
+#define COPYRIGHT "Copyright (c) 2011 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
+
+#define ASCII_BEL   0x07
+#define ASCII_BS    0x08
+#define ASCII_LF    0x0A
+#define ASCII_CR    0x0D
+#define ASCII_ESC   0x1B
+
+#define DEFAULT_GRID_COLS 80
+#define DEFAULT_GRID_ROWS 25
+
+Komport::Komport(QWidget *parent)
+: QMainWindow(parent)
+, mSerial(NULL)
+, mScreen(NULL)
+, mEmulation(NULL)
+, ui(new Ui::Komport)
+, settingsUi(new Ui::SettingsDialog)
+{
+	ui->setupUi(this);
+	settingsUi->setupUi(&settingsDialog);
+	QObject::connect(settingsUi->BackgroundColorButton,SIGNAL(clicked()),this,SLOT(openBackgroundColorDialog()));
+	QObject::connect(settingsUi->ForegroundColorButton,SIGNAL(clicked()),this,SLOT(openForegroundColorDialog()));
+	QObject::connect(settingsUi->buttonHelp,SIGNAL(clicked()),this,SLOT(settingsHelp()));
+
+	readSettings();
+
+	createActions();
+	createMenus();
+	createToolBars();
+	createStatusBar();
+
+	this->setWindowIcon(QIcon(":/images/terminal.png"));
+}
+
+Komport::~Komport()
+{
+	serial()->close();
+	delete mSerial;
+	delete ui;
+}
+
+void Komport::readSettings()
+{
+	QSettings settings( QSettings::IniFormat, QSettings::UserScope, "pikeaero.com", "komport" );
+
+	settings.beginGroup("main");
+
+	restoreGeometry(settings.value("geometry").toByteArray());
+	restoreState(settings.value("windowState").toByteArray());
+
+	QString device			= settings.value("device",		settingsUi->DeviceComboBox->currentText()).toString();
+	int		baud			= settings.value("baud",		settingsUi->BaudRateComboBox->currentText().toInt()).toInt();
+	int		dbits			= settings.value("dbits",		settingsUi->DataBitsComboBox->currentText().toInt()).toInt();
+	int		sbits			= settings.value("sbits",		settingsUi->StopBitsComboBox->currentText().toInt()).toInt();
+	QString parity			= settings.value("parity",		settingsUi->ParityComboBox->currentText()).toString();
+	QString flow			= settings.value("flow",		settingsUi->FlowControlComboBox->currentText()).toString();
+	QString emulation		= settings.value("emulation",	settingsUi->EmulationComboBox->currentText()).toString();
+	int		cols			= settings.value("cols",		settingsUi->ColumnsSpinBox->value()).toInt();
+	int		rows			= settings.value("rows",		settingsUi->RowsSpinBox->value()).toInt();
+	bool	visualbell		= settings.value("visualbell",	settingsUi->VisualBellCheckBox->isChecked()).toBool();
+	bool	localecho		= settings.value("localecho",	settingsUi->LocalEchoCheckBox->isChecked()).toBool();
+	QRgb	backgroundColor = settings.value("background",	settingsUi->BackgroundColorButton->palette().color(QPalette::Button).rgb()).toUInt();
+	QRgb	foregroundColor = settings.value("foreground",	settingsUi->ForegroundColorButton->palette().color(QPalette::Button).rgb()).toUInt();
+	settings.endGroup();
+
+	if ( mScreen != NULL ) delete mScreen;
+	if ( mSerial != NULL ) delete mSerial;
+	if ( mEmulation != NULL ) delete mEmulation;
+
+	settingsUi->DeviceComboBox->setEditText(device);
+	settingsUi->BaudRateComboBox->setCurrentIndex(settingsUi->BaudRateComboBox->findText(QString::number(baud)));
+	settingsUi->FlowControlComboBox->setCurrentIndex(settingsUi->FlowControlComboBox->findText(flow));
+	settingsUi->ParityComboBox->setCurrentIndex(settingsUi->ParityComboBox->findText(parity));
+	settingsUi->DataBitsComboBox->setCurrentIndex(settingsUi->DataBitsComboBox->findText(QString::number(dbits)));
+	settingsUi->StopBitsComboBox->setCurrentIndex(settingsUi->StopBitsComboBox->findText(QString::number(sbits)));
+	settingsUi->EmulationComboBox->setCurrentIndex(settingsUi->EmulationComboBox->findText(emulation));
+	settingsUi->ColumnsSpinBox->setValue(cols);
+	settingsUi->RowsSpinBox->setValue(rows);
+	settingsUi->VisualBellCheckBox->setChecked(visualbell);
+	settingsUi->LocalEchoCheckBox->setChecked(localecho);
+	QPalette backgroundPalette = settingsUi->BackgroundColorButton->palette();
+	backgroundPalette.setColor(QPalette::Button,QColor::fromRgb(backgroundColor));
+	settingsUi->BackgroundColorButton->setPalette(backgroundPalette);
+	QPalette foregroundPalette = settingsUi->ForegroundColorButton->palette();
+	foregroundPalette.setColor(QPalette::Button,QColor::fromRgb(foregroundColor));
+	settingsUi->ForegroundColorButton->setPalette(foregroundPalette);
+
+
+	mScreen = new CScreen();
+	screen()->setGrid(cols,rows);
+	setCentralWidget(screen());
+	screen()->setEnabled(true);
+	screen()->setForegroundColor(QColor::fromRgb(foregroundColor));
+	screen()->setBackgroundColor(QColor::fromRgb(backgroundColor));
+	mSerial = new CSerial(device);
+	if ( emulation == "VT102" )
+	{
+		mEmulation = new CEmulationVT102(screen());
+		mEmulation->setVisualBell(visualbell);
+		mEmulation->setLocalEcho(localecho);
+	}
+	else
+	{
+		QMessageBox::warning(this, "No Emulation", "Emulation '"+emulation+"' not supported.");
+
+	}
+	screen()->setCursorPos(0,0);
+
+	if ( openSerial() )
+	{
+		serial()->setLineControl(baud,dbits,sbits,parity,flow);
+	}
+}
+
+void Komport::writeSettings()
+{
+	QSettings settings( QSettings::IniFormat, QSettings::UserScope, "pikeaero.com", "komport" );
+
+	settings.beginGroup("main");
+
+	settings.setValue("geometry", saveGeometry());
+	settings.setValue("windowState", saveState());
+
+	settings.setValue("device",		settingsUi->DeviceComboBox->currentText() );
+	settings.setValue("baud",		settingsUi->BaudRateComboBox->currentText().toInt() );
+	settings.setValue("dbits",		settingsUi->DataBitsComboBox->currentText().toInt() );
+	settings.setValue("sbits",		settingsUi->StopBitsComboBox->currentText().toInt() );
+	settings.setValue("parity",		settingsUi->ParityComboBox->currentText() );
+	settings.setValue("flow",		settingsUi->FlowControlComboBox->currentText() );
+	settings.setValue("emulation",	settingsUi->EmulationComboBox->currentText() );
+	settings.setValue("cols",		settingsUi->ColumnsSpinBox->value());
+	settings.setValue("rows",		settingsUi->RowsSpinBox->value());
+	settings.setValue("visualbell",	settingsUi->VisualBellCheckBox->isChecked());
+	settings.setValue("localecho",	settingsUi->LocalEchoCheckBox->isChecked());
+	settings.setValue("foreground", screen()->foregroundColor().rgb());
+	settings.setValue("background", screen()->backgroundColor().rgb());
+	settings.endGroup();
+}
+
+bool Komport::openSerial()
+{
+	if ( serial()->open() )
+	{
+		QObject::connect(emulation(),SIGNAL(sendAsciiChar(char)),serial(),SLOT(sendAsciiChar(char)));
+		QObject::connect(emulation(),SIGNAL(sendAsciiString(const char*)),serial(),SLOT(sendAsciiString(const char*)));
+		QObject::connect(serial(),SIGNAL(rx(char)),emulation(),SLOT(receiveChar(char)));
+		return true;
+	}
+	QMessageBox::warning(this, "Open Failed", "Open '"+settingsUi->DeviceComboBox->currentText()+"' failed");
+	return false;
+}
+
+/**
+  * Key press handler
+  */
+void Komport::keyPressEvent(QKeyEvent *e)
+{
+	emulation()->keyPressEvent(e);
+}
+
+void Komport::doCopy()
+{
+	QClipboard *clipboard = QApplication::clipboard();
+	clipboard->setText(screen()->selectedText());
+}
+
+void Komport::doPaste()
+{
+	QClipboard *clipboard = QApplication::clipboard();
+	QString text = clipboard->text();
+	serial()->sendAsciiString(text.toAscii().data());
+}
+
+void Komport::createActions()
+{
+	exitAct = new QAction(QIcon(":/images/exit.png"),tr("E&xit"), this);
+	exitAct->setShortcut(tr("Ctrl+Q"));
+	exitAct->setStatusTip(tr("Exit the application"));
+	QObject::connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+	copyAct = new QAction(QIcon(":/images/editcopy.png"), tr("&Copy"), this);
+	copyAct->setShortcut(tr("Ctrl+C"));
+	copyAct->setStatusTip(tr("Copy the current selection's contents to the clipboard"));
+	QObject::connect(copyAct,SIGNAL(triggered()),this,SLOT(doCopy()));
+
+	pasteAct = new QAction(QIcon(":/images/editpaste.png"), tr("&Paste"), this);
+	pasteAct->setShortcut(tr("Ctrl+V"));
+	pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current selection"));
+	QObject::connect(pasteAct,SIGNAL(triggered()),this,SLOT(doPaste()));
+
+	settingsAct = new QAction(QIcon(":/images/settings.png"), tr("Se&ttings"), this);
+	settingsAct->setShortcut(tr("Ctrl+T"));
+	settingsAct->setStatusTip(tr("Edit settings"));
+	QObject::connect(settingsAct, SIGNAL(triggered()), this, SLOT(editSettings()));
+
+	aboutAct = new QAction(tr("&About"), this);
+	aboutAct->setStatusTip(tr("Show the application's About box"));
+	QObject::connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+
+	copyAct->setEnabled(true);
+}
+
+void Komport::createMenus()
+{
+	fileMenu = menuBar()->addMenu(tr("&File"));
+	fileMenu->addAction(exitAct);
+
+	editMenu = menuBar()->addMenu(tr("&Edit"));
+	editMenu->addAction(copyAct);
+	editMenu->addAction(pasteAct);
+
+	configMenu = menuBar()->addMenu(tr("&Configuration"));
+	configMenu->addAction(settingsAct);
+
+	menuBar()->addSeparator();
+
+	helpMenu = menuBar()->addMenu(tr("&Help"));
+	helpMenu->addAction(aboutAct);
+}
+
+void Komport::createToolBars()
+{
+	fileToolBar = addToolBar(tr("File"));
+	fileToolBar->addAction(exitAct);
+
+	editToolBar = addToolBar(tr("Edit"));
+	editToolBar->addAction(copyAct);
+	editToolBar->addAction(pasteAct);
+
+	configToolBar = addToolBar(tr("Configuration"));
+	configToolBar->addAction(settingsAct);
+}
+
+void Komport::createStatusBar()
+{
+	statusBar()->showMessage(tr("Ready"));
+}
+
+void Komport::closeEvent(QCloseEvent *event)
+{
+	writeSettings();
+	if ( serial() != NULL && serial()->isOpen() )
+	{
+		serial()->close();
+	}
+	event->accept();
+}
+
+
+void Komport::about()
+{
+	QMessageBox::about( this, BANNER,
+						QString ("<br />"
+								"<b>"+QString(BANNER)+"<br />"+QString(COPYRIGHT)+"<br /></b>"
+								"All rights reserved.<br />"
+								"<br />"
+								"This program is free software; you can redistribute it and/or modify<br />"
+								"it under the terms of the GNU General Public License as published by<br />"
+								" the Free Software Foundation; either version 2 of the License, or <br />"
+								"(at your option) any later version. <br />"
+								"<br />"
+								"This program is distributed in the hope that it will be useful,    <br />"
+								"but WITHOUT ANY WARRANTY; without even the implied warranty of<br />"
+								" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <br />"
+								"GNU General Public License for more details.   <br />"
+								"<br />"
+								"You should have received a copy of the GNU General Public License  <br />"
+								"along with this program; if not, write to the  <br />"
+								"<b>"
+								"Free Software Foundation, Inc.,<br />"
+								"59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. <br />"
+								"</b>"
+								"<br />"));
+}
+
+void Komport::settingsHelp()
+{
+	QMessageBox::about( this, "Komport Serial Communications - Settings Help",
+						QString (
+								"<b><u>Terminal Tab</u></b><br /><br />"
+								"<b>Emulation</b>: Select the terminal type to emulate.<br /><br />"
+								"<b>Visual Bell</b>: If enabled, flahses the screen rather than ringing the audio bell in response to the ascii BEL character.<br /><br />"
+								"<b>Local Echo</b>: If enabled, echo characters to the screen as they are typed.<br /><br />"
+								"<b>Cols/Rows</b>: Defines the screen size in character columns and rows.<br /><br />"
+								"<b>Background/Foreground</b>: Defines the foreground and background color of the screen area.<br /><br />"
+								"<b><u>Device Tab</u></b><br /><br />"
+								"<b>Device</b>: Used to select the operating system logical device for performing serial data input/output.<br /><br />"
+								"<b>Baud Rate</b>: The bit rate to transmit and receive in terms of bits per second.<br /><br />"
+								"<b><u>Framing</u></b><br /><br />"
+								"<b>Data bits</b>: The number of data bits in a character.<br /><br />"
+								"<b>Stop bits</b>: The number of stop bits in a character.<br /><br />"
+								"<b>Parity</b>: Parity bit interpretation NONE/EVEN/ODD.<br /><br />"
+								"<b>Flow Control</b>: Data flow control method NONE/[XON/XOFF]/[RTS/CTS].<br /><br />"
+								"<br />")
+						);
+
+}
+
+void Komport::editSettings()
+{
+	if ( settingsDialog.exec() == QDialog::Accepted )
+	{
+		writeSettings();
+		readSettings();
+	}
+}
+
+void Komport::openBackgroundColorDialog()
+{
+	QColorDialog dialog;
+	if ( dialog.exec() == QDialog::Accepted )
+	{	QPalette backgroundPalette = settingsUi->BackgroundColorButton->palette();
+		QColor color = dialog.selectedColor();
+		backgroundPalette.setColor(QPalette::Button,color);
+		settingsUi->BackgroundColorButton->setPalette(backgroundPalette);
+		settingsUi->BackgroundColorButton->update();
+		screen()->setBackgroundColor(color);
+		screen()->update();
+	}
+}
+
+void Komport::openForegroundColorDialog()
+{
+	QColorDialog dialog;
+	if ( dialog.exec() == QDialog::Accepted )
+	{
+		QPalette foregroundPalette = settingsUi->ForegroundColorButton->palette();
+		QColor color = dialog.selectedColor();
+		foregroundPalette.setColor(QPalette::Button,color);
+		settingsUi->ForegroundColorButton->setPalette(foregroundPalette);
+		settingsUi->ForegroundColorButton->update();
+		screen()->setForegroundColor(color);
+		screen()->update();
+	}
+}
+
