@@ -259,6 +259,9 @@ void CCellArray::selectCells(QRect r)
 	}
 }
 
+/*
+  * De-select all previously selected cells.
+  */
 void CCellArray::deselectCells()
 {
 	for( int y=0; y < rows(); y++ )
@@ -269,10 +272,10 @@ void CCellArray::deselectCells()
 			if ( c.select() )
 			{
 				c.setSelect(false);
-				screen()->update(rect());
 			}
 		}
 	}
+	screen()->update();
 }
 
 

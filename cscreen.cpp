@@ -78,6 +78,7 @@ void CScreen::mouseReleaseEvent(QMouseEvent *e)
 	}
 }
 
+/** Return the selected text as a string object */
 QString CScreen::selectedText()
 {
 	QString text;

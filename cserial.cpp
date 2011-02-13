@@ -40,8 +40,8 @@ CSerial::CSerial(const QString& name)
 , mEmitChars(true)
 {
 #ifdef Q_OS_WIN32
-    mWin32Serial = new CWin32Serial();
-    mTimer = startTimer(1000);
+	mWin32Serial = new CWin32Serial();
+	mTimer = startTimer(1000);
 #endif
 }
 
@@ -120,11 +120,15 @@ void CSerial::close()
 	}
 #ifdef Q_OS_WIN32
 	mWin32Serial->Close();
+	mDeviceLock.unlock();
 #else
-	::close( mHandle );
+	if ( isOpen() )
+	{
+		::close( mHandle );
+		mDeviceLock.unlock();
+	}
 	mHandle=(-1);
 #endif
-	mDeviceLock.unlock();
 }
 
 /** ***************************************************************************

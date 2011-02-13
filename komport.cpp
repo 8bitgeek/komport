@@ -26,17 +26,8 @@
 #include <QColorDialog>
 #include <QClipboard>
 
-#define BANNER "Komport V0.8 Serial Communications"
+#define BANNER "Komport V0.9.1 Serial Communications"
 #define COPYRIGHT "Copyright (c) 2011 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
-
-#define ASCII_BEL   0x07
-#define ASCII_BS    0x08
-#define ASCII_LF    0x0A
-#define ASCII_CR    0x0D
-#define ASCII_ESC   0x1B
-
-#define DEFAULT_GRID_COLS 80
-#define DEFAULT_GRID_ROWS 25
 
 Komport::Komport(QWidget *parent)
 : QMainWindow(parent)
@@ -71,26 +62,29 @@ Komport::~Komport()
 
 void Komport::readSettings()
 {
-	QSettings settings( QSettings::IniFormat, QSettings::UserScope, "pikeaero.com", "komport" );
-
+	QSettings settings( QSettings::IniFormat, QSettings::UserScope, "pikeaero.com", "komport-0.9" );
 	settings.beginGroup("main");
+		restoreGeometry(settings.value("geometry").toByteArray());
+		restoreState(settings.value("windowState").toByteArray());
+	settings.endGroup();
 
-	restoreGeometry(settings.value("geometry").toByteArray());
-	restoreState(settings.value("windowState").toByteArray());
+	settings.beginGroup("device");
+		QString device			= settings.value("device",		settingsUi->DeviceComboBox->currentText()).toString();
+		int		baud			= settings.value("baud",		settingsUi->BaudRateComboBox->currentText().toInt()).toInt();
+		int		dbits			= settings.value("dbits",		settingsUi->DataBitsComboBox->currentText().toInt()).toInt();
+		int		sbits			= settings.value("sbits",		settingsUi->StopBitsComboBox->currentText().toInt()).toInt();
+		QString parity			= settings.value("parity",		settingsUi->ParityComboBox->currentText()).toString();
+		QString flow			= settings.value("flow",		settingsUi->FlowControlComboBox->currentText()).toString();
+	settings.endGroup();
 
-	QString device			= settings.value("device",		settingsUi->DeviceComboBox->currentText()).toString();
-	int		baud			= settings.value("baud",		settingsUi->BaudRateComboBox->currentText().toInt()).toInt();
-	int		dbits			= settings.value("dbits",		settingsUi->DataBitsComboBox->currentText().toInt()).toInt();
-	int		sbits			= settings.value("sbits",		settingsUi->StopBitsComboBox->currentText().toInt()).toInt();
-	QString parity			= settings.value("parity",		settingsUi->ParityComboBox->currentText()).toString();
-	QString flow			= settings.value("flow",		settingsUi->FlowControlComboBox->currentText()).toString();
-	QString emulation		= settings.value("emulation",	settingsUi->EmulationComboBox->currentText()).toString();
-	int		cols			= settings.value("cols",		settingsUi->ColumnsSpinBox->value()).toInt();
-	int		rows			= settings.value("rows",		settingsUi->RowsSpinBox->value()).toInt();
-	bool	visualbell		= settings.value("visualbell",	settingsUi->VisualBellCheckBox->isChecked()).toBool();
-	bool	localecho		= settings.value("localecho",	settingsUi->LocalEchoCheckBox->isChecked()).toBool();
-	QRgb	backgroundColor = settings.value("background",	settingsUi->BackgroundColorButton->palette().color(QPalette::Button).rgb()).toUInt();
-	QRgb	foregroundColor = settings.value("foreground",	settingsUi->ForegroundColorButton->palette().color(QPalette::Button).rgb()).toUInt();
+	settings.beginGroup("terminal");
+		QString emulation		= settings.value("emulation",	settingsUi->EmulationComboBox->currentText()).toString();
+		int		cols			= settings.value("cols",		settingsUi->ColumnsSpinBox->value()).toInt();
+		int		rows			= settings.value("rows",		settingsUi->RowsSpinBox->value()).toInt();
+		bool	visualbell		= settings.value("visualbell",	settingsUi->VisualBellCheckBox->isChecked()).toBool();
+		bool	localecho		= settings.value("localecho",	settingsUi->LocalEchoCheckBox->isChecked()).toBool();
+		QRgb	backgroundColor = settings.value("background",	settingsUi->BackgroundColorButton->palette().color(QPalette::Button).rgb()).toUInt();
+		QRgb	foregroundColor = settings.value("foreground",	settingsUi->ForegroundColorButton->palette().color(QPalette::Button).rgb()).toUInt();
 	settings.endGroup();
 
 	if ( mScreen != NULL ) delete mScreen;
@@ -144,29 +138,35 @@ void Komport::readSettings()
 
 void Komport::writeSettings()
 {
-	QSettings settings( QSettings::IniFormat, QSettings::UserScope, "pikeaero.com", "komport" );
-
+	QSettings settings( QSettings::IniFormat, QSettings::UserScope, "pikeaero.com", "komport-0.9" );
 	settings.beginGroup("main");
+		settings.setValue("geometry", saveGeometry());
+		settings.setValue("windowState", saveState());
+	settings.endGroup();
 
-	settings.setValue("geometry", saveGeometry());
-	settings.setValue("windowState", saveState());
+	settings.beginGroup("device");
+		settings.setValue("device",		settingsUi->DeviceComboBox->currentText() );
+		settings.setValue("baud",		settingsUi->BaudRateComboBox->currentText().toInt() );
+		settings.setValue("dbits",		settingsUi->DataBitsComboBox->currentText().toInt() );
+		settings.setValue("sbits",		settingsUi->StopBitsComboBox->currentText().toInt() );
+		settings.setValue("parity",		settingsUi->ParityComboBox->currentText() );
+		settings.setValue("flow",		settingsUi->FlowControlComboBox->currentText() );
+	settings.endGroup();
 
-	settings.setValue("device",		settingsUi->DeviceComboBox->currentText() );
-	settings.setValue("baud",		settingsUi->BaudRateComboBox->currentText().toInt() );
-	settings.setValue("dbits",		settingsUi->DataBitsComboBox->currentText().toInt() );
-	settings.setValue("sbits",		settingsUi->StopBitsComboBox->currentText().toInt() );
-	settings.setValue("parity",		settingsUi->ParityComboBox->currentText() );
-	settings.setValue("flow",		settingsUi->FlowControlComboBox->currentText() );
-	settings.setValue("emulation",	settingsUi->EmulationComboBox->currentText() );
-	settings.setValue("cols",		settingsUi->ColumnsSpinBox->value());
-	settings.setValue("rows",		settingsUi->RowsSpinBox->value());
-	settings.setValue("visualbell",	settingsUi->VisualBellCheckBox->isChecked());
-	settings.setValue("localecho",	settingsUi->LocalEchoCheckBox->isChecked());
-	settings.setValue("foreground", screen()->foregroundColor().rgb());
-	settings.setValue("background", screen()->backgroundColor().rgb());
+	settings.beginGroup("terminal");
+		settings.setValue("emulation",	settingsUi->EmulationComboBox->currentText() );
+		settings.setValue("cols",		settingsUi->ColumnsSpinBox->value());
+		settings.setValue("rows",		settingsUi->RowsSpinBox->value());
+		settings.setValue("visualbell",	settingsUi->VisualBellCheckBox->isChecked());
+		settings.setValue("localecho",	settingsUi->LocalEchoCheckBox->isChecked());
+		settings.setValue("foreground", screen()->foregroundColor().rgb());
+		settings.setValue("background", screen()->backgroundColor().rgb());
 	settings.endGroup();
 }
 
+/**
+ * Open the serial port and notify of there was any trouble */
+*/
 bool Komport::openSerial()
 {
 	if ( serial()->open() )
@@ -188,12 +188,18 @@ void Komport::keyPressEvent(QKeyEvent *e)
 	emulation()->keyPressEvent(e);
 }
 
+/**
+  * Edit->Copy
+  */
 void Komport::doCopy()
 {
 	QClipboard *clipboard = QApplication::clipboard();
 	clipboard->setText(screen()->selectedText());
 }
 
+/**
+  * Edit->Paste
+  */
 void Komport::doPaste()
 {
 	QClipboard *clipboard = QApplication::clipboard();
