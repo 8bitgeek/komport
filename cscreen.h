@@ -52,8 +52,8 @@ class CScreen : public QWidget
 
 	public slots:
 
-		void			setBackgroundColor(QColor backgroundColor)	{mBackgroundColor=backgroundColor;}
-		void			setForegroundColor(QColor foregroundColor)	{mForegroundColor=foregroundColor;}
+		void			setBackgroundColor(QColor backgroundColor);
+		void			setForegroundColor(QColor foregroundColor);
 		void			setBlink(bool b)							{mBlink=b;}
 		void			setBold(bool b)								{mBold=b;}
 		void			setReverse(bool b)							{mReverse=b;}

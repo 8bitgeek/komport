@@ -313,10 +313,7 @@ QColor CCharCell::backgroundColor()
 {
 	if ( screen() != NULL )
 	{
-		if ( reverse() )
-		{
-			return reverse() ? screen()->foregroundColor() : screen()->backgroundColor();
-		}
+		return reverse() ? screen()->foregroundColor() : screen()->backgroundColor();
 	}
 	return reverse() ? mForegroundColor : mBackgroundColor;
 }

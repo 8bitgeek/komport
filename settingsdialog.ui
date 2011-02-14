@@ -9,7 +9,7 @@
     <x>0</x>
     <y>0</y>
     <width>427</width>
-    <height>274</height>
+    <height>276</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -205,6 +205,43 @@ p, li { white-space: pre-wrap; }
        </item>
        <item row="1" column="3">
         <widget class="QPushButton" name="BackgroundColorButton">
+         <property name="palette">
+          <palette>
+           <active>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>0</red>
+               <green>0</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </active>
+           <inactive>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>0</red>
+               <green>0</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </inactive>
+           <disabled>
+            <colorrole role="Button">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>0</red>
+               <green>0</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </disabled>
+          </palette>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -1094,12 +1131,14 @@ p, li { white-space: pre-wrap; }
   <tabstop>LocalEchoCheckBox</tabstop>
   <tabstop>ColumnsSpinBox</tabstop>
   <tabstop>RowsSpinBox</tabstop>
+  <tabstop>BackgroundColorButton</tabstop>
+  <tabstop>ForegroundColorButton</tabstop>
   <tabstop>DeviceComboBox</tabstop>
-  <tabstop>FlowControlComboBox</tabstop>
   <tabstop>BaudRateComboBox</tabstop>
   <tabstop>DataBitsComboBox</tabstop>
   <tabstop>StopBitsComboBox</tabstop>
   <tabstop>ParityComboBox</tabstop>
+  <tabstop>FlowControlComboBox</tabstop>
   <tabstop>buttonHelp</tabstop>
   <tabstop>buttonOk</tabstop>
   <tabstop>buttonCancel</tabstop>

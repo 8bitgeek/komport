@@ -26,7 +26,7 @@
 #include <QColorDialog>
 #include <QClipboard>
 
-#define BANNER "Komport V0.9.1 Serial Communications"
+#define BANNER tr("Komport ")+QString(KOMPORT_VERSION)+tr(" Serial Communications")
 #define COPYRIGHT "Copyright (c) 2011 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
 
 Komport::Komport(QWidget *parent)
