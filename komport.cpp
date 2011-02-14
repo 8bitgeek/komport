@@ -52,12 +52,12 @@ Komport::Komport(QWidget *parent)
 		settingsUi->DeviceComboBox->setCurrentIndex(0);
 	#endif
 
-	readSettings();
-
 	createActions();
 	createMenus();
 	createToolBars();
 	createStatusBar();
+
+	readSettings();
 
 	this->setWindowIcon(QIcon(":/images/terminal.png"));
 }
@@ -143,6 +143,9 @@ void Komport::readSettings()
 	{
 		serial()->setLineControl(baud,dbits,sbits,parity,flow);
 	}
+	screen()->setContextMenuPolicy(Qt::ActionsContextMenu);
+	screen()->addAction(copyAct);
+	screen()->addAction(pasteAct);
 }
 
 void Komport::writeSettings()

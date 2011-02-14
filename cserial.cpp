@@ -41,7 +41,7 @@ CSerial::CSerial(const QString& name)
 {
 #ifdef Q_OS_WIN32
 	mWin32Serial = new CWin32Serial();
-	mTimer = startTimer(1000);
+	mTimer = startTimer(250);
 #endif
 }
 
@@ -406,10 +406,6 @@ void CSerial::windowsEmitLastError()
 		0,
 		NULL
 	);
-	// Process any inserts in lpMsgBuf.
-	// ...
-	// Display the string.
-	//MessageBox( NULL, (LPCTSTR)lpMsgBuf, L"Error", MB_OK | MB_ICONINFORMATION );
 	emit statusMessage( this, 1, QString::fromWCharArray((LPTSTR)lpMsgBuf ) );
 	// Free the buffer.
 	LocalFree( lpMsgBuf );
