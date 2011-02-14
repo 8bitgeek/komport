@@ -78,12 +78,12 @@ void Komport::readSettings()
 	settings.endGroup();
 
 	settings.beginGroup("device");
-		QString device			= settings.value("device",		settingsUi->DeviceComboBox->currentText()).toString();
-		int		baud			= settings.value("baud",		settingsUi->BaudRateComboBox->currentText().toInt()).toInt();
-		int		dbits			= settings.value("dbits",		settingsUi->DataBitsComboBox->currentText().toInt()).toInt();
-		int		sbits			= settings.value("sbits",		settingsUi->StopBitsComboBox->currentText().toInt()).toInt();
-		QString parity			= settings.value("parity",		settingsUi->ParityComboBox->currentText()).toString();
-		QString flow			= settings.value("flow",		settingsUi->FlowControlComboBox->currentText()).toString();
+		QString device	= settings.value("device",		settingsUi->DeviceComboBox->currentText()).toString();
+		int		baud	= settings.value("baud",		settingsUi->BaudRateComboBox->currentText().toInt()).toInt();
+		int		dbits	= settings.value("dbits",		settingsUi->DataBitsComboBox->currentText().toInt()).toInt();
+		int		sbits	= settings.value("sbits",		settingsUi->StopBitsComboBox->currentText().toInt()).toInt();
+		QString parity	= settings.value("parity",		settingsUi->ParityComboBox->currentText()).toString();
+		QString flow	= settings.value("flow",		settingsUi->FlowControlComboBox->currentText()).toString();
 	settings.endGroup();
 
 	settings.beginGroup("terminal");
@@ -154,12 +154,12 @@ void Komport::writeSettings()
 	settings.endGroup();
 
 	settings.beginGroup("device");
-		settings.setValue("device",		settingsUi->DeviceComboBox->currentText() );
-		settings.setValue("baud",		settingsUi->BaudRateComboBox->currentText().toInt() );
-		settings.setValue("dbits",		settingsUi->DataBitsComboBox->currentText().toInt() );
-		settings.setValue("sbits",		settingsUi->StopBitsComboBox->currentText().toInt() );
-		settings.setValue("parity",		settingsUi->ParityComboBox->currentText() );
-		settings.setValue("flow",		settingsUi->FlowControlComboBox->currentText() );
+		settings.setValue("device",	settingsUi->DeviceComboBox->currentText() );
+		settings.setValue("baud",	settingsUi->BaudRateComboBox->currentText().toInt() );
+		settings.setValue("dbits",	settingsUi->DataBitsComboBox->currentText().toInt() );
+		settings.setValue("sbits",	settingsUi->StopBitsComboBox->currentText().toInt() );
+		settings.setValue("parity",	settingsUi->ParityComboBox->currentText() );
+		settings.setValue("flow",	settingsUi->FlowControlComboBox->currentText() );
 	settings.endGroup();
 
 	settings.beginGroup("terminal");
@@ -187,26 +187,20 @@ bool Komport::openSerial()
 	return false;
 }
 
-/**
-  * Key press handler
-  */
+/** Key press handler */
 void Komport::keyPressEvent(QKeyEvent *e)
 {
 	emulation()->keyPressEvent(e);
 }
 
-/**
-  * Edit->Copy
-  */
+/** Edit->Copy */
 void Komport::doCopy()
 {
 	QClipboard *clipboard = QApplication::clipboard();
 	clipboard->setText(screen()->selectedText());
 }
 
-/**
-  * Edit->Paste
-  */
+/** Edit->Paste */
 void Komport::doPaste()
 {
 	QClipboard *clipboard = QApplication::clipboard();
@@ -217,22 +211,22 @@ void Komport::doPaste()
 void Komport::createActions()
 {
 	exitAct = new QAction(QIcon(":/images/exit.png"),tr("E&xit"), this);
-	exitAct->setShortcut(tr("Ctrl+Q"));
+	exitAct->setShortcut(tr("Ctrl+Shift+Q"));
 	exitAct->setStatusTip(tr("Exit the application"));
 	QObject::connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
 	copyAct = new QAction(QIcon(":/images/editcopy.png"), tr("&Copy"), this);
-	copyAct->setShortcut(tr("Ctrl+C"));
+	copyAct->setShortcut(tr("Ctrl+Shift+C"));
 	copyAct->setStatusTip(tr("Copy the current selection's contents to the clipboard"));
 	QObject::connect(copyAct,SIGNAL(triggered()),this,SLOT(doCopy()));
 
 	pasteAct = new QAction(QIcon(":/images/editpaste.png"), tr("&Paste"), this);
-	pasteAct->setShortcut(tr("Ctrl+V"));
+	pasteAct->setShortcut(tr("Ctrl+Shift+V"));
 	pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current selection"));
 	QObject::connect(pasteAct,SIGNAL(triggered()),this,SLOT(doPaste()));
 
 	settingsAct = new QAction(QIcon(":/images/settings.png"), tr("Se&ttings"), this);
-	settingsAct->setShortcut(tr("Ctrl+T"));
+	settingsAct->setShortcut(tr("Ctrl+Shift+T"));
 	settingsAct->setStatusTip(tr("Edit settings"));
 	QObject::connect(settingsAct, SIGNAL(triggered()), this, SLOT(editSettings()));
 
@@ -241,6 +235,7 @@ void Komport::createActions()
 	QObject::connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
 	copyAct->setEnabled(true);
+	pasteAct->setEnabled(true);
 }
 
 void Komport::createMenus()

@@ -34,7 +34,7 @@ CCellArray::~CCellArray()
 {
 }
 
-/*
+/**
  * Translate a row and column coordinate into a character array index.
  * @param col The column coordinate.
  * @param row The row coordinate.
@@ -46,7 +46,7 @@ int CCellArray::indexOf(int col,int row)
 	return i;
 }
 
-/*
+/**
  * Fetch a character cell at a column and row coordinate.
  * @param col The column coordinate.
  * @param row The row coordinate.
@@ -57,7 +57,7 @@ const CCharCell& CCellArray::cell(int col,int row)
 	return mCells.at(indexOf(col,row));
 }
 
-/*
+/**
  * Set the visual drawable object to which character cells will draw themselves.
  * @param drawable A pointer to a QPaintDevice
  */
@@ -71,7 +71,7 @@ void CCellArray::setScreen(CScreen* screen)
 	}
 }
 
-/*
+/**
  * Set the visual drawable rectangle.
  * @param r The rectangle to draw cells on the drawable object.
  */
@@ -98,7 +98,7 @@ void CCellArray::setRect(QRect r)
 	}
 }
 
-/*
+/**
  * Set the number of columns in the array.
  * @param cols The number of columns.
   */
@@ -109,7 +109,7 @@ void CCellArray::setCols(int cols)
 	setRect(mRect); /* force re-calculate sizes */
 }
 
-/*
+/**
  * Set the number of rows in the array.
  * @param rows The number of rows
  */
@@ -120,7 +120,7 @@ void CCellArray::setRows(int rows)
 	setRect(mRect); /* force re-calculate sizes */
 }
 
-/*
+/**
  * @param Synchronize the size of the character array with the number of rows and columns.
  */
 void CCellArray::sync()
@@ -153,7 +153,7 @@ void CCellArray::sync()
 	screen()->update();
 }
 
-/*
+/**
  * @brief Draw the cells.
  * @param rect the paint rect
  */
@@ -169,7 +169,7 @@ void CCellArray::draw(QPainter& painter, const QRect& rect)
 	}
 }
 
-/*
+/**
  * @brief Draw the cells.
  * @param rect the paint rect
  */
@@ -236,9 +236,7 @@ void CCellArray::scrollGrid(CCellArray::ScrollMode mode, int col, int row, int w
 	sync();
 }
 
-/*
-  * Select cells in screen pixel coordinates rectangle
-  */
+/* Select cells in screen pixel coordinates rectangle */
 void CCellArray::selectCells(QRect r)
 {
 	for( int y=0; y < rows(); y++ )
@@ -259,9 +257,7 @@ void CCellArray::selectCells(QRect r)
 	}
 }
 
-/*
-  * De-select all previously selected cells.
-  */
+/* De-select all previously selected cells. */
 void CCellArray::deselectCells()
 {
 	for( int y=0; y < rows(); y++ )

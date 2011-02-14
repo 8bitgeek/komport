@@ -39,21 +39,21 @@ class CCellArray : public QObject
 		CCellArray();
 		virtual ~CCellArray();
 
-		CScreen*			screen() {return mScreen;}
-		QRect				rect() {return mRect;}
-		int					cols() {return mCols;}
-		int					rows() {return mRows;}
-		QList<CCharCell>	cells() {return mCells;}
+		CScreen*			screen()					{return mScreen;}
+		QRect				rect()						{return mRect;}
+		int					cols()						{return mCols;}
+		int					rows()						{return mRows;}
+		QList<CCharCell>	cells()						{return mCells;}
 		const CCharCell&	cell(int col,int row);
 		int					indexOf(int col,int row);
-		int					count() {return mCells.count();}
+		int					count()						{return mCells.count();}
 		void				selectCells(QRect r);
 		void				deselectCells();
 
 	public slots:
 		void				setScreen(CScreen* screen);
 		void				setRect(QRect r);
-		void				setGrid(int cols,int rows) { setCols(cols); setRows(rows); }
+		void				setGrid(int cols,int rows)	{ setCols(cols); setRows(rows); }
 		void				setCols(int cols);
 		void				setRows(int rows);
 		void				draw(QPainter& painter, const QRect& rect);
