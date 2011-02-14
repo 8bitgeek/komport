@@ -7,5 +7,5 @@ Release 0.9.2
 -------------
 
 - Fixed background color issues.
-- Fixed contect menu.
+- Fixed context menu.
 - Added "Shift" modifier to action key sequences.
