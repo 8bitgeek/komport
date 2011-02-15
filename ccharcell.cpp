@@ -147,20 +147,23 @@ CCharCell & CCharCell::operator=(const CCharCell & _other)
 /** copy a cell */
 void CCharCell::copy(CCharCell& _other)
 {
-	copy(_other);
+	copy(&_other);
 }
 
 /** copy a cell */
 void CCharCell::copy(CCharCell* _other)
 {
-	setContainer(		_other->container() );
-	setCursorStyle(		_other->cursorStyle() );
-	setRect(			_other->rect() );
-	setAttributes(		_other->attributes() );
-	setCharacter(		_other->character() );
-	setForegroundColor(	_other->foregroundColor() );
-	setBackgroundColor(	_other->backgroundColor() );
-	setCursor(false);
+	if ( _other != this )
+	{
+		setContainer(		_other->container() );
+		setCursorStyle(		_other->cursorStyle() );
+		setRect(			_other->rect() );
+		setAttributes(		_other->attributes() );
+		setCharacter(		_other->character() );
+		setForegroundColor(	_other->foregroundColor() );
+		setBackgroundColor(	_other->backgroundColor() );
+		setCursor(false);
+	}
 	if ( screen() != NULL )
 	{
 		screen()->update(rect());
