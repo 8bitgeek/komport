@@ -140,7 +140,6 @@ void Komport::readSettings()
 	else
 	{
 		QMessageBox::warning(this, "No Emulation", "Emulation '"+emulation+"' not supported.");
-
 	}
 	screen()->setCursorPos(0,0);
 
@@ -220,26 +219,26 @@ void Komport::createActions()
 {
 	exitAct = new QAction(QIcon(":/images/exit.png"),tr("E&xit"), this);
 	exitAct->setShortcut(tr("Ctrl+Shift+Q"));
-	exitAct->setStatusTip(tr("Exit the application"));
+	exitAct->setStatusTip(tr("Exit Komport"));
 	QObject::connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
 	copyAct = new QAction(QIcon(":/images/editcopy.png"), tr("&Copy"), this);
 	copyAct->setShortcut(tr("Ctrl+Shift+C"));
-	copyAct->setStatusTip(tr("Copy the current selection's contents to the clipboard"));
+	copyAct->setStatusTip(tr("Copy the current selection's contents to the clipboard."));
 	QObject::connect(copyAct,SIGNAL(triggered()),this,SLOT(doCopy()));
 
 	pasteAct = new QAction(QIcon(":/images/editpaste.png"), tr("&Paste"), this);
 	pasteAct->setShortcut(tr("Ctrl+Shift+V"));
-	pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current selection"));
+	pasteAct->setStatusTip(tr("Paste the clipboard's contents."));
 	QObject::connect(pasteAct,SIGNAL(triggered()),this,SLOT(doPaste()));
 
 	settingsAct = new QAction(QIcon(":/images/settings.png"), tr("Se&ttings"), this);
 	settingsAct->setShortcut(tr("Ctrl+Shift+T"));
-	settingsAct->setStatusTip(tr("Edit settings"));
+	settingsAct->setStatusTip(tr("Edit Kompotr settings"));
 	QObject::connect(settingsAct, SIGNAL(triggered()), this, SLOT(editSettings()));
 
-	aboutAct = new QAction(tr("&About"), this);
-	aboutAct->setStatusTip(tr("Show the application's About box"));
+	aboutAct = new QAction(QIcon(":/images/about.png"),tr("&About"), this);
+	aboutAct->setStatusTip(tr("Show information about Komport"));
 	QObject::connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
 	copyAct->setEnabled(true);
@@ -300,47 +299,47 @@ void Komport::about()
 {
 	QMessageBox::about( this, BANNER,
 						QString ("<br />"
-								"<b>"+QString(BANNER)+"<br />"+QString(COPYRIGHT)+"<br /></b>"
-								"All rights reserved.<br />"
-								"<br />"
-								"This program is free software; you can redistribute it and/or modify<br />"
-								"it under the terms of the GNU General Public License as published by<br />"
-								" the Free Software Foundation; either version 2 of the License, or <br />"
-								"(at your option) any later version. <br />"
-								"<br />"
-								"This program is distributed in the hope that it will be useful,    <br />"
-								"but WITHOUT ANY WARRANTY; without even the implied warranty of<br />"
-								" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <br />"
-								"GNU General Public License for more details.   <br />"
-								"<br />"
-								"You should have received a copy of the GNU General Public License  <br />"
-								"along with this program; if not, write to the  <br />"
-								"<b>"
-								"Free Software Foundation, Inc.,<br />"
-								"59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. <br />"
-								"</b>"
-								"<br />"));
+						"<b>"+QString(BANNER)+"<br />"+QString(COPYRIGHT)+"<br /></b>"
+						"All rights reserved.<br />"
+						"<br />"
+						"This program is free software; you can redistribute it and/or modify<br />"
+						"it under the terms of the GNU General Public License as published by<br />"
+						" the Free Software Foundation; either version 2 of the License, or <br />"
+						"(at your option) any later version. <br />"
+						"<br />"
+						"This program is distributed in the hope that it will be useful,    <br />"
+						"but WITHOUT ANY WARRANTY; without even the implied warranty of<br />"
+						" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <br />"
+						"GNU General Public License for more details.   <br />"
+						"<br />"
+						"You should have received a copy of the GNU General Public License  <br />"
+						"along with this program; if not, write to the  <br />"
+						"<b>"
+						"Free Software Foundation, Inc.,<br />"
+						"59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. <br />"
+						"</b>"
+						"<br />"));
 }
 
 void Komport::settingsHelp()
 {
 	QMessageBox::about( this, "Komport Serial Communications - Settings Help",
 						QString (
-								"<b><u>Terminal Tab</u></b><br /><br />"
-								"<b>Emulation</b>: Select the terminal type to emulate.<br /><br />"
-								"<b>Visual Bell</b>: If enabled, flahses the screen rather than ringing the audio bell in response to the ascii BEL character.<br /><br />"
-								"<b>Local Echo</b>: If enabled, echo characters to the screen as they are typed.<br /><br />"
-								"<b>Cols/Rows</b>: Defines the screen size in character columns and rows.<br /><br />"
-								"<b>Background/Foreground</b>: Defines the foreground and background color of the screen area.<br /><br />"
-								"<b><u>Device Tab</u></b><br /><br />"
-								"<b>Device</b>: Used to select the operating system logical device for performing serial data input/output.<br /><br />"
-								"<b>Baud Rate</b>: The bit rate to transmit and receive in terms of bits per second.<br /><br />"
-								"<b><u>Framing</u></b><br /><br />"
-								"<b>Data bits</b>: The number of data bits in a character.<br /><br />"
-								"<b>Stop bits</b>: The number of stop bits in a character.<br /><br />"
-								"<b>Parity</b>: Parity bit interpretation NONE/EVEN/ODD.<br /><br />"
-								"<b>Flow Control</b>: Data flow control method NONE/[XON/XOFF]/[RTS/CTS].<br /><br />"
-								"<br />")
+						"<b><u>Terminal Tab</u></b><br /><br />"
+						"<b>Emulation</b>: Select the terminal type to emulate.<br /><br />"
+						"<b>Visual Bell</b>: If enabled, flahses the screen rather than ringing the audio bell in response to the ascii BEL character.<br /><br />"
+						"<b>Local Echo</b>: If enabled, echo characters to the screen as they are typed.<br /><br />"
+						"<b>Cols/Rows</b>: Defines the screen size in character columns and rows.<br /><br />"
+						"<b>Background/Foreground</b>: Defines the foreground and background color of the screen area.<br /><br />"
+						"<b><u>Device Tab</u></b><br /><br />"
+						"<b>Device</b>: Used to select the operating system logical device for performing serial data input/output.<br /><br />"
+						"<b>Baud Rate</b>: The bit rate to transmit and receive in terms of bits per second.<br /><br />"
+						"<b><u>Framing</u></b><br /><br />"
+						"<b>Data bits</b>: The number of data bits in a character.<br /><br />"
+						"<b>Stop bits</b>: The number of stop bits in a character.<br /><br />"
+						"<b>Parity</b>: Parity bit interpretation NONE/EVEN/ODD.<br /><br />"
+						"<b>Flow Control</b>: Data flow control method NONE/[XON/XOFF]/[RTS/CTS].<br /><br />"
+						"<br />")
 						);
 
 }

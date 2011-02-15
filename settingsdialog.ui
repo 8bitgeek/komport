@@ -111,6 +111,12 @@
          <layout class="QGridLayout">
           <item row="0" column="0">
            <widget class="QComboBox" name="EmulationComboBox">
+            <property name="toolTip">
+             <string>Selects the terminal emulation.</string>
+            </property>
+            <property name="statusTip">
+             <string>Selects the terminal emulation.</string>
+            </property>
             <item>
              <property name="text">
               <string>VT102</string>
@@ -123,6 +129,12 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="toolTip">
+             <string>Echo characters typed to the screen.</string>
+            </property>
+            <property name="statusTip">
+             <string>Echo characters typed to the screen.</string>
+            </property>
             <property name="text">
              <string>Local Echo</string>
             </property>
@@ -132,6 +144,12 @@
            <widget class="QCheckBox" name="VisualBellCheckBox">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>The visual bell will flash the emulation window instead of ringing the terminal bell.</string>
+            </property>
+            <property name="statusTip">
+             <string>The visual bell will flash the emulation window instead of ringing the terminal bell.</string>
             </property>
             <property name="text">
              <string>Visual Bell</string>
@@ -157,6 +175,12 @@ p, li { white-space: pre-wrap; }
        </item>
        <item row="0" column="2" colspan="2">
         <widget class="QSpinBox" name="ColumnsSpinBox">
+         <property name="toolTip">
+          <string>Specify the number of character columns.</string>
+         </property>
+         <property name="statusTip">
+          <string>Specify the number of character columns.</string>
+         </property>
          <property name="minimum">
           <number>16</number>
          </property>
@@ -181,6 +205,12 @@ p, li { white-space: pre-wrap; }
        </item>
        <item row="0" column="5">
         <widget class="QSpinBox" name="RowsSpinBox">
+         <property name="toolTip">
+          <string>Specify the number of character rows.</string>
+         </property>
+         <property name="statusTip">
+          <string>Specify the number of character rows.</string>
+         </property>
          <property name="minimum">
           <number>2</number>
          </property>
@@ -241,6 +271,12 @@ p, li { white-space: pre-wrap; }
             </colorrole>
            </disabled>
           </palette>
+         </property>
+         <property name="toolTip">
+          <string>Change the character background color.</string>
+         </property>
+         <property name="statusTip">
+          <string>Change the character background color.</string>
          </property>
          <property name="text">
           <string/>
@@ -740,7 +776,10 @@ p, li { white-space: pre-wrap; }
          <item row="1" column="1" colspan="2">
           <widget class="QComboBox" name="BaudRateComboBox">
            <property name="toolTip">
-            <string>Baud Rate (bps)</string>
+            <string>SPecify the baud raet (bps).</string>
+           </property>
+           <property name="statusTip">
+            <string>SPecify the baud raet (bps).</string>
            </property>
            <property name="currentIndex">
             <number>11</number>
@@ -855,6 +894,12 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="2" column="1" colspan="2">
                <widget class="QComboBox" name="ParityComboBox">
+                <property name="toolTip">
+                 <string>Specify the character framing parity.</string>
+                </property>
+                <property name="statusTip">
+                 <string>Specify the character framing parity.</string>
+                </property>
                 <item>
                  <property name="text">
                   <string>NONE</string>
@@ -887,6 +932,12 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="0" column="2">
                <widget class="QComboBox" name="DataBitsComboBox">
+                <property name="toolTip">
+                 <string>Specify the number of data bits in a character frame.</string>
+                </property>
+                <property name="statusTip">
+                 <string>Specify the number of data bits in a character frame.</string>
+                </property>
                 <property name="currentIndex">
                  <number>3</number>
                 </property>
@@ -927,6 +978,12 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="1" column="2">
                <widget class="QComboBox" name="StopBitsComboBox">
+                <property name="toolTip">
+                 <string>Specify the number of stop bits in a frame.</string>
+                </property>
+                <property name="statusTip">
+                 <string>Specify the number of stop bits in a frame.</string>
+                </property>
                 <item>
                  <property name="text">
                   <string>1</string>
@@ -1023,7 +1080,10 @@ p, li { white-space: pre-wrap; }
          <item row="0" column="1" colspan="2">
           <widget class="QComboBox" name="DeviceComboBox">
            <property name="toolTip">
-            <string>Device special file name</string>
+            <string>Specify the name of the serial device.</string>
+           </property>
+           <property name="statusTip">
+            <string>Specify the name of the serial device.</string>
            </property>
            <property name="editable">
             <bool>true</bool>
@@ -1089,10 +1149,13 @@ p, li { white-space: pre-wrap; }
          <item row="0" column="4">
           <widget class="QComboBox" name="FlowControlComboBox">
            <property name="toolTip">
-            <string>Flow Control</string>
+            <string>Specify the flow control method.</string>
+           </property>
+           <property name="statusTip">
+            <string>Specify the flow control method.</string>
            </property>
            <property name="whatsThis">
-            <string>Flow Control</string>
+            <string>Specify the flow control method.</string>
            </property>
            <property name="currentIndex">
             <number>0</number>
@@ -1166,22 +1229,6 @@ p, li { white-space: pre-wrap; }
    <signal>clicked()</signal>
    <receiver>SettingsDialog</receiver>
    <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>FlowControlComboBox</sender>
-   <signal>highlighted(int)</signal>
-   <receiver>SettingsDialog</receiver>
-   <slot>FlowControlComboBox_highlighted(int)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>20</x>
