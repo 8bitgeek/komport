@@ -534,12 +534,14 @@ class CEmulationVT102 : public CEmulation
 		virtual void		doSetModes();							/** set terminal modes */
 		virtual void		doSetScrollRegion();					/** set scroll region */
 
+		virtual char		doLeadIn(unsigned char ch);				/** process the lead-in sequence */
+
 	public slots:
 		virtual void		keyPressEvent(QKeyEvent* e);			/** key press input. process and transmit the char. */
-		virtual void		receiveChar(char _ch);					/** received and process an incoming character */
+		virtual void		receiveChar(unsigned char ch);			/** received and process an incoming character */
 
 	private:
-		void				sequence(char _ch);						/** recognise and execute an escape sequence */
+		void				sequence(unsigned char ch);				/** recognise and execute an escape sequence */
 		QByteArray			mCtlSequence;							/** terminal control sequence  */
 		bool				mSawESC;								/** did we see an ESC? */
 		bool				mInCtlSequence;							/** are we in a terminal control sequence? */

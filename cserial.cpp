@@ -144,7 +144,7 @@ void CSerial::readActivated(int handle)
 			char c;
 			while ( getChar(&c) )
 			{
-				emit rx(c);
+				emit rx((unsigned char)c);
 			}
 		}
 	}
@@ -428,7 +428,7 @@ void CSerial::timerEvent(QTimerEvent* e)
 				char c;
 				while ( getChar(&c) )
 				{
-					emit rx(c);
+					emit rx((unsigned char)c);
 				}
 			}
 		}

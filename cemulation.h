@@ -68,6 +68,7 @@ class CEmulation : public QObject
 		virtual void		doRestoreCursor();						/** restore cursor */
 		virtual void		doSaveCursor();							/** save cursor */
 
+		virtual void		doVisualBell();							/** perform visual bell */
 		virtual void		doBell();								/** ring bell or perform visual bell */
 
 		
@@ -77,7 +78,7 @@ class CEmulation : public QObject
 
 	public slots:
 		virtual void		keyPressEvent(QKeyEvent* e)=0;			/** key press input. process and transmit the char. */
-		virtual void		receiveChar(char _ch)=0;				/** received and process an incoming character */
+		virtual void		receiveChar(unsigned char _ch)=0;		/** received and process an incoming character */
 		void				setVisualBell(bool b)	{mVisualBell=b;}
 		void				setLocalEcho(bool b)	{mLocalEcho=b;}
 

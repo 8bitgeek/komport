@@ -143,23 +143,29 @@ void CEmulation::doRestoreCursor()
 	screen()->setCursorPos(mSaveCursor);
 }
 
+/** ring a visual bell */
+void CEmulation::doVisualBell()
+{
+	for( int flash=0; flash<2; flash++ )
+	{
+		for( int y=0; y < screen()->rows(); y++ )
+		{
+			for (int x=0; x < screen()->cols();x++ )
+			{
+				CCharCell& c = screen()->cell(x,y);
+				c.setReverse( !c.reverse() );
+			}
+		}
+		screen()->repaint();
+	}
+}
+
 /** ring bell or perform visual bell */
 void CEmulation::doBell()
 {
 	if ( visualBell() )
 	{
-		for( int flash=0; flash<2; flash++ )
-		{
-			for( int y=0; y < screen()->rows(); y++ )
-			{
-				for (int x=0; x < screen()->cols();x++ )
-				{
-					CCharCell& c = screen()->cell(x,y);
-					c.setReverse( !c.reverse() );
-				}
-			}
-			screen()->repaint();
-		}
+		doVisualBell();
 	}
 	else
 	{

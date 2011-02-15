@@ -114,6 +114,16 @@ void CCharCell::setBackgroundColor(QColor _c)
 	}
 }
 
+QColor CCharCell::backgroundColor()
+{
+	return reverse() ? mForegroundColor : mBackgroundColor;
+}
+
+QColor CCharCell::foregroundColor()
+{
+	return reverse() ? mBackgroundColor : mForegroundColor;
+}
+
 void CCharCell::setRect(QRect _r)
 {
 	if ( mRect != _r )
@@ -129,8 +139,8 @@ void CCharCell::clear()
 	mAttributes=0;
 	mCursorStyle=Underline;
 	setCharacter(_DEFAULT_CHAR_);
-	setForegroundColor(_DEFAULT_FOREGROUND_);
-	setBackgroundColor(_DEFAULT_BACKGROUND_);
+	setForegroundColor(screen()!=NULL?screen()->defaultForegroundColor():_DEFAULT_FOREGROUND_);
+	setBackgroundColor(screen()!=NULL?screen()->defaultBackgroundColor():_DEFAULT_BACKGROUND_);
 	screen()->update(rect());
 }
 
@@ -310,24 +320,6 @@ void CCharCell::timerEvent(QTimerEvent* e)
 		mBlinkState = !mBlinkState;
 		screen()->update(rect());
 	}
-}
-
-QColor CCharCell::backgroundColor()
-{
-	if ( screen() != NULL )
-	{
-		return reverse() ? screen()->foregroundColor() : screen()->backgroundColor();
-	}
-	return reverse() ? mForegroundColor : mBackgroundColor;
-}
-
-QColor CCharCell::foregroundColor()
-{
-	if ( screen() != NULL )
-	{
-		return reverse() ? screen()->backgroundColor() : screen()->foregroundColor();
-	}
-	return reverse() ? mBackgroundColor : mForegroundColor;
 }
 
 CScreen* CCharCell::screen()

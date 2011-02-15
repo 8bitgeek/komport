@@ -18,6 +18,11 @@
 #include "cemulationVT102.h"
 #include <QString>
 
+#define ASCII_ENQ   0x05
+#define ASCII_NUL   0x00
+#define ASCII_SO    0x0E
+#define ASCII_SI    0x0F
+#define ASCII_CSI   0x9B
 #define ASCII_BEL   0x07
 #define ASCII_BS    0x08
 #define ASCII_LF    0x0A
@@ -99,9 +104,10 @@ void CEmulationVT102::doGraphics()
 				case 36:  //    Cyan
 					screen()->setForegroundColor(QColor(10,240,230));  break;
 				case 37:  //    White
+					screen()->setForegroundColor(QColor(255,255,255)); break;
 				case 38:
 				case 39:
-					screen()->setForegroundColor(QColor(255,255,255)); break;
+					screen()->setForegroundColor(screen()->defaultForegroundColor()); break;
 
 				//  Background colors
 				case 40:  //    Black
@@ -119,9 +125,10 @@ void CEmulationVT102::doGraphics()
 				case 46:  //    Cyan
 					screen()->setBackgroundColor(QColor(10,240,230));  break;
 				case 47:  //    White
+					screen()->setBackgroundColor(QColor(255,255,255)); break;
 				case 48:
 				case 49:
-					screen()->setBackgroundColor(QColor(255,255,255)); break;
+					screen()->setBackgroundColor(screen()->defaultBackgroundColor()); break;
 
 				default:
 					printf( "?attr? %d\n", attr);
@@ -238,189 +245,236 @@ void CEmulationVT102::doSetScrollRegion()
 }
 
 // received part of an escape sequence
-void CEmulationVT102::sequence(char _ch)
+void CEmulationVT102::sequence(unsigned char ch)
 {
-	bool completed=(_ch>='a'&&_ch<='z')||(_ch>='A'&&_ch<='Z');
-
-	if ( completed )
+	switch( ch )
 	{
-		switch( _ch )
-		{
-			case 'H':   // cursor position
-			case 'f':
+		case 'H':   // cursor position
+		case 'f':
+			{
+				int sep = mCtlSequence.indexOf( ';' );
+				if ( sep >= 0 )
 				{
-					int sep = mCtlSequence.indexOf( ';' );
-					if ( sep >= 0 )
+					QByteArray rowStr = mCtlSequence.left( sep );
+					++sep;
+					QByteArray colStr = mCtlSequence.right( mCtlSequence.length()-sep );
+					int row = rowStr.toInt()-1;
+					int col = colStr.toInt()-1;
+					doCursorTo(col,row);
+				}
+				else
+				{
+					doCursorTo(0,0);
+				}
+			}
+		break;
+		case 'A':   // cursor up
+			doCursorUp();
+		break;
+		case 'B':   // cursor down
+			doCursorDown();
+		break;
+		case 'C':   // cursor forward
+			doCursorRight();
+		break;
+		case 'D':   // cursor backward
+			doCursorLeft();
+		break;
+		case 'J':   // erase display
+			{
+				int attr = mCtlSequence.isEmpty() ? 0 : mCtlSequence.toInt();
+				switch(attr) {
+				case 0:  // cursor to EOD
+					doClearScreen(ClearScreenEOD);
+					break;
+				case 1: // BOD to cursor
+					doClearScreen(ClearScreenBOD);
+					break;
+				case 2: // full display
+					doClearScreen(ClearScreenAOD);
+					break;
+				}
+			}
+			break;
+		case 'h':    // set modes
+			doSetModes();
+		break;
+		case 'K':   // erase line
+			{
+				int attr = mCtlSequence.isEmpty() ? 0 : mCtlSequence.toInt();
+				switch(attr) {
+					case 0:  // cursor to EOL
+						doClearEOL(ClearLineEOL);
+					break;
+					case 1: // BOL to cursor
 					{
-						QByteArray rowStr = mCtlSequence.left( sep );
-						++sep;
-						QByteArray colStr = mCtlSequence.right( mCtlSequence.length()-sep );
-						int row = rowStr.toInt()-1;
-						int col = colStr.toInt()-1;
-						doCursorTo(col,row);
-					}
-					else
+						doClearEOL(ClearLineBOL);
+					 }
+					 break;
+					case 2: // full line
 					{
-						doCursorTo(0,0);
+						doClearEOL(ClearLineBOL);
 					}
+					break;
 				}
+			}
 			break;
-			case 'A':   // cursor up
-				doCursorUp();
-			break;
-			case 'B':   // cursor down
-				doCursorDown();
-			break;
-			case 'C':   // cursor forward
-				doCursorRight();
-			break;
-			case 'D':   // cursor backward
-				doCursorLeft();
-			break;
-			case 'J':   // erase display
-				{
-					int attr = mCtlSequence.isEmpty() ? 0 : mCtlSequence.toInt();
-					switch(attr) {
-					case 0:  // cursor to EOD
-						doClearScreen(ClearScreenEOD);
-						break;
-					case 1: // BOD to cursor
-						doClearScreen(ClearScreenBOD);
-						break;
-					case 2: // full display
-						doClearScreen(ClearScreenAOD);
-						break;
-					}
-				}
-				break;
-			case 'h':    // set modes
-				doSetModes();
-			break;
-			case 'K':   // erase line
-				{
-					int attr = mCtlSequence.isEmpty() ? 0 : mCtlSequence.toInt();
-					switch(attr) {
-						case 0:  // cursor to EOL
-							doClearEOL(ClearLineEOL);
-						break;
-						case 1: // BOL to cursor
-						{
-							doClearEOL(ClearLineBOL);
-						 }
-						 break;
-						case 2: // full line
-						{
-							doClearEOL(ClearLineBOL);
-						}
-						break;
-					}
-				}
-				break;
-			case 'L':    // insert line(s)
-				{
-					int num = mCtlSequence.isEmpty() ? 1 : mCtlSequence.toInt();
-					doInsertLines(num);
-				}
-			break;
-			case 'l':     // reset modes
-				doResetModes();
-			break;
-			case 'm':   // graphics attributes
-				doGraphics();
-			break;
-			case 'P':   // delete character(s)
-				{
-					int num = mCtlSequence.isEmpty() ? 1 : mCtlSequence.toInt();
-					doDeleteCharacters(num);
-				}
-			break;
-			case 'r':   // set scroll region
-				doSetScrollRegion();
-			break;
-			case 's':   // save cursor position
-				doSaveCursor();
-			break;
-			case 'u':   // restore cursor position
-				doRestoreCursor();
-			break;
-			default:
-				printf( "emulation: unknown '%c' in ESC[%s%c\n", _ch,  mCtlSequence.data()==NULL?"": mCtlSequence.data(),_ch);
-			break;
-		}
-		mSawESC = false;
-		mInCtlSequence = false;
-		mCtlSequence.resize(0);
-	}
-	else
-	{
-		mCtlSequence += _ch;
+		case 'L':    // insert line(s)
+			{
+				int num = mCtlSequence.isEmpty() ? 1 : mCtlSequence.toInt();
+				doInsertLines(num);
+			}
+		break;
+		case 'l':     // reset modes
+			doResetModes();
+		break;
+		case 'm':   // graphics attributes
+			doGraphics();
+		break;
+		case 'P':   // delete character(s)
+			{
+				int num = mCtlSequence.isEmpty() ? 1 : mCtlSequence.toInt();
+				doDeleteCharacters(num);
+			}
+		break;
+		case 'r':   // set scroll region
+			doSetScrollRegion();
+		break;
+		case 's':   // save cursor position
+			doSaveCursor();
+		break;
+		case 'u':   // restore cursor position
+			doRestoreCursor();
+		break;
+		default:
+			printf( "emulation: unknown '%c' in ESC[%s%c\n", ch,  mCtlSequence.data()==NULL?"": mCtlSequence.data(),ch);
+		break;
 	}
 }
 
-// received a char */
-void CEmulationVT102::receiveChar(char _ch)
+// process escape codes
+char CEmulationVT102::doLeadIn(unsigned char ch)
 {
 	// handle the terminal control sequence...
-	if ( _ch == ASCII_ESC && !mSawESC && !mInCtlSequence )
+	if ( ch == ASCII_ESC && !mSawESC && !mInCtlSequence )
 	{
 		mSawESC = true;
-		return;
+		ch = ASCII_NUL;
 	}
-	if ( _ch == '[' && mSawESC && !mInCtlSequence  )
+	else if ( mSawESC )
 	{
-		mInCtlSequence=true;
-		mCtlSequence.resize(0);
-		return;
+		// ESC lead-in...
+		mSawESC=false;
+		switch (ch)
+		{
+			case '[':		// CSI lead in...
+				if ( !mInCtlSequence )
+				{
+					ch = ASCII_CSI;
+				}
+				break;
+			case '7':		// FIXME (DECSC) save state.
+				printf( "CSI+7 (save state) ignored\n" );
+				ch = ASCII_NUL;
+				break;
+			case '8':		// FIXME (DECRS) restore saved state.
+				printf( "CSI+8 (restore state) ignored\n" );
+				ch = ASCII_NUL;
+				break;
+			case 'H':		// FIXME (HTS) set tab stop at current column.
+				printf( "CSI+H (set tab stop at current column) ignored\n" );
+				ch = ASCII_NUL;
+				break;
+			case 'g':		// visual bell.
+				doVisualBell();
+				ch = ASCII_NUL;
+				break;
+			default:		// bad escape sequence.
+				printf( "Escape sequence ignored '%c' \n", ch );
+				ch = ASCII_NUL;
+				break;
+		}
 	}
-	if ( mInCtlSequence )
+	else if ( mInCtlSequence )
 	{
-		sequence(_ch);
-		return;
+		// still assembling an escape sequence...
+		bool completed=(ch>='a'&&ch<='z')||(ch>='A'&&ch<='Z');
+		if ( completed )
+		{
+			sequence(ch);
+			mInCtlSequence = false;
+			mCtlSequence.resize(0);
+		}
+		else
+		{
+			mCtlSequence += ch;
+		}
+		ch = ASCII_NUL;
 	}
+	return ch;
+}
 
-	// handle standard dumb terminal codes and printable ASCII....
-	switch(_ch)
+/* received a char */
+void CEmulationVT102::receiveChar(unsigned char ch)
+{
+	// handle terminal codes and printable ASCII....
+	switch( (ch = doLeadIn(ch)) )
 	{
-	case ASCII_BEL:
-		{
-		doBell();
-		}
-		break;
-	case ASCII_BS:
-		doCursorLeft();
-		break;
-	case ASCII_LF:
-		{
-			QPoint pos = screen()->cursorPos();
-			if ( pos.y() >= screen()->rows()-1 )
+		case ASCII_ENQ:
+		case ASCII_SO:
+		case ASCII_SI:
+		case ASCII_NUL:
+			break;
+		case ASCII_CSI:			// same as ESC[ lead-in
 			{
-				screen()->scrollUp();
+				if ( !mInCtlSequence )
+				{
+					mSawESC=false;
+					mInCtlSequence=true;
+					mCtlSequence.resize(0);
+				}
 			}
-			else
+			break;
+		case ASCII_BEL:
 			{
-				screen()->setCursorPos(pos.x(),pos.y()+1);
+				doBell();
 			}
-		}
-		break;
-	case ASCII_CR:
-		{
-			QPoint pos = screen()->cursorPos();
-			screen()->setCursorPos(0,pos.y());
-		}
-		break;
-	default:
-		if ( mInsertMode )
-		{
-			int y = screen()->cursorPos().y();
-			for( int x=screen()->rows()-1; x > screen()->cursorPos().x(); x-- )
+			break;
+		case ASCII_BS:
+			doCursorLeft();
+			break;
+		case ASCII_LF:
 			{
-				screen()->cell(x,y).copy( screen()->cell(x-1,y) );
+				QPoint pos = screen()->cursorPos();
+				if ( pos.y() >= screen()->rows()-1 )
+				{
+					screen()->scrollUp();
+				}
+				else
+				{
+					screen()->setCursorPos(pos.x(),pos.y()+1);
+				}
 			}
-			screen()->cell( screen()->cursorPos() ).clear();
-		}
-		screen()->putchar(_ch,screen()->cursorPos());
-		screen()->advanceCursor();
-		break;
+			break;
+		case ASCII_CR:
+			{
+				QPoint pos = screen()->cursorPos();
+				screen()->setCursorPos(0,pos.y());
+			}
+			break;
+		default:
+			if ( mInsertMode )
+			{
+				int y = screen()->cursorPos().y();
+				for( int x=screen()->rows()-1; x > screen()->cursorPos().x(); x-- )
+				{
+					screen()->cell(x,y).copy( screen()->cell(x-1,y) );
+				}
+				screen()->cell( screen()->cursorPos() ).clear();
+			}
+			screen()->putchar(ch,screen()->cursorPos());
+			screen()->advanceCursor();
+			break;
 	}
 }
 

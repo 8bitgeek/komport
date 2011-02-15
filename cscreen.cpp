@@ -247,6 +247,9 @@ void CScreen::putchar(char c,int x, int y)
 	if ( x < 0 ) x = cursorPos().x();
 	if ( y < 0 ) y = cursorPos().y();
 	cell(x,y).setCharacter(c);
+	cell(x,y).setBackgroundColor(backgroundColor());
+	cell(x,y).setForegroundColor(foregroundColor());
+	cell(x,y).setReverse(this->reverse());
 }
 
 /** advance the cursor and scroll if we need to */

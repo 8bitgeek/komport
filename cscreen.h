@@ -50,6 +50,11 @@ class CScreen : public QWidget
 		QColor			foregroundColor();
 		QColor			backgroundColor();
 
+		bool			blink()										{return mBlink;}
+		bool			bold()										{return mBold;}
+		bool			reverse()									{return mReverse;}
+		bool			underline()									{return mUnderline;}
+
 		QString			selectedText();
 
 	public slots:

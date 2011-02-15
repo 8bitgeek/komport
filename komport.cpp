@@ -123,8 +123,13 @@ void Komport::readSettings()
 	screen()->setGrid(cols,rows);
 	setCentralWidget(screen());
 	screen()->setEnabled(true);
+
 	screen()->setDefaultForegroundColor(QColor::fromRgb(foregroundColor));
 	screen()->setDefaultBackgroundColor(QColor::fromRgb(backgroundColor));
+
+	screen()->setForegroundColor(QColor::fromRgb(foregroundColor));
+	screen()->setBackgroundColor(QColor::fromRgb(backgroundColor));
+
 	mSerial = new CSerial(device);
 	if ( emulation == "VT102" )
 	{
@@ -183,7 +188,7 @@ bool Komport::openSerial()
 	{
 		QObject::connect(emulation(),SIGNAL(sendAsciiChar(char)),serial(),SLOT(sendAsciiChar(char)));
 		QObject::connect(emulation(),SIGNAL(sendAsciiString(const char*)),serial(),SLOT(sendAsciiString(const char*)));
-		QObject::connect(serial(),SIGNAL(rx(char)),emulation(),SLOT(receiveChar(char)));
+		QObject::connect(serial(),SIGNAL(rx(unsigned char)),emulation(),SLOT(receiveChar(unsigned char)));
 		return true;
 	}
 	QMessageBox::warning(this, "Open Failed", "Open '"+settingsUi->DeviceComboBox->currentText()+"' failed");
@@ -356,6 +361,7 @@ void Komport::openBackgroundColorDialog()
 		settingsUi->BackgroundColorButton->setPalette(backgroundPalette);
 		settingsUi->BackgroundColorButton->update();
 		screen()->setDefaultBackgroundColor(color);
+		screen()->setBackgroundColor(color);
 		screen()->update();
 	}
 }
@@ -371,6 +377,7 @@ void Komport::openForegroundColorDialog()
 		settingsUi->ForegroundColorButton->setPalette(foregroundPalette);
 		settingsUi->ForegroundColorButton->update();
 		screen()->setDefaultForegroundColor(color);
+		screen()->setForegroundColor(color);
 		screen()->update();
 	}
 }
