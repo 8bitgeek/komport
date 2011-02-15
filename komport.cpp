@@ -267,13 +267,16 @@ void Komport::createMenus()
 void Komport::createToolBars()
 {
 	fileToolBar = addToolBar(tr("File"));
+	fileToolBar->setObjectName("FileToolBar");
 	fileToolBar->addAction(exitAct);
 
 	editToolBar = addToolBar(tr("Edit"));
+	editToolBar->setObjectName("EditToolBar");
 	editToolBar->addAction(copyAct);
 	editToolBar->addAction(pasteAct);
 
 	configToolBar = addToolBar(tr("Configuration"));
+	configToolBar->setObjectName("ConfigToolBar");
 	configToolBar->addAction(settingsAct);
 }
 
