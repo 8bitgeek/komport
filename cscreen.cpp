@@ -78,12 +78,22 @@ void CScreen::mouseReleaseEvent(QMouseEvent *e)
 	}
 }
 
-void CScreen::setBackgroundColor(QColor backgroundColor)
+void CScreen::setDefaultBackgroundColor(QColor defaultBackgroundColor)
 {
 	QPalette p = palette();
-	p.setColor(QPalette::Window,backgroundColor);
+	p.setColor(QPalette::Window,defaultBackgroundColor);
 	setPalette(p);
 	setAutoFillBackground(true);
+	mDefaultBackgroundColor=defaultBackgroundColor;
+}
+
+void CScreen::setDefaultForegroundColor(QColor defaultForegroundColor)
+{
+	mDefaultForegroundColor=defaultForegroundColor;
+}
+
+void CScreen::setBackgroundColor(QColor backgroundColor)
+{
 	mBackgroundColor=backgroundColor;
 }
 
@@ -91,6 +101,16 @@ void CScreen::setBackgroundColor(QColor backgroundColor)
 void CScreen::setForegroundColor(QColor foregroundColor)
 {
 	mForegroundColor=foregroundColor;
+}
+
+QColor CScreen::foregroundColor()
+{
+	return mForegroundColor;
+}
+
+QColor CScreen::backgroundColor()
+{
+	return mBackgroundColor;
 }
 
 /** Return the selected text as a string object */

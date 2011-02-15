@@ -60,8 +60,8 @@ void CEmulationVT102::doGraphics()
 				//    Text attributes
 				case 0:   //    All attributes off
 					{
-					screen()->setBackgroundColor(screen()->backgroundColor());
-					screen()->setForegroundColor(screen()->foregroundColor());
+					screen()->setBackgroundColor(screen()->defaultBackgroundColor());
+					screen()->setForegroundColor(screen()->defaultForegroundColor());
 					screen()->setBlink(false);
 					screen()->setBold(false);
 					screen()->setReverse(false);

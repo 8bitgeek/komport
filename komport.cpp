@@ -123,8 +123,8 @@ void Komport::readSettings()
 	screen()->setGrid(cols,rows);
 	setCentralWidget(screen());
 	screen()->setEnabled(true);
-	screen()->setForegroundColor(QColor::fromRgb(foregroundColor));
-	screen()->setBackgroundColor(QColor::fromRgb(backgroundColor));
+	screen()->setDefaultForegroundColor(QColor::fromRgb(foregroundColor));
+	screen()->setDefaultBackgroundColor(QColor::fromRgb(backgroundColor));
 	mSerial = new CSerial(device);
 	if ( emulation == "VT102" )
 	{
@@ -355,7 +355,7 @@ void Komport::openBackgroundColorDialog()
 		backgroundPalette.setColor(QPalette::Button,color);
 		settingsUi->BackgroundColorButton->setPalette(backgroundPalette);
 		settingsUi->BackgroundColorButton->update();
-		screen()->setBackgroundColor(color);
+		screen()->setDefaultBackgroundColor(color);
 		screen()->update();
 	}
 }
@@ -370,7 +370,7 @@ void Komport::openForegroundColorDialog()
 		foregroundPalette.setColor(QPalette::Button,color);
 		settingsUi->ForegroundColorButton->setPalette(foregroundPalette);
 		settingsUi->ForegroundColorButton->update();
-		screen()->setForegroundColor(color);
+		screen()->setDefaultForegroundColor(color);
 		screen()->update();
 	}
 }

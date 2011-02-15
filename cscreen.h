@@ -45,15 +45,20 @@ class CScreen : public QWidget
 		int				cols() {return cells().cols();}
 		int				rows() {return cells().rows();}
 
-		QColor			foregroundColor()							{return mForegroundColor;}
-		QColor			backgroundColor()							{return mBackgroundColor;}
+		QColor			defaultForegroundColor()					{return mDefaultForegroundColor;}
+		QColor			defaultBackgroundColor()					{return mDefaultBackgroundColor;}
+		QColor			foregroundColor();
+		QColor			backgroundColor();
 
 		QString			selectedText();
 
 	public slots:
 
+		void			setDefaultBackgroundColor(QColor defaultBackgroundColor);
+		void			setDefaultForegroundColor(QColor defaultForegroundColor);
 		void			setBackgroundColor(QColor backgroundColor);
 		void			setForegroundColor(QColor foregroundColor);
+
 		void			setBlink(bool b)							{mBlink=b;}
 		void			setBold(bool b)								{mBold=b;}
 		void			setReverse(bool b)							{mReverse=b;}
@@ -90,6 +95,8 @@ class CScreen : public QWidget
 	private:
 		CCellArray		mCells;
 		QPoint			mCursor;
+		QColor			mDefaultBackgroundColor;
+		QColor			mDefaultForegroundColor;
 		QColor			mBackgroundColor;
 		QColor			mForegroundColor;
 		bool			mBlink;
