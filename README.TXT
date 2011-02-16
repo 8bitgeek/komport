@@ -3,6 +3,13 @@ To build:
 $ qmake-qt4
 $ make
 
+Release 0.9.4
+-------------
+- Background/foreground color issues sorted out.
+- Fixed some bugs on the CSI interpretation in VT 102 emulation.
+- Added balloon help to settings dialog.
+- Fixed bug related to not saving toolbar positions in settings file.
+
 Release 0.9.2
 -------------
 
