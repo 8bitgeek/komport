@@ -26,6 +26,10 @@
 #include <QColorDialog>
 #include <QClipboard>
 
+#ifdef Q_OS_WIN32
+	#include <QWindowsStyle>
+#endif
+
 #define BANNER tr("Komport ")+QString(KOMPORT_VERSION)+tr(" Serial Communications")
 #define COPYRIGHT "Copyright (c) 2011 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
 
@@ -118,17 +122,20 @@ void Komport::readSettings()
 	foregroundPalette.setColor(QPalette::Button,QColor::fromRgb(foregroundColor));
 	settingsUi->ForegroundColorButton->setPalette(foregroundPalette);
 
+	settingsUi->BackgroundColorButton->setStyleSheet("QPushButton {background-color:#"+colorToHex(backgroundColor)+"; }");
+	settingsUi->ForegroundColorButton->setStyleSheet("QPushButton {background-color:#"+colorToHex(foregroundColor)+"; }");
 
 	mScreen = new CScreen();
-	screen()->setGrid(cols,rows);
-	setCentralWidget(screen());
-	screen()->setEnabled(true);
 
 	screen()->setDefaultForegroundColor(QColor::fromRgb(foregroundColor));
 	screen()->setDefaultBackgroundColor(QColor::fromRgb(backgroundColor));
 
 	screen()->setForegroundColor(QColor::fromRgb(foregroundColor));
 	screen()->setBackgroundColor(QColor::fromRgb(backgroundColor));
+
+	screen()->setGrid(cols,rows);
+	setCentralWidget(screen());
+	screen()->setEnabled(true);
 
 	mSerial = new CSerial(device);
 	if ( emulation == "VT102" )
@@ -294,53 +301,52 @@ void Komport::closeEvent(QCloseEvent *event)
 	event->accept();
 }
 
-
 void Komport::about()
 {
 	QMessageBox::about( this, BANNER,
-						QString ("<br />"
-						"<b>"+QString(BANNER)+"<br />"+QString(COPYRIGHT)+"<br /></b>"
-						"All rights reserved.<br />"
-						"<br />"
-						"This program is free software; you can redistribute it and/or modify<br />"
-						"it under the terms of the GNU General Public License as published by<br />"
-						" the Free Software Foundation; either version 2 of the License, or <br />"
-						"(at your option) any later version. <br />"
-						"<br />"
-						"This program is distributed in the hope that it will be useful,    <br />"
-						"but WITHOUT ANY WARRANTY; without even the implied warranty of<br />"
-						" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <br />"
-						"GNU General Public License for more details.   <br />"
-						"<br />"
-						"You should have received a copy of the GNU General Public License  <br />"
-						"along with this program; if not, write to the  <br />"
-						"<b>"
-						"Free Software Foundation, Inc.,<br />"
-						"59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. <br />"
-						"</b>"
-						"<br />"));
+				QString ("<br />"
+				"<b>"+QString(BANNER)+"<br />"+QString(COPYRIGHT)+"<br /></b>"
+				"All rights reserved.<br />"
+				"<br />"
+				"This program is free software; you can redistribute it and/or modify<br />"
+				"it under the terms of the GNU General Public License as published by<br />"
+				" the Free Software Foundation; either version 2 of the License, or <br />"
+				"(at your option) any later version. <br />"
+				"<br />"
+				"This program is distributed in the hope that it will be useful,    <br />"
+				"but WITHOUT ANY WARRANTY; without even the implied warranty of<br />"
+				" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the <br />"
+				"GNU General Public License for more details.   <br />"
+				"<br />"
+				"You should have received a copy of the GNU General Public License  <br />"
+				"along with this program; if not, write to the  <br />"
+				"<b>"
+				"Free Software Foundation, Inc.,<br />"
+				"59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. <br />"
+				"</b>"
+				"<br />"));
 }
 
 void Komport::settingsHelp()
 {
 	QMessageBox::about( this, "Komport Serial Communications - Settings Help",
-						QString (
-						"<b><u>Terminal Tab</u></b><br /><br />"
-						"<b>Emulation</b>: Select the terminal type to emulate.<br /><br />"
-						"<b>Visual Bell</b>: If enabled, flahses the screen rather than ringing the audio bell in response to the ascii BEL character.<br /><br />"
-						"<b>Local Echo</b>: If enabled, echo characters to the screen as they are typed.<br /><br />"
-						"<b>Cols/Rows</b>: Defines the screen size in character columns and rows.<br /><br />"
-						"<b>Background/Foreground</b>: Defines the foreground and background color of the screen area.<br /><br />"
-						"<b><u>Device Tab</u></b><br /><br />"
-						"<b>Device</b>: Used to select the operating system logical device for performing serial data input/output.<br /><br />"
-						"<b>Baud Rate</b>: The bit rate to transmit and receive in terms of bits per second.<br /><br />"
-						"<b><u>Framing</u></b><br /><br />"
-						"<b>Data bits</b>: The number of data bits in a character.<br /><br />"
-						"<b>Stop bits</b>: The number of stop bits in a character.<br /><br />"
-						"<b>Parity</b>: Parity bit interpretation NONE/EVEN/ODD.<br /><br />"
-						"<b>Flow Control</b>: Data flow control method NONE/[XON/XOFF]/[RTS/CTS].<br /><br />"
-						"<br />")
-						);
+				QString (
+				"<b><u>Terminal Tab</u></b><br /><br />"
+				"<b>Emulation</b>: Select the terminal type to emulate.<br /><br />"
+				"<b>Visual Bell</b>: If enabled, flahses the screen rather than ringing the audio bell in response to the ascii BEL character.<br /><br />"
+				"<b>Local Echo</b>: If enabled, echo characters to the screen as they are typed.<br /><br />"
+				"<b>Cols/Rows</b>: Defines the screen size in character columns and rows.<br /><br />"
+				"<b>Background/Foreground</b>: Defines the foreground and background color of the screen area.<br /><br />"
+				"<b><u>Device Tab</u></b><br /><br />"
+				"<b>Device</b>: Used to select the operating system logical device for performing serial data input/output.<br /><br />"
+				"<b>Baud Rate</b>: The bit rate to transmit and receive in terms of bits per second.<br /><br />"
+				"<b><u>Framing</u></b><br /><br />"
+				"<b>Data bits</b>: The number of data bits in a character.<br /><br />"
+				"<b>Stop bits</b>: The number of stop bits in a character.<br /><br />"
+				"<b>Parity</b>: Parity bit interpretation NONE/EVEN/ODD.<br /><br />"
+				"<b>Flow Control</b>: Data flow control method NONE/[XON/XOFF]/[RTS/CTS].<br /><br />"
+				"<br />")
+				);
 
 }
 
@@ -357,11 +363,14 @@ void Komport::openBackgroundColorDialog()
 {
 	QColorDialog dialog;
 	if ( dialog.exec() == QDialog::Accepted )
-	{	QPalette backgroundPalette = settingsUi->BackgroundColorButton->palette();
+	{
+		QPalette backgroundPalette = settingsUi->BackgroundColorButton->palette();
 		QColor color = dialog.selectedColor();
 		backgroundPalette.setColor(QPalette::Button,color);
+		backgroundPalette.setColor(QPalette::Window,color);
 		settingsUi->BackgroundColorButton->setPalette(backgroundPalette);
 		settingsUi->BackgroundColorButton->update();
+		settingsUi->BackgroundColorButton->setStyleSheet("QPushButton {background-color:#"+colorToHex(color)+"; }");
 		screen()->setDefaultBackgroundColor(color);
 		screen()->setBackgroundColor(color);
 		screen()->update();
@@ -376,11 +385,22 @@ void Komport::openForegroundColorDialog()
 		QPalette foregroundPalette = settingsUi->ForegroundColorButton->palette();
 		QColor color = dialog.selectedColor();
 		foregroundPalette.setColor(QPalette::Button,color);
+		foregroundPalette.setColor(QPalette::Window,color);
 		settingsUi->ForegroundColorButton->setPalette(foregroundPalette);
 		settingsUi->ForegroundColorButton->update();
+		settingsUi->ForegroundColorButton->setStyleSheet("QPushButton {background-color:#"+colorToHex(color)+"; }");
 		screen()->setDefaultForegroundColor(color);
 		screen()->setForegroundColor(color);
 		screen()->update();
 	}
 }
+
+/* Convert a QColor to a hex ascii string suitable for style sheet */
+QString Komport::colorToHex(QColor c)
+{
+	QString hex;
+	hex.sprintf("%02x%02x%02x", c.red(), c.green(), c.blue() );
+	return hex;
+}
+
 

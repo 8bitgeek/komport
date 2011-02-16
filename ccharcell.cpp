@@ -1,6 +1,6 @@
 /**************************************************************************
 *   Author <mike@pikeaero.com> Mike Sharkey                               *
-*   Copyright (C) 2010 by Pike Aerospace Research Corporation             *
+*  copyright (C) 2010 by Pike Aerospace Research Corporation             *
 *                                                                         *
 *   This program is free software: you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -42,6 +42,11 @@ CCharCell::CCharCell(CCellArray* cellArray)
 , mCursorStyle(BlockInvert)
 {
 	setCharacter(QChar(_DEFAULT_CHAR_));
+	if ( screen() != NULL )
+	{
+		mForegroundColor = screen()->defaultForegroundColor();
+		mBackgroundColor = screen()->defaultBackgroundColor();
+	}
 }
 
 CCharCell::~CCharCell()
@@ -54,62 +59,62 @@ void CCharCell::setCursorStyle(CursorStyle cs)
 	if ( screen() != NULL ) screen()->update(rect());
 }
 
-void CCharCell::setSelect(bool _b)
+void CCharCell::setSelect(bool b)
 {
-	_b ? mAttributes |= attrSelect : mAttributes &= ~attrSelect;
+	b ? mAttributes |= attrSelect : mAttributes &= ~attrSelect;
 	if ( screen() != NULL ) screen()->update(rect());
 }
 
-void CCharCell::setBold(bool _b)
+void CCharCell::setBold(bool b)
 {
-	_b ? mAttributes |= attrBold : mAttributes &= ~attrBold;
+	b ? mAttributes |= attrBold : mAttributes &= ~attrBold;
 	if ( screen() != NULL ) screen()->update(rect());
 }
 
-void CCharCell::setReverse(bool _b)
+void CCharCell::setReverse(bool b)
 {
-	_b ? mAttributes |= attrReverse : mAttributes &= ~attrReverse;
+	b ? mAttributes |= attrReverse : mAttributes &= ~attrReverse;
 	if ( screen() != NULL ) screen()->update(rect());
 }
 
-void CCharCell::setUnderline(bool _b)
+void CCharCell::setUnderline(bool b)
 {
-	_b ? mAttributes |= attrUnderline : mAttributes &= ~attrUnderline ;
+	b ? mAttributes |= attrUnderline : mAttributes &= ~attrUnderline ;
 	if ( screen() != NULL ) screen()->update(rect());
 }
 
-void CCharCell::setAttributes(unsigned short _a)
+void CCharCell::setAttributes(unsigned short a)
 {
-	if ( mAttributes != _a )
+	if ( mAttributes != a )
 	{
-		mAttributes = _a;
+		mAttributes = a;
 		if ( screen() != NULL ) screen()->update(rect());
 	}
 }
 
-void CCharCell::setCharacter(QChar _c)
+void CCharCell::setCharacter(QChar c)
 {
-	if ( mCharacter != _c )
+	if ( mCharacter != c )
 	{
-		mCharacter = _c;
+		mCharacter = c;
 		if ( screen() != NULL ) screen()->update(rect());
 	}
 }
 
-void CCharCell::setForegroundColor(QColor _c)
+void CCharCell::setForegroundColor(QColor c)
 {
-	if ( mForegroundColor != _c )
+	if ( mForegroundColor != c )
 	{
-		mForegroundColor = _c;
+		mForegroundColor = c;
 		if ( screen() != NULL ) screen()->update(rect());
 	}
 }
 
-void CCharCell::setBackgroundColor(QColor _c)
+void CCharCell::setBackgroundColor(QColor c)
 {
-	if ( mBackgroundColor != _c )
+	if ( mBackgroundColor != c )
 	{
-		mBackgroundColor = _c;
+		mBackgroundColor = c;
 		if ( screen() != NULL ) screen()->update(rect());
 	}
 }
@@ -124,11 +129,11 @@ QColor CCharCell::foregroundColor()
 	return reverse() ? mBackgroundColor : mForegroundColor;
 }
 
-void CCharCell::setRect(QRect _r)
+void CCharCell::setRect(QRect r)
 {
-	if ( mRect != _r )
+	if ( mRect != r )
 	{
-		mRect = _r;
+		mRect = r;
 		screen()->update(rect());
 	}
 }
@@ -155,23 +160,23 @@ CCharCell & CCharCell::operator=(const CCharCell & _other)
 }
 
 /** copy a cell */
-void CCharCell::copy(CCharCell& _other)
+void CCharCell::copy(CCharCell& other)
 {
-	copy(&_other);
+	copy(&other);
 }
 
 /** copy a cell */
-void CCharCell::copy(CCharCell* _other)
+void CCharCell::copy(CCharCell* other)
 {
-	if ( _other != this )
+	if ( other != this )
 	{
-		setContainer(		_other->container() );
-		setCursorStyle(		_other->cursorStyle() );
-		setRect(			_other->rect() );
-		setAttributes(		_other->attributes() );
-		setCharacter(		_other->character() );
-		setForegroundColor(	_other->foregroundColor() );
-		setBackgroundColor(	_other->backgroundColor() );
+		setContainer(		other->container() );
+		setCursorStyle(		other->cursorStyle() );
+		setRect(			other->rect() );
+		setAttributes(		other->attributes() );
+		setCharacter(		other->character() );
+		setForegroundColor(	other->foregroundColor() );
+		setBackgroundColor(	other->backgroundColor() );
 		setCursor(false);
 	}
 	if ( screen() != NULL )
@@ -191,16 +196,16 @@ void CCharCell::drawCursorBegin(QPainter& painter)
 		switch(cursorStyle())
 		{
 			case Underline:
-			break;
+				break;
 			case BlockOutline:
-			break;
+				break;
 			case BlockInvert:
-			if ( mCursorState )
-			{
-				painter.fillRect(rect(),foregroundColor());
-				painter.setPen(backgroundColor());
-			}
-			break;
+				if ( mCursorState )
+				{
+					painter.fillRect(rect(),foregroundColor());
+					painter.setPen(backgroundColor());
+				}
+				break;
 		}
 	}
 }
@@ -215,21 +220,21 @@ void CCharCell::drawCursorEnd(QPainter& painter)
 		switch(cursorStyle())
 		{
 			case Underline:
-			if ( mCursorState )
-			{
-				painter.setPen(foregroundColor());
-				painter.drawLine(rect().bottomLeft(),rect().bottomRight());
-			}
-			break;
+				if ( mCursorState )
+				{
+					painter.setPen(foregroundColor());
+					painter.drawLine(rect().bottomLeft(),rect().bottomRight());
+				}
+				break;
 			case BlockOutline:
-			if ( mCursorState )
-			{
-				painter.setPen(foregroundColor());
-				painter.drawRect(rect());
-			}
-			break;
+				if ( mCursorState )
+				{
+					painter.setPen(foregroundColor());
+					painter.drawRect(rect());
+				}
+				break;
 			case BlockInvert:
-			break;
+				break;
 		}
 	}
 }
@@ -269,10 +274,10 @@ void CCharCell::draw()
 /**
   * @brief set or clear the cursor assignment to this cell and set the cursor style
   */
-void CCharCell::setCursor(bool _b,CursorStyle cs)
+void CCharCell::setCursor(bool b,CursorStyle cs)
 {
 	setCursorStyle(cs);
-	if ( _b )
+	if ( b )
 	{
 		mAttributes |= attrCursor;
 		if ( mCursorTimer >= 0 )
@@ -289,9 +294,9 @@ void CCharCell::setCursor(bool _b,CursorStyle cs)
 	screen()->update(rect());
 }
 
-void CCharCell::setBlink(bool _b)
+void CCharCell::setBlink(bool b)
 {
-	if ( _b )
+	if ( b )
 	{
 		mAttributes |= attrBlink;
 		if ( mBlinkTimer >= 0 )
@@ -312,7 +317,7 @@ void CCharCell::timerEvent(QTimerEvent* e)
 {
 	if ( e->timerId() == mCursorTimer )
 	{
-		mCursorState = !mCursorState;
+		mCursorState = mCursorState ? false : true;
 		screen()->update(rect());
 	}
 	else if ( e->timerId() == mBlinkTimer)

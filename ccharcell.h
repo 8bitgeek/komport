@@ -73,21 +73,21 @@ class CCharCell : public QObject
 		void				setContainer(CCellArray* container) {mCellArray=container;}
 		void				setCursor(bool _b,CursorStyle cs=DEFAULTCURSORSTYLE);
 		void				setCursorStyle(CursorStyle cs);
-		void				setBlink(bool _b);
-		void				setSelect(bool _b);
-		void				setBold(bool _b);
-		void				setReverse(bool _b);
-		void				setUnderline(bool _b);
-		void				setAttributes(unsigned short _a);
-		void				setCharacter(QChar _c);
-		void				setForegroundColor(QColor _c);
-		void				setBackgroundColor(QColor _c);
-		void				setRect(QRect _r);
+		void				setBlink(bool b);
+		void				setSelect(bool b);
+		void				setBold(bool b);
+		void				setReverse(bool b);
+		void				setUnderline(bool b);
+		void				setAttributes(unsigned short a);
+		void				setCharacter(QChar c);
+		void				setForegroundColor(QColor c);
+		void				setBackgroundColor(QColor c);
+		void				setRect(QRect r);
 
-		void				clear();										/** reset properties to default values */
-		void				copy(CCharCell* _other);						/** copy a cell */
-		void				copy(CCharCell& _other);						/** copy a cell */
-		CCharCell & operator=(const CCharCell & _other);					/** copy operator */
+		void				clear();						/** reset properties to default values */
+		void				copy(CCharCell* other);			/** copy a cell */
+		void				copy(CCharCell& other);			/** copy a cell */
+		CCharCell & operator=(const CCharCell & other);		/** copy operator */
 
 	public slots:
 		void draw();

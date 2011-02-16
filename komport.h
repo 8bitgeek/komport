@@ -23,6 +23,7 @@
 #include <QTimerEvent>
 #include <QDialog>
 #include <QCloseEvent>
+#include <QColor>
 
 #include "cscreen.h"
 #include "cserial.h"
@@ -69,6 +70,7 @@ class Komport : public QMainWindow
 		void				createStatusBar();
 		void				readSettings();
 		void				writeSettings();
+		QString				colorToHex(QColor);
 
 		CSerial*			mSerial;
 		CScreen*			mScreen;
