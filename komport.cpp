@@ -307,6 +307,7 @@ void Komport::about()
 				QString ("<br />"
 				"<b>"+QString(BANNER)+"<br />"+QString(COPYRIGHT)+"<br /></b>"
 				"All rights reserved.<br />"
+				"<br /><a href=\"http://sourceforge.net/projects/komport2\">sourceforge.net/projects/komport2</a><br />"
 				"<br />"
 				"This program is free software; you can redistribute it and/or modify<br />"
 				"it under the terms of the GNU General Public License as published by<br />"

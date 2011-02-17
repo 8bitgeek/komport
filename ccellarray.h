@@ -40,13 +40,13 @@ class CCellArray : public QObject
 		virtual ~CCellArray();
 
 		CScreen*			screen()					{return mScreen;}
-		QRect				rect()						{return mRect;}
-		int					cols()						{return mCols;}
-		int					rows()						{return mRows;}
+		inline QRect&		rect()						{return mRect;}
+		inline int			cols()						{return mCols;}
+		inline int			rows()						{return mRows;}
 		QList<CCharCell>	cells()						{return mCells;}
-		const CCharCell&	cell(int col,int row);
-		int					indexOf(int col,int row);
-		int					count()						{return mCells.count();}
+		inline const CCharCell&	cell(int col,int row)	{return mCells.at(indexOf(col,row));}
+		inline int			indexOf(int col,int row)	{return (row*cols())+col;}
+		inline int			count()						{return mCells.count();}
 		void				selectCells(QRect r);
 		void				deselectCells();
 

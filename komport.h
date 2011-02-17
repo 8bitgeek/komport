@@ -29,7 +29,7 @@
 #include "cserial.h"
 #include "cemulation.h"
 
-#define KOMPORT_VERSION "V0.9.4 (beta)"
+#define KOMPORT_VERSION "V0.9.5 (beta)"
 
 namespace Ui
 {

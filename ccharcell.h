@@ -54,8 +54,8 @@ class CCharCell : public QObject
 		CCharCell(const CCharCell & _other) : QObject() {copy((CCharCell*)(&_other));}
 		virtual ~CCharCell();
 
-		CCellArray*			container()				{return mCellArray;}
-		CursorStyle			cursorStyle()			{return mCursorStyle;}
+		inline CCellArray*	container()				{return mCellArray;}
+		inline CursorStyle	cursorStyle()			{return mCursorStyle;}
 		inline bool			cursor()				{return ( mAttributes & attrCursor );}
 		inline bool			blink()					{return ( mAttributes & attrBlink );}
 		inline bool			select()				{return ( mAttributes & attrSelect );}
@@ -66,11 +66,12 @@ class CCharCell : public QObject
 		inline QChar		character()				{return mCharacter;}
 		inline QRect		rect()					{return mRect;}
 
-		QColor				backgroundColor();
-		QColor				foregroundColor();
+		inline QColor&		backgroundColor()		{return reverse()?mForegroundColor:mBackgroundColor;}
+		inline QColor&		foregroundColor()		{return reverse()?mBackgroundColor:mForegroundColor;}
+
 		CScreen*			screen();
 
-		void				setContainer(CCellArray* container) {mCellArray=container;}
+		inline void			setContainer(CCellArray* container) {mCellArray=container;}
 		void				setCursor(bool _b,CursorStyle cs=DEFAULTCURSORSTYLE);
 		void				setCursorStyle(CursorStyle cs);
 		void				setBlink(bool b);
@@ -90,8 +91,9 @@ class CCharCell : public QObject
 		CCharCell & operator=(const CCharCell & other);		/** copy operator */
 
 	public slots:
-		void draw();
-		void draw(QPainter& painter);
+		void				update();
+		void				draw();
+		void				draw(QPainter& painter);
 
 	private slots:
 		void drawCursorBegin(QPainter& paint);

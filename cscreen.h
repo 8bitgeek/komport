@@ -36,24 +36,24 @@ class CScreen : public QWidget
 		CScreen(QWidget *parent = 0);
 		virtual ~CScreen();
 
-		CCellArray&		cells() {return mCells;}
-		CCharCell&		cell(int col,int row) {return (CCharCell&)cells().cell(col,row);}
-		CCharCell&		cell(QPoint pt) {return cell(pt.x(),pt.y());}
+		CCellArray&		cells()										{return mCells;}
+		inline CCharCell& cell(int col,int row)						{return (CCharCell&)cells().cell(col,row);}
+		inline CCharCell& cell(QPoint pt)							{return cell(pt.x(),pt.y());}
 
-		QPoint			cursorPos() {return mCursor;}
+		inline QPoint&	cursorPos()									{return mCursor;}
 
-		int				cols() {return cells().cols();}
-		int				rows() {return cells().rows();}
+		inline int		cols()										{return cells().cols();}
+		inline int		rows()										{return cells().rows();}
 
-		QColor			defaultForegroundColor()					{return mDefaultForegroundColor;}
-		QColor			defaultBackgroundColor()					{return mDefaultBackgroundColor;}
-		QColor			foregroundColor();
-		QColor			backgroundColor();
+		inline QColor&	defaultForegroundColor()					{return mDefaultForegroundColor;}
+		inline QColor&	defaultBackgroundColor()					{return mDefaultBackgroundColor;}
+		inline QColor&	foregroundColor()							{return mForegroundColor;}
+		inline QColor&	backgroundColor()							{return mBackgroundColor;}
 
-		bool			blink()										{return mBlink;}
-		bool			bold()										{return mBold;}
-		bool			reverse()									{return mReverse;}
-		bool			underline()									{return mUnderline;}
+		inline bool		blink()										{return mBlink;}
+		inline bool		bold()										{return mBold;}
+		inline bool		reverse()									{return mReverse;}
+		inline bool		underline()									{return mUnderline;}
 
 		QString			selectedText();
 
@@ -64,14 +64,14 @@ class CScreen : public QWidget
 		void			setBackgroundColor(QColor backgroundColor);
 		void			setForegroundColor(QColor foregroundColor);
 
-		void			setBlink(bool b)							{mBlink=b;}
-		void			setBold(bool b)								{mBold=b;}
-		void			setReverse(bool b)							{mReverse=b;}
-		void			setUnderline(bool b)						{mUnderline=b;}
+		inline void		setBlink(bool b)							{mBlink=b;}
+		inline void		setBold(bool b)								{mBold=b;}
+		inline void		setReverse(bool b)							{mReverse=b;}
+		inline void		setUnderline(bool b)						{mUnderline=b;}
 
-		void			setGrid(int cols,int rows) {setCols(cols); setRows(rows);}
-		void			setCols(int cols)	{cells().setCols(cols);}
-		void			setRows(int rows)	{cells().setRows(rows);}
+		inline void		setGrid(int cols,int rows)					{setCols(cols); setRows(rows);}
+		inline void		setCols(int cols)							{cells().setCols(cols);}
+		inline void		setRows(int rows)							{cells().setRows(rows);}
 		void			setCursorPos(QPoint& pt);
 		void			setCursorPos(int col,int row);
 		void			scrollUp();
@@ -86,7 +86,7 @@ class CScreen : public QWidget
 		void			insLines(int num);
 
 		void			putchar(char c,int x=-1,int y=-1);
-		void			putchar(char c,QPoint pt) {putchar(c,pt.x(),pt.y());}
+		inline void		putchar(char c,QPoint pt)					{putchar(c,pt.x(),pt.y());}
 
 		void			advanceCursor();
 

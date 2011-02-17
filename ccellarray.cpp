@@ -35,29 +35,6 @@ CCellArray::~CCellArray()
 }
 
 /**
- * Translate a row and column coordinate into a character array index.
- * @param col The column coordinate.
- * @param row The row coordinate.
- * @return The index into the character array.
- */
-int CCellArray::indexOf(int col,int row)
-{
-	int i = (row*cols())+col;
-	return i;
-}
-
-/**
- * Fetch a character cell at a column and row coordinate.
- * @param col The column coordinate.
- * @param row The row coordinate.
- * @return A reference to the character cell at the specified coordinates.
- */
-const CCharCell& CCellArray::cell(int col,int row)
-{
-	return mCells.at(indexOf(col,row));
-}
-
-/**
  * Set the visual drawable object to which character cells will draw themselves.
  * @param drawable A pointer to a QPaintDevice
  */

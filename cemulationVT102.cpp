@@ -267,19 +267,19 @@ void CEmulationVT102::sequence(unsigned char ch)
 					doCursorTo(0,0);
 				}
 			}
-		break;
+			break;
 		case 'A':   // cursor up
 			doCursorUp();
-		break;
+			break;
 		case 'B':   // cursor down
 			doCursorDown();
-		break;
+			break;
 		case 'C':   // cursor forward
 			doCursorRight();
-		break;
+			break;
 		case 'D':   // cursor backward
 			doCursorLeft();
-		break;
+			break;
 		case 'J':   // erase display
 			{
 				int attr = mCtlSequence.isEmpty() ? 0 : mCtlSequence.toInt();
@@ -298,7 +298,7 @@ void CEmulationVT102::sequence(unsigned char ch)
 			break;
 		case 'h':    // set modes
 			doSetModes();
-		break;
+			break;
 		case 'K':   // erase line
 			{
 				int attr = mCtlSequence.isEmpty() ? 0 : mCtlSequence.toInt();

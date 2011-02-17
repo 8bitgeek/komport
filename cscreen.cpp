@@ -103,16 +103,6 @@ void CScreen::setForegroundColor(QColor foregroundColor)
 	mForegroundColor=foregroundColor;
 }
 
-QColor CScreen::foregroundColor()
-{
-	return mForegroundColor;
-}
-
-QColor CScreen::backgroundColor()
-{
-	return mBackgroundColor;
-}
-
 /** Return the selected text as a string object */
 QString CScreen::selectedText()
 {
