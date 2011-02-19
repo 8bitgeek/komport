@@ -624,6 +624,7 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 	}
 }
 
+#ifdef DEBUG
 /** An escape code was not handled, let's have a look at it. */
 void CEmulationVT102::doCodeNotHandled()
 {
@@ -642,10 +643,34 @@ void CEmulationVT102::doCodeNotHandled()
 		putchar('\n');
 	}
 }
+#else
+/** An escape code was not handled, let's have a look at it. */
+void CEmulationVT102::doCodeNotHandled()
+{
+	if ( mControlCode.length() > 1 )
+	{
+		for( int n=0; n < mControlCode.length(); n++ )
+		{
+			putchar(mControlCode.data()[n]);
+		}
+		putchar(mChar);
+		putchar('\n');
+	}
+	else
+	{
+		putchar(mChar);
+		putchar('\n');
+	}
+}
+#endif
 
 /** position cursor */
 void CEmulationVT102::doCursorTo(int col, int row)
 {
+	if ( originMode() )
+	{
+		row += scrollRegion().top();
+	}
 	inherited::doCursorTo(col,row);
 }
 

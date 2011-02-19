@@ -88,7 +88,7 @@ class CScreen : public QWidget
 		void			putchar(char c,int x=-1,int y=-1);
 		inline void		putchar(char c,QPoint pt)					{putchar(c,pt.x(),pt.y());}
 
-		void			advanceCursor();
+		bool			advanceCursor();
 
 	protected:
 		void			resizeEvent(QResizeEvent* e);

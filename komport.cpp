@@ -56,6 +56,11 @@ Komport::Komport(QWidget *parent)
 		settingsUi->DeviceComboBox->setCurrentIndex(0);
 	#endif
 
+	#ifdef DEBUG
+		debugText = new QTextBrowser();
+		debugText->hide();
+	#endif
+
 	createActions();
 	createMenus();
 	createToolBars();
@@ -248,6 +253,12 @@ void Komport::createActions()
 	aboutAct->setStatusTip(tr("Show information about Komport"));
 	QObject::connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
+#ifdef DEBUG
+	debugAct = new QAction(QIcon(":/images/debug.png"),tr("&Debug"), this);
+	debugAct->setStatusTip(tr("Show debug information"));
+	QObject::connect(debugAct, SIGNAL(triggered()), this, SLOT(debug()));
+#endif
+
 	copyAct->setEnabled(true);
 	pasteAct->setEnabled(true);
 }
@@ -268,6 +279,9 @@ void Komport::createMenus()
 
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(aboutAct);
+#ifdef DEBUG
+	helpMenu->addAction(debugAct);
+#endif
 }
 
 void Komport::createToolBars()
@@ -403,5 +417,13 @@ QString Komport::colorToHex(QColor c)
 	hex.sprintf("%02x%02x%02x", c.red(), c.green(), c.blue() );
 	return hex;
 }
+
+#ifdef DEBUG
+void Komport::debug()
+{
+	this->debugText->show();
+	this->debugText->raise();
+}
+#endif
 
 

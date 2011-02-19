@@ -216,6 +216,16 @@ void CEmulation::doCarriageReturn()
 	}
 }
 
+/** advance the cursor */
+void CEmulation::doAdvanceCursor()
+{
+	if ( !screen()->advanceCursor() && autoWrap() )
+	{
+		doCarriageReturn();
+		doNewLine();
+	}
+}
+
 /** write a character to the screen */
 void CEmulation::doChar(unsigned char ch)
 {
@@ -229,8 +239,7 @@ void CEmulation::doChar(unsigned char ch)
 		screen()->cell( screen()->cursorPos() ).clear();
 	}
 	screen()->putchar(ch,screen()->cursorPos());
-	screen()->advanceCursor();
-
+	doAdvanceCursor();
 }
 
 void CEmulation::setGrid(int cols,int rows)

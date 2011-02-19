@@ -2,5 +2,9 @@
 
 void csi()
 {
+	putchar(ASCII_ESC);
+
+
+
 }
 

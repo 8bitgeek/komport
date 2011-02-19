@@ -85,6 +85,7 @@ class CEmulation : public QObject
 		virtual void		doVisualBell();							/** perform visual bell */
 		virtual void		doBell();								/** ring bell or perform visual bell */
 
+		virtual void		doAdvanceCursor();						/** advance cursor and wrap if nessesary */
 		virtual void		doChar(unsigned char ch);				/** write a character to the screen */
 		
 	signals:

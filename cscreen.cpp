@@ -243,12 +243,14 @@ void CScreen::putchar(char c,int x, int y)
 }
 
 /** advance the cursor and scroll if we need to */
-void CScreen::advanceCursor()
+bool CScreen::advanceCursor()
 {
 	if ( cursorPos().x() <cols()-1 )
 	{
 		setCursorPos(cursorPos().x()+1,cursorPos().y());
+		return true;
 	}
+	return false;
 }
 
 /** scroll characters up */
