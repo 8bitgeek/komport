@@ -36,7 +36,6 @@ CEmulation::CEmulation(CScreen* screen)
 , mAutoNewLine(false)
 , mAutoInsert(false)
 , mCursorOn(true)
-, mScrollRegion(0,0,0,0)
 , mKeyboardLock(false)
 , mJumpScroll(true)
 , mReverseVideo(false)
@@ -233,11 +232,8 @@ void CEmulation::doChar(unsigned char ch)
 	screen()->advanceCursor();
 
 }
-/** Set the scroll region */
-void CEmulation::setScrollRegion(int top, int bottom)
+
+void CEmulation::setGrid(int cols,int rows)
 {
-	mScrollRegion.setTop(top);
-	mScrollRegion.setBottom(bottom);
+	screen()->setGrid(cols,rows);
 }
-
-

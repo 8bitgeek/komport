@@ -58,7 +58,6 @@ class CEmulation : public QObject
 		inline bool			autoNewLine()						{return mAutoNewLine;}
 		inline bool			autoInsert()						{return mAutoInsert;}
 		inline bool			cursorOn()							{return mCursorOn;}
-		inline QRect&		scrollRegion()						{return mScrollRegion;}
 		inline bool			keyboardLock()						{return mKeyboardLock;}
 		inline int			cols()								{return screen()->cols();}
 		inline int			rows()								{return screen()->rows();}
@@ -103,10 +102,10 @@ class CEmulation : public QObject
 		virtual void		setAutoNewLine(bool b)				{mAutoNewLine=b;}
 		virtual void		setAutoInsert(bool b)				{mAutoInsert=b;}
 		virtual void		setCursorOn(bool b)					{mCursorOn=b;}
-		virtual void		setScrollRegion(int top, int bottom);
 		virtual void		setKeyboardLock(bool b)				{mKeyboardLock=b;}
 		virtual void		setCols(int cols)					{screen()->setCols(cols);}
 		virtual void		setRows(int rows)					{screen()->setRows(rows);}
+		virtual void		setGrid(int cols,int rows);
 		virtual void		setJumpScroll(bool b)				{mJumpScroll=b;}
 		virtual void		setReverseVideo(bool b)				{mReverseVideo=b;}
 		virtual void		setRelativeCoordinates(bool b)		{mRelativeCoordinates=b;}
@@ -120,7 +119,6 @@ class CEmulation : public QObject
 		bool				mAutoNewLine;							/** automatic new line on carriage return */
 		bool				mAutoInsert;							/** are we in character insertion mode? */
 		bool				mCursorOn;								/** is cursor visible? */
-		QRect				mScrollRegion;							/** the scroll region */
 		bool				mKeyboardLock;							/** keyboard lock */
 		bool				mJumpScroll;							/** jump scroll */
 		bool				mReverseVideo;							/** screen reverse video */

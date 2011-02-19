@@ -21,6 +21,7 @@
 
 #include "cemulation.h"
 #include <QList>
+#include <QRect>
 
 /**
 Escape codes for vt102 terminal.
@@ -530,12 +531,16 @@ class CEmulationVT102 : public CEmulation
 		~CEmulationVT102();
 
 		bool				applicationCursorKeys()				{return mApplicationCursorKeys;}
+		bool				originMode()						{return mOriginMode;}
+		inline QRect&		scrollRegion()						{return mScrollRegion;}
 
-	protected:
+	protected slots:
+		virtual void		doCursorTo(int col, int row);			/** cursor to absolute x,y */
 		virtual void		doGraphics();							/** do graphics attributes bold, blink, color, etc... */
 		virtual void		doResetModes();							/** reset terminal modes */
 		virtual void		doSetModes();							/** set terminal modes */
 		virtual void		doSetScrollRegion();					/** set scroll region */
+		virtual void		doCursorPosition();						/** set the cursor position */
 
 		virtual char		doLeadIn(unsigned char ch);				/** process the lead-in sequence */
 
@@ -548,6 +553,10 @@ class CEmulationVT102 : public CEmulation
 
 	protected slots:
 		virtual void		setApplicationCursorKeys(bool b)	{mApplicationCursorKeys=b;}
+		virtual void		setOriginMode(bool b)				{mOriginMode=b;}
+		virtual void		setScrollRegion(int top, int bottom);
+		virtual void		setGrid(int cols,int rows);
+
 
 	signals:
 		void				codeNotHandled();						/** a code was not handled */
@@ -560,6 +569,8 @@ class CEmulationVT102 : public CEmulation
 		QByteArray			mControlCode;							/** lead in sequence */
 		unsigned char		mChar;									/** the last character dispatched (for debugging) */
 		bool				mApplicationCursorKeys;					/** application/normal cursor keys */
+		bool				mOriginMode;							/** origin scroll region(set)/screen(reset) */
+		QRect				mScrollRegion;							/** the scroll region */
 };
 
 

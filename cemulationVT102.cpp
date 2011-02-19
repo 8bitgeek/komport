@@ -34,6 +34,8 @@
 CEmulationVT102::CEmulationVT102(CScreen* screen)
 : inherited(screen)
 , mApplicationCursorKeys(false)
+, mOriginMode(true)
+, mScrollRegion(0,0,0,0)
 {
 	QObject::connect(this,SIGNAL(codeNotHandled()),this,SLOT(doCodeNotHandled()));
 }
@@ -320,6 +322,23 @@ void CEmulationVT102::doSetScrollRegion()
 		emit codeNotHandled();
 }
 
+
+/* do cursor position */
+void CEmulationVT102::doCursorPosition()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	int row=0;
+	int col=0;
+	attributes(attrs,extAttrs);
+	if ( attrs.count() == 2 )
+	{
+		row=attrs.at(0)-1;
+		col=attrs.at(1)-1;
+	}
+	doCursorTo(col,row);
+}
+
 /* handle a CSI sequence */
 void CEmulationVT102::doCSI(unsigned char ch)
 {
@@ -327,22 +346,7 @@ void CEmulationVT102::doCSI(unsigned char ch)
 	{
 	case 'H':   /* cursor position */
 	case 'f':
-		{
-			int sep = mControlCode.indexOf( ';' );
-			if ( sep >= 0 )
-			{
-				QByteArray rowStr = mControlCode.left( sep );
-				++sep;
-				QByteArray colStr = mControlCode.right( mControlCode.length()-sep );
-				int row = rowStr.toInt()-1;
-				int col = colStr.toInt()-1;
-				doCursorTo(col,row);
-			}
-			else
-			{
-				doCursorTo(0,0);
-			}
-		}
+		doCursorPosition();
 		break;
 	case 'A':   /* cursor up */
 		doCursorUp();
@@ -412,7 +416,9 @@ void CEmulationVT102::doCSI(unsigned char ch)
 		}
 		break;
 	case 'r':   /* set scroll region */
+		setOriginMode(true);
 		doSetScrollRegion();
+		doCursorTo(0,0);
 		break;
 	case 's':   /* save cursor position */
 		doSaveCursorPos();
@@ -571,10 +577,32 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 			case Qt::Key_End:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
 			case Qt::Key_PageUp:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
 			case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
-			case Qt::Key_Left:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D"); break;
-			case Qt::Key_Up:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[A"); break;
-			case Qt::Key_Right:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C"); break;
-			case Qt::Key_Down :		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[B"); break;
+			case Qt::Key_Left:
+				if ( !applicationCursorKeys() ) {
+					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D");
+				} else {
+					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OD");
+				}
+				break;
+			case Qt::Key_Up:
+				if ( !applicationCursorKeys() ) {
+					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[A");
+				} else {
+					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OA");
+				}
+				break;
+			case Qt::Key_Right:
+				if ( !applicationCursorKeys() ) {
+					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C");
+				} else {
+					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OC");
+				}
+			case Qt::Key_Down:
+				if ( !applicationCursorKeys() ) {
+					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[B");
+				} else {
+					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OB");
+				}
 			default:
 			{
 				emit sendAsciiString(e->text().toAscii().data());
@@ -609,6 +637,25 @@ void CEmulationVT102::doCodeNotHandled()
 		putchar(mChar);
 		putchar('\n');
 	}
+}
+
+/** position cursor */
+void CEmulationVT102::doCursorTo(int col, int row)
+{
+	inherited::doCursorTo(col,row);
+}
+
+/** Set the scroll region */
+void CEmulationVT102::setScrollRegion(int top, int bottom)
+{
+	mScrollRegion.setTop(top);
+	mScrollRegion.setBottom(bottom);
+}
+
+void CEmulationVT102::setGrid(int cols,int rows)
+{
+	setScrollRegion(0,rows-1);
+	inherited::setGrid(cols,rows);
 }
 
 

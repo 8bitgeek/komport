@@ -133,7 +133,6 @@ void Komport::readSettings()
 	screen()->setForegroundColor(QColor::fromRgb(foregroundColor));
 	screen()->setBackgroundColor(QColor::fromRgb(backgroundColor));
 
-	screen()->setGrid(cols,rows);
 	setCentralWidget(screen());
 	screen()->setEnabled(true);
 
@@ -143,6 +142,7 @@ void Komport::readSettings()
 		mEmulation = new CEmulationVT102(screen());
 		mEmulation->setVisualBell(visualbell);
 		mEmulation->setLocalEcho(localecho);
+		mEmulation->setGrid(cols,rows);
 	}
 	else
 	{
