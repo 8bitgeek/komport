@@ -20,6 +20,7 @@
 #define CEMULATION_VT102_H
 
 #include "cemulation.h"
+#include <QList>
 
 /**
 Escape codes for vt102 terminal.
@@ -540,20 +541,21 @@ class CEmulationVT102 : public CEmulation
 		virtual void		keyPressEvent(QKeyEvent* e);			/** key press input. process and transmit the char. */
 		virtual void		receiveChar(unsigned char ch);			/** received and process an incoming character */
 
-	private:
-		void				sequence(unsigned char ch);				/** recognise and execute an escape sequence */
-		QByteArray			mCtlSequence;							/** terminal control sequence  */
-		bool				mSawESC;								/** did we see an ESC? */
-		bool				mInCtlSequence;							/** are we in a terminal control sequence? */
-
-	protected:
-		bool				mInsertMode;							/** are we in character insertion mode? */
-		bool				mCursorOn;								/** is cursor visible? */
+	private slots:
+		void				doCodeNotHandled();
 
 	signals:
+		void				codeNotHandled();						/** a code was not handled */
 		void				cursorOff();							/** command cursor off */
 		void				cursorOn();								/** command cursor on */
+
+	private:
+		bool				attributes(QList<int>& attrs,QList<int>& extEttrs);							/** obtain the attributes from an escape string */
+		void				doCSI(unsigned char ch);				/** recognise and execute a CSI sequence */
+		QByteArray			mControlCode;							/** lead in sequence */
+		unsigned char		mChar;									/** the last character dispatched (for debugging) */
 };
+
 
 #endif
 

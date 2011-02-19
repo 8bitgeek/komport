@@ -33,109 +33,131 @@
 
 CEmulationVT102::CEmulationVT102(CScreen* screen)
 : inherited(screen)
-, mSawESC(false)
-, mInCtlSequence(false)
-, mInsertMode(false)
-, mCursorOn(true)
 {
+	QObject::connect(this,SIGNAL(codeNotHandled()),this,SLOT(doCodeNotHandled()));
 }
 
 CEmulationVT102::~CEmulationVT102()
 {
 }
 
+/** Parse out the attributes from a control string */
+bool CEmulationVT102::attributes(QList<int>& attrs, QList<int>& extAttrs)
+{
+	QString num;
+	for( int n=0; n < mControlCode.length(); n++ )
+	{
+		if ( mControlCode.at(n) == '?' )
+		{
+			++n;
+			while(n < mControlCode.count() && isdigit(mControlCode.at(n)))
+			{
+				num = num + mControlCode.at(n);
+				++n;
+			}
+			extAttrs.append( num.toInt() );
+			num="";
+		}
+		else
+		{
+			while(n < mControlCode.count() && isdigit(mControlCode.at(n)))
+			{
+				num = num + mControlCode.at(n);
+				++n;
+			}
+			attrs.append( num.toInt() );
+			num="";
+		}
+	}
+	return ( attrs.count() > 0 || extAttrs.count() > 0 );
+}
+
 /** do graphics attributes */
 void CEmulationVT102::doGraphics()
 {
-	int index=0;
-	int sep=0;
-	if ( mCtlSequence.isEmpty() )
-	mCtlSequence = "0";
-	do {
-		sep = mCtlSequence.indexOf( ';', index );
-		if ( sep < 0 )
-		  sep = mCtlSequence.length();
-		QByteArray attrStr = mCtlSequence.mid( index, mCtlSequence.indexOf(';',index)-index );
-		index = sep+1;
-		if ( !attrStr.isEmpty() )
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	if (attrs.count() == 0 ) attrs.append(0);
+	for( int n=0; n < attrs.count(); n++ )
+	{
+		switch(attrs.at(n))
 		{
-			int attr = attrStr.toInt();
-			switch(attr)
-			{
-				//    Text attributes
-				case 0:   //    All attributes off
-					{
+			//    Text attributes
+			case 0:   //    All attributes off
+				{
 					screen()->setBackgroundColor(screen()->defaultBackgroundColor());
 					screen()->setForegroundColor(screen()->defaultForegroundColor());
 					screen()->setBlink(false);
 					screen()->setBold(false);
 					screen()->setReverse(false);
 					screen()->setUnderline(false);
-					}
-					break;
-				case 1:   //    Bold on
-					screen()->setBold(true);
-					break;
-				case 4:   //    Underscore on
-					screen()->setUnderline(true);
-					break;
-				case 5:   //    Blink on
-					screen()->setBlink(true);
-					break;
-				case 7:   //    Reverse video on
-					screen()->setReverse(true);
-					break;
-				case 8:   //    Concealed on
-					break;
+				}
+				break;
+			case 1:   /* Bold on */
+				screen()->setBold(true);
+				break;
+			case 4:   /* Underscore on */
+				screen()->setUnderline(true);
+				break;
+			case 5:   /* Blink on */
+				screen()->setBlink(true);
+				break;
+			case 7:   /* Reverse video on */
+				screen()->setReverse(true);
+				break;
+			case 8:   /* Concealed on */
+				break;
 
-				//    Foreground colors
-				case 30:  //    Black
-					screen()->setForegroundColor(QColor(0,0,0));       break;
-				case 31:  //    Red
-					screen()->setForegroundColor(QColor(255,0,0));     break;
-				case 32:  //    Green
-					screen()->setForegroundColor(QColor(0,255,0));     break;
-				case 33:  //    Yellow
-					screen()->setForegroundColor(QColor(240,240,10));  break;
-				case 34:  //    Blue
-					screen()->setForegroundColor(QColor(0,0,255));     break;
-				case 35:  //    Magenta
-					screen()->setForegroundColor(QColor(215,15,230));  break;
-				case 36:  //    Cyan
-					screen()->setForegroundColor(QColor(10,240,230));  break;
-				case 37:  //    White
-					screen()->setForegroundColor(QColor(255,255,255)); break;
-				case 38:
-				case 39:
-					screen()->setForegroundColor(screen()->defaultForegroundColor()); break;
+			/* Foreground colors */
+			case 30:  /* Black */
+				screen()->setForegroundColor(QColor(0,0,0));       break;
+			case 31:  /* Red */
+				screen()->setForegroundColor(QColor(255,0,0));     break;
+			case 32:  /* Green */
+				screen()->setForegroundColor(QColor(0,255,0));     break;
+			case 33:  /* Yellow */
+				screen()->setForegroundColor(QColor(240,240,10));  break;
+			case 34:  /* Blue */
+				screen()->setForegroundColor(QColor(0,0,255));     break;
+			case 35:  /* Magenta */
+				screen()->setForegroundColor(QColor(215,15,230));  break;
+			case 36:  /* Cyan */
+				screen()->setForegroundColor(QColor(10,240,230));  break;
+			case 37:  /* White */
+				screen()->setForegroundColor(QColor(255,255,255)); break;
+			case 38:
+			case 39:
+				screen()->setForegroundColor(screen()->defaultForegroundColor());
+				break;
 
-				//  Background colors
-				case 40:  //    Black
-					screen()->setBackgroundColor(QColor(0,0,0));       break;
-				case 41:  //    Red
-					screen()->setBackgroundColor(QColor(255,0,0));     break;
-				case 42:  //    Green
-					screen()->setBackgroundColor(QColor(0,255,0));     break;
-				case 43:  //    Yellow
-					screen()->setForegroundColor(QColor(240,240,10));  break;
-				case 44:  //    Blue
-					screen()->setBackgroundColor(QColor(0,0,255));     break;
-				case 45:  //    Magenta
-					screen()->setBackgroundColor(QColor(215,15,230));  break;
-				case 46:  //    Cyan
-					screen()->setBackgroundColor(QColor(10,240,230));  break;
-				case 47:  //    White
-					screen()->setBackgroundColor(QColor(255,255,255)); break;
-				case 48:
-				case 49:
-					screen()->setBackgroundColor(screen()->defaultBackgroundColor()); break;
+			/* Background colors */
+			case 40:  /* Black */
+				screen()->setBackgroundColor(QColor(0,0,0));       break;
+			case 41:  /* Red */
+				screen()->setBackgroundColor(QColor(255,0,0));     break;
+			case 42:  /* Green */
+				screen()->setBackgroundColor(QColor(0,255,0));     break;
+			case 43:  /* Yellow */
+				screen()->setForegroundColor(QColor(240,240,10));  break;
+			case 44:  /* Blue */
+				screen()->setBackgroundColor(QColor(0,0,255));     break;
+			case 45:  /* Magenta */
+				screen()->setBackgroundColor(QColor(215,15,230));  break;
+			case 46:  /* Cyan */
+				screen()->setBackgroundColor(QColor(10,240,230));  break;
+			case 47:  /* White */
+				screen()->setBackgroundColor(QColor(255,255,255)); break;
+			case 48:
+			case 49:
+				screen()->setBackgroundColor(screen()->defaultBackgroundColor());
+				break;
 
-				default:
-					printf( "?attr? %d\n", attr);
-					break;
-			}
+			default:
+				emit codeNotHandled();
+				break;
 		}
-	} while( sep < (unsigned int)mCtlSequence.length() );
+	}
 }
 
 /*
@@ -168,248 +190,334 @@ Reset and set modes
 /** set terminal modes */
 void CEmulationVT102::doSetModes()
 {
-	int index=0;
-	int sep=0;
-	if ( mCtlSequence.isEmpty() )
-	mCtlSequence = "0";
-	do {
-		sep = mCtlSequence.indexOf( ';', index );
-		if ( sep < 0 )
-			sep = mCtlSequence.length();
-		QByteArray attrStr = mCtlSequence.mid( index, mCtlSequence.indexOf(';',index)-index );
-		index = sep+1;
-		if ( !attrStr.isEmpty() )
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	for( int n=0; n < attrs.count(); n++ )
+	{
+		switch(attrs.at(n))
 		{
-			int attr = attrStr.toInt();
-			switch(attr)
-			{
-				//    Text attributes
-				case 0:   //    huh?
-					break;
-				case 4:   //    insert mode
-					mInsertMode=true;
-					break;
-				case 25:  // cursor on
-					mCursorOn=true;
-					emit cursorOn();
-					break;
-
-				default:
-					printf( "?attr? %d\n", attr);
-					break;
-			}
+		case 2:			/* keyboard lock */
+			setKeyboardLock(true);
+			break;
+		case 4:			/* insert mode */
+			setAutoInsert(true);
+			break;
+		case 12:		/* set echo mode */
+			setLocalEcho(true);
+			break;
+		case 20:		/* auto new line */
+			setAutoNewLine(true);
+			break;
+		default:
+			emit codeNotHandled();
+			break;
 		}
-	} while( sep < (unsigned int)mCtlSequence.length() );
+	}
+	for( int n=0; n < extAttrs.count(); n++ )
+	{
+		switch(extAttrs.at(n))
+		{
+		case 3:   /* 132 columns */
+			setCols(132);
+			break;
+		case 4:   /* jump scroll */
+			setJumpScroll(true);
+			break;
+		case 5:   /* reverse video */
+			setReverseVideo(true);
+			break;
+		case 6:   /* relative coordinates */
+			setRelativeCoordinates(true);
+			break;
+		case 7:   /* auto wrap */
+			setAutoWrap(true);
+			break;
+		case 25:  /* cursor on */
+			setCursorOn(true);
+			break;
+		default:
+			emit codeNotHandled();
+			break;
+		}
+	}
 }
 
 /** reset terminal modes */
 void CEmulationVT102::doResetModes()
 {
-	int index=0;
-	int sep=0;
-	if ( mCtlSequence.isEmpty() )
-		mCtlSequence = "0";
-	do {
-		sep = mCtlSequence.indexOf( ';', index );
-		if ( sep < 0 )
-		  sep = mCtlSequence.length();
-		QByteArray attrStr = mCtlSequence.mid( index, mCtlSequence.indexOf(';',index)-index );
-		index = sep+1;
-		if ( !attrStr.isEmpty() )
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	for( int n=0; n < attrs.count(); n++ )
+	{
+		switch(attrs.at(n))
 		{
-			int attr = attrStr.toInt();
-			switch(attr)
-			{
-				//    Text attributes
-				case 0:   // huh?
-					break;
-				case 4:   //    insert mode
-					mInsertMode=false;
-					break;
-				case 25: // cursor off
-					mCursorOn=false;
-					emit cursorOff();
-					break;
-				default:
-					printf( "?attr? %d\n", attr);
-					break;
-			}
+		case 2:			/* keyboard lock */
+			setKeyboardLock(false);
+			break;
+		case 4:			/* insert mode */
+			setAutoInsert(false);
+			break;
+		case 12:		/* set echo mode */
+			setLocalEcho(false);
+			break;
+		case 20:		/* auto new line */
+			setAutoNewLine(false);
+			break;
+		default:
+			emit codeNotHandled();
+			break;
 		}
-	} while( sep < (unsigned int)mCtlSequence.length() );
+	}
+	for( int n=0; n < extAttrs.count(); n++ )
+	{
+		switch(extAttrs.at(n))
+		{
+		case 3:   /* 80 columns */
+			setCols(80);
+			break;
+		case 4:   /* jump scroll */
+			setJumpScroll(false);
+			break;
+		case 5:   /* reverse video */
+			setReverseVideo(false);
+			break;
+		case 6:   /* relative coordinates */
+			setRelativeCoordinates(false);
+			break;
+		case 7:   /* auto wrap */
+			setAutoWrap(false);
+			break;
+		case 25:  /* cursor on */
+			setCursorOn(false);
+			break;
+		default:
+			emit codeNotHandled();
+			break;
+		}
+	}
 }
 
-// set scroll region
+/* set scroll region */
 void CEmulationVT102::doSetScrollRegion()
 {
-  printf( "emulation: setScrollRegion()\n" );
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	if ( attrs.count() == 2 )
+	{
+		setScrollRegion(attrs.at(0),attrs.at(1));
+	}
+	else
+		emit codeNotHandled();
 }
 
-// received part of an escape sequence
-void CEmulationVT102::sequence(unsigned char ch)
+/* handle a CSI sequence */
+void CEmulationVT102::doCSI(unsigned char ch)
 {
-	switch( ch )
+	switch( (mChar=ch) )
 	{
-		case 'H':   // cursor position
-		case 'f':
+	case 'H':   /* cursor position */
+	case 'f':
+		{
+			int sep = mControlCode.indexOf( ';' );
+			if ( sep >= 0 )
 			{
-				int sep = mCtlSequence.indexOf( ';' );
-				if ( sep >= 0 )
+				QByteArray rowStr = mControlCode.left( sep );
+				++sep;
+				QByteArray colStr = mControlCode.right( mControlCode.length()-sep );
+				int row = rowStr.toInt()-1;
+				int col = colStr.toInt()-1;
+				doCursorTo(col,row);
+			}
+			else
+			{
+				doCursorTo(0,0);
+			}
+		}
+		break;
+	case 'A':   /* cursor up */
+		doCursorUp();
+		break;
+	case 'B':   /* cursor down */
+		doCursorDown();
+		break;
+	case 'C':   /* cursor forward */
+		doCursorRight();
+		break;
+	case 'D':   /* cursor backward */
+		doCursorLeft();
+		break;
+	case 'J':   /* erase display */
+		{
+			int attr = mControlCode.isEmpty() ? 0 : mControlCode.toInt();
+			switch(attr)
+			{
+			case 0:  /* cursor to EOD */
+				doClearScreen(ClearScreenEOD);
+				break;
+			case 1: /* BOD to cursor */
+				doClearScreen(ClearScreenBOD);
+				break;
+			case 2: /* full display */
+				doClearScreen(ClearScreenAOD);
+				break;
+			}
+		}
+		break;
+	case 'h':    /* set modes */
+		doSetModes();
+		break;
+	case 'K':   /* erase line */
+		{
+			int attr = mControlCode.isEmpty() ? 0 : mControlCode.toInt();
+			switch(attr)
+			{
+			case 0:  /* cursor to EOL */
+				doClearEOL(ClearLineEOL);
+				break;
+			case 1: /* BOL to cursor */
+				doClearEOL(ClearLineBOL);
+				break;
+			case 2: /* full line */
+				doClearEOL(ClearLineBOL);
+				break;
+			}
+		}
+		break;
+	case 'L':    /* insert line(s) */
+		{
+			int num = mControlCode.isEmpty() ? 1 : mControlCode.toInt();
+			doInsertLines(num);
+		}
+		break;
+	case 'l':     /* reset modes */
+		doResetModes();
+		break;
+	case 'm':   /* graphics attributes */
+		doGraphics();
+		break;
+	case 'P':   /* delete character(s) */
+		{
+			int num = mControlCode.isEmpty() ? 1 : mControlCode.toInt();
+			doDeleteCharacters(num);
+		}
+		break;
+	case 'r':   /* set scroll region */
+		doSetScrollRegion();
+		break;
+	case 's':   /* save cursor position */
+		doSaveCursorPos();
+		break;
+	case 'u':   /* restore cursor position */
+		doRestoreCursorPos();
+		break;
+	default:
+		emit codeNotHandled();
+		break;
+	}
+}
+
+/* process escape codes */
+char CEmulationVT102::doLeadIn(unsigned char ch)
+{
+	if ( ch == ASCII_ESC && mControlCode.length() == 0 )
+	{
+		/* ESC char with no-leadin started */
+		mControlCode.append(ch);
+		return ASCII_NUL;
+	}
+	else if ( ch == ASCII_ESC && mControlCode.length() )
+	{
+		/* ESC char with leadin started */
+		mControlCode.clear();
+		return doLeadIn(ch);
+	}
+	else if ( ch == ASCII_CSI && mControlCode.length() == 0 )
+	{
+		/* CSI char with no leadin started */
+		mControlCode.append(ASCII_ESC);
+		mControlCode.append('[');
+		return ASCII_NUL;
+	}
+	else if ( ch == ASCII_CSI && mControlCode.length() )
+	{
+		/* CSI char with leadin started */
+		mControlCode.clear();
+		return doLeadIn(ch);
+	}
+	else if ( mControlCode.length() == 1 && mControlCode.at(0) == ASCII_ESC )
+	{
+		/* ESC character seen so far */
+		switch ((mChar=ch))
+		{
+			case '[':		/* This is a multi-character lead in sequence. */
+			case ')':
+			case '(':
+				mControlCode.append(ch);
+				return ASCII_NUL;
+				break;
+			case 'M':		/* Cursor up. */
+				doCursorUp();
+				break;
+			case 'D':
+			case 'E':		/* New Line. */
+				doCarriageReturn();
+				doNewLine();
+				break;
+			case '7':		/* (DECSC) save state. */
+				doSaveCursorPos();
+				break;
+			case '8':		/* (DECRS) restore saved state. */
+				doRestoreCursorPos();
+				break;
+			case 'H':		/* FIXME (HTS) set tab stop at current column. */
+				emit codeNotHandled();
+				break;
+			case 'g':		/* visual bell. */
+				doVisualBell();
+				break;
+			default:		/* did not understand escape code. */
+				emit codeNotHandled();
+				break;
+		}
+		mControlCode.clear();
+		return ASCII_NUL;
+	}
+	else if ( mControlCode.length() >= 2 )
+	{
+		switch ( mControlCode.at(1) )
+		{
+		case '[':
+			if ( mControlCode.at(1) == '[' )
+			{
+				if ( (ch>='a'&&ch<='z')||(ch>='A'&&ch<='Z') )
 				{
-					QByteArray rowStr = mCtlSequence.left( sep );
-					++sep;
-					QByteArray colStr = mCtlSequence.right( mCtlSequence.length()-sep );
-					int row = rowStr.toInt()-1;
-					int col = colStr.toInt()-1;
-					doCursorTo(col,row);
+					mControlCode.remove(0,2);
+					doCSI(ch);
+					mControlCode.clear();
+					return ASCII_NUL;
 				}
 				else
 				{
-					doCursorTo(0,0);
-				}
-			}
-			break;
-		case 'A':   // cursor up
-			doCursorUp();
-			break;
-		case 'B':   // cursor down
-			doCursorDown();
-			break;
-		case 'C':   // cursor forward
-			doCursorRight();
-			break;
-		case 'D':   // cursor backward
-			doCursorLeft();
-			break;
-		case 'J':   // erase display
-			{
-				int attr = mCtlSequence.isEmpty() ? 0 : mCtlSequence.toInt();
-				switch(attr) {
-				case 0:  // cursor to EOD
-					doClearScreen(ClearScreenEOD);
-					break;
-				case 1: // BOD to cursor
-					doClearScreen(ClearScreenBOD);
-					break;
-				case 2: // full display
-					doClearScreen(ClearScreenAOD);
-					break;
-				}
-			}
-			break;
-		case 'h':    // set modes
-			doSetModes();
-			break;
-		case 'K':   // erase line
-			{
-				int attr = mCtlSequence.isEmpty() ? 0 : mCtlSequence.toInt();
-				switch(attr) {
-					case 0:  // cursor to EOL
-						doClearEOL(ClearLineEOL);
-					break;
-					case 1: // BOL to cursor
+					mControlCode.append(ch);
+					if ( mControlCode.length()>25)
 					{
-						doClearEOL(ClearLineBOL);
-					 }
-					 break;
-					case 2: // full line
-					{
-						doClearEOL(ClearLineBOL);
+						mControlCode.clear();
 					}
-					break;
 				}
 			}
 			break;
-		case 'L':    // insert line(s)
-			{
-				int num = mCtlSequence.isEmpty() ? 1 : mCtlSequence.toInt();
-				doInsertLines(num);
-			}
-		break;
-		case 'l':     // reset modes
-			doResetModes();
-		break;
-		case 'm':   // graphics attributes
-			doGraphics();
-		break;
-		case 'P':   // delete character(s)
-			{
-				int num = mCtlSequence.isEmpty() ? 1 : mCtlSequence.toInt();
-				doDeleteCharacters(num);
-			}
-		break;
-		case 'r':   // set scroll region
-			doSetScrollRegion();
-		break;
-		case 's':   // save cursor position
-			doSaveCursor();
-		break;
-		case 'u':   // restore cursor position
-			doRestoreCursor();
-		break;
+		case '(':
+		case ')':
+			mControlCode.clear();
+			break;
 		default:
-			printf( "emulation: unknown '%c' in ESC[%s%c\n", ch,  mCtlSequence.data()==NULL?"": mCtlSequence.data(),ch);
-		break;
-	}
-}
-
-// process escape codes
-char CEmulationVT102::doLeadIn(unsigned char ch)
-{
-	// handle the terminal control sequence...
-	if ( ch == ASCII_ESC && !mSawESC && !mInCtlSequence )
-	{
-		mSawESC = true;
-		ch = ASCII_NUL;
-	}
-	else if ( mSawESC )
-	{
-		// ESC lead-in...
-		mSawESC=false;
-		switch (ch)
-		{
-			case '[':		// CSI lead in...
-				if ( !mInCtlSequence )
-				{
-					ch = ASCII_CSI;
-				}
-				break;
-			case '7':		// FIXME (DECSC) save state.
-				printf( "CSI+7 (save state) ignored\n" );
-				ch = ASCII_NUL;
-				break;
-			case '8':		// FIXME (DECRS) restore saved state.
-				printf( "CSI+8 (restore state) ignored\n" );
-				ch = ASCII_NUL;
-				break;
-			case 'H':		// FIXME (HTS) set tab stop at current column.
-				printf( "CSI+H (set tab stop at current column) ignored\n" );
-				ch = ASCII_NUL;
-				break;
-			case 'g':		// visual bell.
-				doVisualBell();
-				ch = ASCII_NUL;
-				break;
-			default:		// bad escape sequence.
-				printf( "Escape sequence ignored '%c' \n", ch );
-				ch = ASCII_NUL;
-				break;
+			mControlCode.clear();
+			break;
 		}
-	}
-	else if ( mInCtlSequence )
-	{
-		// still assembling an escape sequence...
-		bool completed=(ch>='a'&&ch<='z')||(ch>='A'&&ch<='Z');
-		if ( completed )
-		{
-			sequence(ch);
-			mInCtlSequence = false;
-			mCtlSequence.resize(0);
-		}
-		else
-		{
-			mCtlSequence += ch;
-		}
-		ch = ASCII_NUL;
+		return ASCII_NUL;
 	}
 	return ch;
 }
@@ -417,7 +525,6 @@ char CEmulationVT102::doLeadIn(unsigned char ch)
 /* received a char */
 void CEmulationVT102::receiveChar(unsigned char ch)
 {
-	// handle terminal codes and printable ASCII....
 	switch( (ch = doLeadIn(ch)) )
 	{
 		case ASCII_ENQ:
@@ -425,87 +532,75 @@ void CEmulationVT102::receiveChar(unsigned char ch)
 		case ASCII_SI:
 		case ASCII_NUL:
 			break;
-		case ASCII_CSI:			// same as ESC[ lead-in
-			{
-				if ( !mInCtlSequence )
-				{
-					mSawESC=false;
-					mInCtlSequence=true;
-					mCtlSequence.resize(0);
-				}
-			}
-			break;
 		case ASCII_BEL:
-			{
-				doBell();
-			}
+			doBell();
 			break;
 		case ASCII_BS:
 			doCursorLeft();
 			break;
 		case ASCII_LF:
-			{
-				QPoint pos = screen()->cursorPos();
-				if ( pos.y() >= screen()->rows()-1 )
-				{
-					screen()->scrollUp();
-				}
-				else
-				{
-					screen()->setCursorPos(pos.x(),pos.y()+1);
-				}
-			}
+			doNewLine();
 			break;
 		case ASCII_CR:
-			{
-				QPoint pos = screen()->cursorPos();
-				screen()->setCursorPos(0,pos.y());
-			}
+			doCarriageReturn();
 			break;
 		default:
-			if ( mInsertMode )
-			{
-				int y = screen()->cursorPos().y();
-				for( int x=screen()->rows()-1; x > screen()->cursorPos().x(); x-- )
-				{
-					screen()->cell(x,y).copy( screen()->cell(x-1,y) );
-				}
-				screen()->cell( screen()->cursorPos() ).clear();
-			}
-			screen()->putchar(ch,screen()->cursorPos());
-			screen()->advanceCursor();
+			doChar(ch);
 			break;
 	}
+	mChar='\0';
 }
 
 /** simulated key press for pasting from clipboard, etc... */
 void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 {
-	switch( e->key() )
+	if ( !keyboardLock() )
 	{
-		case Qt::Key_Insert:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[1~");  break;
-		case Qt::Key_Delete:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[4~"); break;
-		case Qt::Key_Home:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
-		case Qt::Key_End:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
-		case Qt::Key_PageUp:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
-		case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
-		case Qt::Key_Left:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D"); break;
-		case Qt::Key_Up:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[A"); break;
-		case Qt::Key_Right:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C"); break;
-		case Qt::Key_Down :		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[B"); break;
-		default:
+		switch( e->key() )
 		{
-			emit sendAsciiString(e->text().toAscii().data());
-			if ( localEcho() )
+			case Qt::Key_Insert:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[1~");  break;
+			case Qt::Key_Delete:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[4~"); break;
+			case Qt::Key_Home:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
+			case Qt::Key_End:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
+			case Qt::Key_PageUp:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
+			case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
+			case Qt::Key_Left:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D"); break;
+			case Qt::Key_Up:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[A"); break;
+			case Qt::Key_Right:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C"); break;
+			case Qt::Key_Down :		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[B"); break;
+			default:
 			{
-				for ( int n=0; n < e->text().length(); n++ )
+				emit sendAsciiString(e->text().toAscii().data());
+				if ( localEcho() )
 				{
-					char c = e->text().toAscii().at(n);
-					receiveChar(c);
+					for ( int n=0; n < e->text().length(); n++ )
+					{
+						char c = e->text().toAscii().at(n);
+						receiveChar(c);
+					}
 				}
+				break;
 			}
-			break;
 		}
+	}
+}
+
+/** An escape code was not handled, let's have a look at it. */
+void CEmulationVT102::doCodeNotHandled()
+{
+	if ( mControlCode.length() > 1 )
+	{
+		for( int n=0; n < mControlCode.length(); n++ )
+		{
+			putchar(mControlCode.data()[n]);
+		}
+		putchar(mChar);
+		putchar('\n');
+	}
+	else
+	{
+		putchar(mChar);
+		putchar('\n');
 	}
 }
 

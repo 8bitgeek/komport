@@ -3,6 +3,11 @@ To build:
 $ qmake-qt4
 $ make
 
+Release 1.9.5 (beta)
+-------------
+- Screen draw optimization.
+- Improved scroll rate.
+
 Release 0.9.4
 -------------
 - Background/foreground color issues sorted out.

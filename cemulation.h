@@ -49,9 +49,22 @@ class CEmulation : public QObject
 		~CEmulation();
 
 
-		CScreen*			screen()				{return mScreen;}
-		bool				visualBell()			{return mVisualBell;}
-		bool				localEcho()				{return mLocalEcho;}
+		inline CScreen*		screen()							{return mScreen;}
+		inline bool			visualBell()						{return mVisualBell;}
+		inline bool			localEcho()							{return mLocalEcho;}
+		inline QPoint&		savedCursorPos()					{return mSaveCursorPos;}
+		inline QPoint&		cursorPos()							{return screen()->cursorPos();}
+		inline bool			autoWrap()							{return mAutoWrap;}
+		inline bool			autoNewLine()						{return mAutoNewLine;}
+		inline bool			autoInsert()						{return mAutoInsert;}
+		inline bool			cursorOn()							{return mCursorOn;}
+		inline QRect&		scrollRegion()						{return mScrollRegion;}
+		inline bool			keyboardLock()						{return mKeyboardLock;}
+		inline int			cols()								{return screen()->cols();}
+		inline int			rows()								{return screen()->rows();}
+		inline bool			jumpScroll()						{return mJumpScroll;}
+		inline bool			reverseVideo()						{return mReverseVideo;}
+		inline bool			relativeCoordinates()				{return mRelativeCoordinates;}
 
 	protected:
 		virtual void		doCursorTo(int col, int row);			/** cursor to absolute x,y */
@@ -64,29 +77,54 @@ class CEmulation : public QObject
 		virtual void		doClearEOL(ClearLineMode mode);			/** clear to EOL from cursor position */
 		virtual void		doDeleteCharacters(int num);			/** delete characters in line */
 		virtual void		doInsertLines(int num);					/** insert lines */
+		virtual void		doNewLine();							/** new line */
+		virtual void		doCarriageReturn();						/** carriage return */
 
-		virtual void		doRestoreCursor();						/** restore cursor */
-		virtual void		doSaveCursor();							/** save cursor */
+		virtual void		doRestoreCursorPos();					/** restore cursor */
+		virtual void		doSaveCursorPos();						/** save cursor */
 
 		virtual void		doVisualBell();							/** perform visual bell */
 		virtual void		doBell();								/** ring bell or perform visual bell */
 
+		virtual void		doChar(unsigned char ch);				/** write a character to the screen */
 		
 	signals:
 		void				sendAsciiChar(const char ch);
 		void				sendAsciiString(const char* s);
 
 	public slots:
+
 		virtual void		keyPressEvent(QKeyEvent* e)=0;			/** key press input. process and transmit the char. */
 		virtual void		receiveChar(unsigned char _ch)=0;		/** received and process an incoming character */
-		void				setVisualBell(bool b)	{mVisualBell=b;}
-		void				setLocalEcho(bool b)	{mLocalEcho=b;}
+
+		virtual void		setVisualBell(bool b)				{mVisualBell=b;}
+		virtual void		setLocalEcho(bool b)				{mLocalEcho=b;}
+		virtual void		setAutoWrap(bool b)					{mAutoWrap=b;}
+		virtual void		setAutoNewLine(bool b)				{mAutoNewLine=b;}
+		virtual void		setAutoInsert(bool b)				{mAutoInsert=b;}
+		virtual void		setCursorOn(bool b)					{mCursorOn=b;}
+		virtual void		setScrollRegion(int top, int bottom);
+		virtual void		setKeyboardLock(bool b)				{mKeyboardLock=b;}
+		virtual void		setCols(int cols)					{screen()->setCols(cols);}
+		virtual void		setRows(int rows)					{screen()->setRows(rows);}
+		virtual void		setJumpScroll(bool b)				{mJumpScroll=b;}
+		virtual void		setReverseVideo(bool b)				{mReverseVideo=b;}
+		virtual void		setRelativeCoordinates(bool b)		{mRelativeCoordinates=b;}
 
 	private:
 		CScreen*			mScreen;								/** the screen */
 		bool				mVisualBell;							/** do we do a visual bell? */
 		bool				mLocalEcho;								/** do we do local echo? */
-		QPoint				mSaveCursor;							/** save cursor position */
+		QPoint				mSaveCursorPos;							/** save cursor position */
+		bool				mAutoWrap;								/** automatic line wrap */
+		bool				mAutoNewLine;							/** automatic new line on carriage return */
+		bool				mAutoInsert;							/** are we in character insertion mode? */
+		bool				mCursorOn;								/** is cursor visible? */
+		QRect				mScrollRegion;							/** the scroll region */
+		bool				mKeyboardLock;							/** keyboard lock */
+		bool				mJumpScroll;							/** jump scroll */
+		bool				mReverseVideo;							/** screen reverse video */
+		bool				mRelativeCoordinates;					/** use relative coords rather than absolute */
 
 };
 

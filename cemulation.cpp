@@ -19,10 +19,28 @@
 #include <QString>
 #include <QApplication>
 
+CScreen*			mScreen;								/** the screen */
+bool				mVisualBell;							/** do we do a visual bell? */
+bool				mLocalEcho;								/** do we do local echo? */
+QPoint				mSaveCursorPos;							/** save cursor position */
+bool				mAutoWrap;								/** automatic line wrap */
+bool				mAutoNewLine;							/** automatic new line on carriage return */
+
+
 CEmulation::CEmulation(CScreen* screen)
 : mScreen(screen)
 , mVisualBell(true)
 , mLocalEcho(false)
+, mSaveCursorPos(0,0)
+, mAutoWrap(true)
+, mAutoNewLine(false)
+, mAutoInsert(false)
+, mCursorOn(true)
+, mScrollRegion(0,0,0,0)
+, mKeyboardLock(false)
+, mJumpScroll(true)
+, mReverseVideo(false)
+, mRelativeCoordinates(false)
 {
 }
 
@@ -132,15 +150,16 @@ void CEmulation::doInsertLines(int num)
 }
 
 /** save cursor */
-void CEmulation::doSaveCursor()
+void CEmulation::doSaveCursorPos()
 {
-	mSaveCursor = screen()->cursorPos();
+	QPoint tempCursor(screen()->cursorPos());
+	mSaveCursorPos = tempCursor;
 }
 
 /** restore cursor */
-void CEmulation::doRestoreCursor()
+void CEmulation::doRestoreCursorPos()
 {
-	screen()->setCursorPos(mSaveCursor);
+	screen()->setCursorPos(mSaveCursorPos);
 }
 
 /** ring a visual bell */
@@ -172,3 +191,53 @@ void CEmulation::doBell()
 		QApplication::beep();
 	}
 }
+
+/** new line */
+void CEmulation::doNewLine()
+{
+	QPoint pos = screen()->cursorPos();
+	if ( pos.y() >= screen()->rows()-1 )
+	{
+		screen()->scrollUp();
+	}
+	else
+	{
+		screen()->setCursorPos(pos.x(),pos.y()+1);
+	}
+}
+
+/** carriage return */
+void CEmulation::doCarriageReturn()
+{
+	QPoint pos = screen()->cursorPos();
+	screen()->setCursorPos(0,pos.y());
+	if ( autoNewLine() )
+	{
+		doNewLine();
+	}
+}
+
+/** write a character to the screen */
+void CEmulation::doChar(unsigned char ch)
+{
+	if ( autoInsert() )
+	{
+		int y = screen()->cursorPos().y();
+		for( int x=screen()->rows()-1; x > screen()->cursorPos().x(); x-- )
+		{
+			screen()->cell(x,y).copy( screen()->cell(x-1,y) );
+		}
+		screen()->cell( screen()->cursorPos() ).clear();
+	}
+	screen()->putchar(ch,screen()->cursorPos());
+	screen()->advanceCursor();
+
+}
+/** Set the scroll region */
+void CEmulation::setScrollRegion(int top, int bottom)
+{
+	mScrollRegion.setTop(top);
+	mScrollRegion.setBottom(bottom);
+}
+
+

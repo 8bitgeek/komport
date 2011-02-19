@@ -138,9 +138,9 @@ void CScreen::setCursorPos(int col,int row)
 		CCharCell& newCell = cell(col,row);
 		oldCell.setCursor(false);
 		newCell.setCursor(true);
+		mCursor.setX(col);
+		mCursor.setY(row);
 	}
-	mCursor.setX(col);
-	mCursor.setY(row);
 }
 
 /** Clear from the current cursor position to the end of the line */

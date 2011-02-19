@@ -2,12 +2,12 @@
 # Project created by QtCreator 2011-02-09T06:45:33
 # -------------------------------------------------
 QT += core \
-	gui
+    gui
 unix:QMAKE_CXXFLAGS_RELEASE += -g
 unix:QMAKE_CFLAGS_RELEASE += -g
 unix:QMAKE_CXXFLAGS_RELEASE -= -O2
 unix:QMAKE_CFLAGS_RELEASE -= -O2
-unix:QMAKE_LFLAGS_RELEASE =
+unix:QMAKE_LFLAGS_RELEASE = 
 TARGET = komport
 TEMPLATE = app
 SOURCES += main.cpp \
@@ -35,4 +35,5 @@ unix:HEADERS -= Win32Serial.h
 FORMS += komport.ui \
     settingsdialog.ui
 RESOURCES += komport.qrc
-OTHER_FILES += README.TXT
+OTHER_FILES += README.TXT \
+    EMULATION.TXT
