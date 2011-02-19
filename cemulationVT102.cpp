@@ -33,6 +33,7 @@
 
 CEmulationVT102::CEmulationVT102(CScreen* screen)
 : inherited(screen)
+, mApplicationCursorKeys(false)
 {
 	QObject::connect(this,SIGNAL(codeNotHandled()),this,SLOT(doCodeNotHandled()));
 }
@@ -218,6 +219,9 @@ void CEmulationVT102::doSetModes()
 	{
 		switch(extAttrs.at(n))
 		{
+		case 1:			/* application cursor keys */
+			setApplicationCursorKeys(true);
+			break;
 		case 3:   /* 132 columns */
 			setCols(132);
 			break;
@@ -274,6 +278,9 @@ void CEmulationVT102::doResetModes()
 	{
 		switch(extAttrs.at(n))
 		{
+		case 1:			/* application cursor keys */
+			setApplicationCursorKeys(false);
+			break;
 		case 3:   /* 80 columns */
 			setCols(80);
 			break;

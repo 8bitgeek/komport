@@ -529,6 +529,8 @@ class CEmulationVT102 : public CEmulation
 		CEmulationVT102(CScreen* screen);
 		~CEmulationVT102();
 
+		bool				applicationCursorKeys()				{return mApplicationCursorKeys;}
+
 	protected:
 		virtual void		doGraphics();							/** do graphics attributes bold, blink, color, etc... */
 		virtual void		doResetModes();							/** reset terminal modes */
@@ -544,6 +546,9 @@ class CEmulationVT102 : public CEmulation
 	private slots:
 		void				doCodeNotHandled();
 
+	protected slots:
+		virtual void		setApplicationCursorKeys(bool b)	{mApplicationCursorKeys=b;}
+
 	signals:
 		void				codeNotHandled();						/** a code was not handled */
 		void				cursorOff();							/** command cursor off */
@@ -554,6 +559,7 @@ class CEmulationVT102 : public CEmulation
 		void				doCSI(unsigned char ch);				/** recognise and execute a CSI sequence */
 		QByteArray			mControlCode;							/** lead in sequence */
 		unsigned char		mChar;									/** the last character dispatched (for debugging) */
+		bool				mApplicationCursorKeys;					/** application/normal cursor keys */
 };
 
 
