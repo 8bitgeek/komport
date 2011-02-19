@@ -221,25 +221,25 @@ void CEmulationVT102::doSetModes()
 	{
 		switch(extAttrs.at(n))
 		{
-		case 1:			/* application cursor keys */
+		case 1:		/* application cursor keys */
 			setApplicationCursorKeys(true);
 			break;
-		case 3:   /* 132 columns */
+		case 3:		/* 132 columns */
 			setCols(132);
 			break;
-		case 4:   /* jump scroll */
+		case 4:		/* jump scroll */
 			setJumpScroll(true);
 			break;
-		case 5:   /* reverse video */
+		case 5:		/* reverse video */
 			setReverseVideo(true);
 			break;
-		case 6:   /* relative coordinates */
+		case 6:		/* relative coordinates */
 			setRelativeCoordinates(true);
 			break;
-		case 7:   /* auto wrap */
+		case 7:		/* auto wrap */
 			setAutoWrap(true);
 			break;
-		case 25:  /* cursor on */
+		case 25:	/* cursor on */
 			setCursorOn(true);
 			break;
 		default:
@@ -578,30 +578,34 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 			case Qt::Key_PageUp:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
 			case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
 			case Qt::Key_Left:
+				emit sendAsciiChar(ASCII_ESC);
 				if ( !applicationCursorKeys() ) {
-					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D");
+					emit sendAsciiString("[D");
 				} else {
-					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OD");
+					emit sendAsciiString("OD");
 				}
 				break;
 			case Qt::Key_Up:
+				emit sendAsciiChar(ASCII_ESC);
 				if ( !applicationCursorKeys() ) {
-					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[A");
+					emit sendAsciiString("[A");
 				} else {
-					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OA");
+					emit sendAsciiString("OA");
 				}
 				break;
 			case Qt::Key_Right:
+				emit sendAsciiChar(ASCII_ESC);
 				if ( !applicationCursorKeys() ) {
-					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C");
+					emit sendAsciiString("[C");
 				} else {
-					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OC");
+					emit sendAsciiString("OC");
 				}
 			case Qt::Key_Down:
+				emit sendAsciiChar(ASCII_ESC);
 				if ( !applicationCursorKeys() ) {
-					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[B");
+					emit sendAsciiString("[B");
 				} else {
-					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OB");
+					emit sendAsciiString("OB");
 				}
 			default:
 			{
