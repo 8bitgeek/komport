@@ -34,8 +34,9 @@
 CEmulationVT102::CEmulationVT102(CScreen* screen)
 : inherited(screen)
 , mApplicationCursorKeys(false)
-, mOriginMode(true)
-, mScrollRegion(0,0,0,0)
+, mOriginMode(false)
+, mTopMargin(0)
+, mBottomMargin(0)
 {
 	QObject::connect(this,SIGNAL(codeNotHandled()),this,SLOT(doCodeNotHandled()));
 }
@@ -314,9 +315,10 @@ void CEmulationVT102::doSetScrollRegion()
 	QList<int> attrs;
 	QList<int> extAttrs;
 	attributes(attrs,extAttrs);
-	if ( attrs.count() == 2 )
+	if ( attrs.count() == 2 && attrs.at(0) < attrs.at(1) )
 	{
-		setScrollRegion(attrs.at(0),attrs.at(1));
+		setTopMargin(attrs.at(0));
+		setBottomMargin(attrs.at(1));
 	}
 	else
 		emit codeNotHandled();
@@ -669,21 +671,68 @@ void CEmulationVT102::doCursorTo(int col, int row)
 {
 	if ( originMode() )
 	{
-		row += scrollRegion().top();
+		row += topMargin();
+		if ( row < bottomMargin() )
+		{
+			inherited::doCursorTo(col,row);
+		}
 	}
-	inherited::doCursorTo(col,row);
+	else
+	{
+		inherited::doCursorTo(col,row);
+	}
 }
 
-/** Set the scroll region */
-void CEmulationVT102::setScrollRegion(int top, int bottom)
+/** Set the top margin */
+void CEmulationVT102::setTopMargin(int top)
 {
-	mScrollRegion.setTop(top);
-	mScrollRegion.setBottom(bottom);
+	mTopMargin = top;
+}
+
+/** Set the bottom margin */
+void CEmulationVT102::setBottomMargin(int bottom)
+{
+	mBottomMargin = bottom;
+}
+
+/** scroll up */
+void CEmulationVT102::doScrollUp()
+{
+	if ( originMode() )
+	{
+		screen()->cells().scrollGrid(CCellArray::ScrollUp,0,topMargin(),cols(),(bottomMargin()-topMargin())+1);
+	}
+	else
+	{
+		inherited::doScrollUp();
+	}
+}
+
+/** new line */
+void CEmulationVT102::doNewLine()
+{
+	if ( originMode() )
+	{
+		QPoint pos = screen()->cursorPos();
+		if ( pos.y() >= bottomMargin() )
+		{
+			doScrollUp();
+		}
+		else
+		{
+			inherited::doNewLine();
+		}
+	}
+	else
+	{
+		inherited::doNewLine();
+	}
 }
 
 void CEmulationVT102::setGrid(int cols,int rows)
 {
-	setScrollRegion(0,rows-1);
+	setTopMargin(0);
+	setBottomMargin(rows);
 	inherited::setGrid(cols,rows);
 }
 

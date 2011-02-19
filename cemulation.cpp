@@ -191,13 +191,19 @@ void CEmulation::doBell()
 	}
 }
 
+/** scroll up */
+void CEmulation::doScrollUp()
+{
+	screen()->scrollUp();
+}
+
 /** new line */
 void CEmulation::doNewLine()
 {
 	QPoint pos = screen()->cursorPos();
 	if ( pos.y() >= screen()->rows()-1 )
 	{
-		screen()->scrollUp();
+		doScrollUp();
 	}
 	else
 	{
@@ -222,7 +228,10 @@ void CEmulation::doAdvanceCursor()
 	if ( !screen()->advanceCursor() && autoWrap() )
 	{
 		doCarriageReturn();
-		doNewLine();
+		if ( !autoNewLine() )
+		{
+			doNewLine();
+		}
 	}
 }
 

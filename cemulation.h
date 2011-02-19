@@ -78,6 +78,7 @@ class CEmulation : public QObject
 		virtual void		doInsertLines(int num);					/** insert lines */
 		virtual void		doNewLine();							/** new line */
 		virtual void		doCarriageReturn();						/** carriage return */
+		virtual void		doScrollUp();							/** scroll up */
 
 		virtual void		doRestoreCursorPos();					/** restore cursor */
 		virtual void		doSaveCursorPos();						/** save cursor */

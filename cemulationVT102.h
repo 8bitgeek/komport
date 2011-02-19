@@ -532,15 +532,18 @@ class CEmulationVT102 : public CEmulation
 
 		bool				applicationCursorKeys()				{return mApplicationCursorKeys;}
 		bool				originMode()						{return mOriginMode;}
-		inline QRect&		scrollRegion()						{return mScrollRegion;}
+		inline int			topMargin()							{return mTopMargin;}
+		inline int			bottomMargin()						{return mBottomMargin;}
 
-	protected slots:
+	protected:
 		virtual void		doCursorTo(int col, int row);			/** cursor to absolute x,y */
 		virtual void		doGraphics();							/** do graphics attributes bold, blink, color, etc... */
 		virtual void		doResetModes();							/** reset terminal modes */
 		virtual void		doSetModes();							/** set terminal modes */
 		virtual void		doSetScrollRegion();					/** set scroll region */
 		virtual void		doCursorPosition();						/** set the cursor position */
+		virtual void		doScrollUp();							/** scroll screen/region up */
+		virtual void		doNewLine();							/** new line/scroll up */
 
 		virtual char		doLeadIn(unsigned char ch);				/** process the lead-in sequence */
 
@@ -554,7 +557,8 @@ class CEmulationVT102 : public CEmulation
 	protected slots:
 		virtual void		setApplicationCursorKeys(bool b)	{mApplicationCursorKeys=b;}
 		virtual void		setOriginMode(bool b)				{mOriginMode=b;}
-		virtual void		setScrollRegion(int top, int bottom);
+		virtual void		setTopMargin(int top);
+		virtual void		setBottomMargin(int bottom);
 		virtual void		setGrid(int cols,int rows);
 
 
@@ -570,7 +574,8 @@ class CEmulationVT102 : public CEmulation
 		unsigned char		mChar;									/** the last character dispatched (for debugging) */
 		bool				mApplicationCursorKeys;					/** application/normal cursor keys */
 		bool				mOriginMode;							/** origin scroll region(set)/screen(reset) */
-		QRect				mScrollRegion;							/** the scroll region */
+		int					mTopMargin;								/** the top margin */
+		int					mBottomMargin;							/** the bottom margin */
 };
 
 
