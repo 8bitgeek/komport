@@ -29,6 +29,8 @@
 #define ASCII_CR    0x0D
 #define ASCII_ESC   0x1B
 
+//#define DEBUG_RX 1
+
 #define inherited CEmulation
 
 CEmulationVT102::CEmulationVT102(CScreen* screen)
@@ -765,11 +767,13 @@ char CEmulationVT102::doLeadIn(unsigned char ch)
 /* received a char */
 void CEmulationVT102::receiveChar(unsigned char ch)
 {
-	if ( ch < ' ' || ch > '~' )
-		printf("$%02x",ch);
-	else
-		putchar(ch);
-	fflush(stdout);
+	#ifdef DEBUG_RX
+		if ( ch < ' ' || ch > '~' )
+			printf("$%02x",ch);
+		else
+			putchar(ch);
+		fflush(stdout);
+	#endif
 	switch( (ch = doLeadIn(ch)) )
 	{
 		case ASCII_ENQ:
