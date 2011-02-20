@@ -155,7 +155,7 @@ void CScreen::clearEOL()
 /** Clear from the current cursor position to the beginning of the line */
 void CScreen::clearBOL()
 {
-	for( int n=cursorPos().x(); n > 0; n-- )
+	for( int n=cursorPos().x(); n >= 0; n-- )
 	{
 		cell(n,cursorPos().y()).clear();
 	}

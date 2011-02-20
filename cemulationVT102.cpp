@@ -76,6 +76,73 @@ bool CEmulationVT102::attributes(QList<int>& attrs, QList<int>& extAttrs)
 	return ( attrs.count() > 0 || extAttrs.count() > 0 );
 }
 
+
+/** reset to initial state */
+void CEmulationVT102::doReset()
+{
+	/* FIXME - do something here */
+	printf( "FIXME - doReset()\n" );
+	inherited::doReset();
+}
+
+/** do report */
+void CEmulationVT102::doReport()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	if ( attrs.count() )
+	{
+		switch(attrs.at(0))
+		{
+			case 5: /* Device Status Report */
+				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3n"); /* OK */
+				break;
+			case 6: /* Cursor Position Report */
+				{
+					QString coords;
+					coords.sprintf("[%d;%dR",cursorPos().y()+1,cursorPos().x()+1);
+					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString(coords.toAscii().data());
+				}
+				break;
+			default:
+				emit codeNotHandled();
+				break;
+		}
+	}
+	if ( extAttrs.count() )
+	{
+		switch(extAttrs.at(0))
+		{
+			case 15: /* Printer status report */
+				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[?10n"); /* OK */
+				break;
+			default:
+				emit codeNotHandled();
+				break;
+		}
+	}
+}
+
+/** do device attributes */
+void CEmulationVT102::doDeviceAttributes()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	if ( !attrs.count() )
+		attrs.append(0);
+	switch(attrs.at(0))
+	{
+		case 0: /* Device Attributes (terminal ID) */
+			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[?6c"); /* VT102 */
+			break;
+		default:
+			emit codeNotHandled();
+			break;
+	}
+}
+
 /** do graphics attributes */
 void CEmulationVT102::doGraphics()
 {
@@ -394,7 +461,7 @@ void CEmulationVT102::doCSI(unsigned char ch)
 				doClearEOL(ClearLineBOL);
 				break;
 			case 2: /* full line */
-				doClearEOL(ClearLineBOL);
+				doClearEOL(ClearLineAOL);
 				break;
 			}
 		}
@@ -405,11 +472,17 @@ void CEmulationVT102::doCSI(unsigned char ch)
 			doInsertLines(num);
 		}
 		break;
+	case 'c':   /* device attributes */
+		doDeviceAttributes();
+		break;
 	case 'l':     /* reset modes */
 		doResetModes();
 		break;
 	case 'm':   /* graphics attributes */
 		doGraphics();
+		break;
+	case 'n':  /* reports */
+		doReport();
 		break;
 	case 'P':   /* delete character(s) */
 		{
@@ -493,6 +566,12 @@ char CEmulationVT102::doLeadIn(unsigned char ch)
 			case 'g':		/* visual bell. */
 				doVisualBell();
 				break;
+			case 'c':		/* reset terminal */
+				doReset();
+				break;
+			case 'Z':		/* Identify Terminal */
+				doDeviceAttributes();
+				break;
 			default:		/* did not understand escape code. */
 				emit codeNotHandled();
 				break;
@@ -571,58 +650,62 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 {
 	if ( !keyboardLock() )
 	{
-		switch( e->key() )
+		if (applicationCursorKeys() )
 		{
-			case Qt::Key_Insert:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[1~");  break;
-			case Qt::Key_Delete:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[4~"); break;
-			case Qt::Key_Home:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
-			case Qt::Key_End:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
-			case Qt::Key_PageUp:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
-			case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
-			case Qt::Key_Up:
-				emit sendAsciiChar(ASCII_ESC);
-				if ( !applicationCursorKeys() ) {
-					emit sendAsciiString("[A");
-				} else {
-					emit sendAsciiString("OA");
-				}
-				break;
-			case Qt::Key_Down:
-				emit sendAsciiChar(ASCII_ESC);
-				if ( !applicationCursorKeys() ) {
-					emit sendAsciiString("[B");
-				} else {
-					emit sendAsciiString("OB");
-				}
-				break;
-			case Qt::Key_Right:
-				emit sendAsciiChar(ASCII_ESC);
-				if ( !applicationCursorKeys() ) {
-					emit sendAsciiString("[C");
-				} else {
-					emit sendAsciiString("OC");
-				}
-				break;
-			case Qt::Key_Left:
-				emit sendAsciiChar(ASCII_ESC);
-				if ( !applicationCursorKeys() ) {
-					emit sendAsciiString("[D");
-				} else {
-					emit sendAsciiString("OD");
-				}
-				break;
-			default:
+			switch( e->key() )
 			{
-				emit sendAsciiString(e->text().toAscii().data());
-				if ( localEcho() )
+				case Qt::Key_Insert:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[1~"); break;
+				case Qt::Key_Delete:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[4~"); break;
+				case Qt::Key_Home:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
+				case Qt::Key_End:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
+				case Qt::Key_PageUp:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
+				case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
+				case Qt::Key_Up:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OA"); break;
+				case Qt::Key_Down:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OB"); break;
+				case Qt::Key_Right:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OC"); break;
+				case Qt::Key_Left:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OD"); break;
+				default:
 				{
-					for ( int n=0; n < e->text().length(); n++ )
+					emit sendAsciiString(e->text().toAscii().data());
+					if ( localEcho() )
 					{
-						char c = e->text().toAscii().at(n);
-						receiveChar(c);
+						for ( int n=0; n < e->text().length(); n++ )
+						{
+							char c = e->text().toAscii().at(n);
+							receiveChar(c);
+						}
 					}
+					break;
 				}
-				break;
+			}
+		}
+		else
+		{
+			switch( e->key() )
+			{
+				case Qt::Key_Insert:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[1~"); break;
+				case Qt::Key_Delete:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[4~"); break;
+				case Qt::Key_Home:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
+				case Qt::Key_End:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
+				case Qt::Key_PageUp:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
+				case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
+				case Qt::Key_Up:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[A"); break;
+				case Qt::Key_Down:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[B"); break;
+				case Qt::Key_Right:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C"); break;
+				case Qt::Key_Left:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D"); break;
+				default:
+				{
+					emit sendAsciiString(e->text().toAscii().data());
+					if ( localEcho() )
+					{
+						for ( int n=0; n < e->text().length(); n++ )
+						{
+							char c = e->text().toAscii().at(n);
+							receiveChar(c);
+						}
+					}
+					break;
+				}
 			}
 		}
 	}
@@ -674,7 +757,7 @@ void CEmulationVT102::doCursorTo(int col, int row)
 	if ( originMode() )
 	{
 		row += topMargin();
-		if ( row < bottomMargin() )
+		if ( row <= bottomMargin() )
 		{
 			inherited::doCursorTo(col,row);
 		}

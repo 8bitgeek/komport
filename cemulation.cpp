@@ -47,6 +47,11 @@ CEmulation::~CEmulation()
 {
 }
 
+/** reset to initial state */
+void CEmulation::doReset()
+{
+}
+
 /** move cursor to x,y */
 void CEmulation::doCursorTo(int col, int row)
 {

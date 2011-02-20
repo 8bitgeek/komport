@@ -66,6 +66,7 @@ class CEmulation : public QObject
 		inline bool			relativeCoordinates()				{return mRelativeCoordinates;}
 
 	protected:
+		virtual void		doReset();								/** reset to initial state */
 		virtual void		doCursorTo(int col, int row);			/** cursor to absolute x,y */
 		virtual void		doCursorUp();							/** cursor up one row */
 		virtual void		doCursorDown();							/** cursor down one row. */

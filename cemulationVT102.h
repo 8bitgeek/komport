@@ -536,6 +536,9 @@ class CEmulationVT102 : public CEmulation
 		inline int			bottomMargin()						{return mBottomMargin;}
 
 	protected:
+		virtual void		doReset();								/** reset */
+		virtual void		doReport();								/** report */
+		virtual void		doDeviceAttributes();					/** device attributes */
 		virtual void		doCursorTo(int col, int row);			/** cursor to absolute x,y */
 		virtual void		doCursorUp();							/** cursor up one row */
 		virtual void		doCursorDown();							/** cursor down one row. */
