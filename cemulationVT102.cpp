@@ -85,6 +85,150 @@ void CEmulationVT102::doReset()
 	inherited::doReset();
 }
 
+/** An escape code was not handled, let's have a look at it. */
+void CEmulationVT102::doCodeNotHandled()
+{
+	putchar('<');
+	if ( mControlCode.length() > 1 )
+	{
+		for( int n=0; n < mControlCode.length(); n++ )
+		{
+			putchar(mControlCode.data()[n]);
+		}
+		putchar(mChar);
+	}
+	else
+	{
+		putchar(mChar);
+	}
+	putchar('>');
+	fflush(stdout);
+}
+
+/** position cursor */
+void CEmulationVT102::doCursorTo(int col, int row)
+{
+	//if ( originMode() )
+	//{
+	//	row += topMargin();
+	//	if ( row <= bottomMargin() )
+	//	{
+	//		inherited::doCursorTo(col,row);
+	//	}
+	//}
+	//else
+	//{
+		inherited::doCursorTo(col,row);
+	//}
+}
+
+/** cursor up one row */
+void CEmulationVT102::doCursorUp()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	for( int y =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; y > 0; y-- )
+	{
+		if ( !originMode() || (originMode() && cursorPos().y() > topMargin() ) )
+		{
+			inherited::doCursorUp();
+		}
+	}
+}
+
+/** cursor down one row. */
+void CEmulationVT102::doCursorDown()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	for( int y =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; y > 0; y-- )
+	{
+		if ( !originMode() || (originMode() && cursorPos().y() < bottomMargin() ) )
+		{
+			inherited::doCursorDown();
+		}
+	}
+}
+
+/** cursor left one column  */
+void CEmulationVT102::doCursorLeft()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	for( int x =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; x > 0; x-- )
+	{
+		inherited::doCursorLeft();
+	}
+}
+
+/** cursor right one column  */
+void CEmulationVT102::doCursorRight()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	for( int x =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; x > 0; x-- )
+	{
+		inherited::doCursorRight();
+	}
+}
+
+/** Set the top margin */
+void CEmulationVT102::setTopMargin(int top)
+{
+	mTopMargin = top;
+}
+
+/** Set the bottom margin */
+void CEmulationVT102::setBottomMargin(int bottom)
+{
+	mBottomMargin = bottom;
+}
+
+/** scroll up */
+void CEmulationVT102::doScrollUp()
+{
+	if ( originMode() )
+	{
+		screen()->cells().scrollGrid(CCellArray::ScrollUp,0,topMargin(),cols(),(bottomMargin()-topMargin())+1);
+	}
+	else
+	{
+		inherited::doScrollUp();
+	}
+}
+
+/** new line */
+void CEmulationVT102::doNewLine()
+{
+	if ( originMode() )
+	{
+		QPoint pos = screen()->cursorPos();
+		if ( pos.y() >= bottomMargin() )
+		{
+			doScrollUp();
+		}
+		else
+		{
+			inherited::doNewLine();
+		}
+	}
+	else
+	{
+		inherited::doNewLine();
+	}
+}
+
+void CEmulationVT102::setGrid(int cols,int rows)
+{
+	setTopMargin(0);
+	setBottomMargin(rows);
+	inherited::setGrid(cols,rows);
+}
+
 /** do report */
 void CEmulationVT102::doReport()
 {
@@ -549,8 +693,10 @@ char CEmulationVT102::doLeadIn(unsigned char ch)
 			case 'M':		/* Cursor up. */
 				doCursorUp();
 				break;
-			case 'D':
-			case 'E':		/* New Line. */
+			case 'D':		/* Index */
+				doNewLine();
+				break;
+			case 'E':		/* Next Line. */
 				doCarriageReturn();
 				doNewLine();
 				break;
@@ -619,6 +765,11 @@ char CEmulationVT102::doLeadIn(unsigned char ch)
 /* received a char */
 void CEmulationVT102::receiveChar(unsigned char ch)
 {
+	if ( ch < ' ' || ch > '~' )
+		printf("$%02x",ch);
+	else
+		putchar(ch);
+	fflush(stdout);
 	switch( (ch = doLeadIn(ch)) )
 	{
 		case ASCII_ENQ:
@@ -711,168 +862,5 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 	}
 }
 
-#ifdef DEBUG
-/** An escape code was not handled, let's have a look at it. */
-void CEmulationVT102::doCodeNotHandled()
-{
-	if ( mControlCode.length() > 1 )
-	{
-		for( int n=0; n < mControlCode.length(); n++ )
-		{
-			putchar(mControlCode.data()[n]);
-		}
-		putchar(mChar);
-		putchar('\n');
-	}
-	else
-	{
-		putchar(mChar);
-		putchar('\n');
-	}
-}
-#else
-/** An escape code was not handled, let's have a look at it. */
-void CEmulationVT102::doCodeNotHandled()
-{
-	if ( mControlCode.length() > 1 )
-	{
-		for( int n=0; n < mControlCode.length(); n++ )
-		{
-			putchar(mControlCode.data()[n]);
-		}
-		putchar(mChar);
-		putchar('\n');
-	}
-	else
-	{
-		putchar(mChar);
-		putchar('\n');
-	}
-}
-#endif
-
-/** position cursor */
-void CEmulationVT102::doCursorTo(int col, int row)
-{
-	if ( originMode() )
-	{
-		row += topMargin();
-		if ( row <= bottomMargin() )
-		{
-			inherited::doCursorTo(col,row);
-		}
-	}
-	else
-	{
-		inherited::doCursorTo(col,row);
-	}
-}
-
-/** cursor up one row */
-void CEmulationVT102::doCursorUp()
-{
-	QList<int> attrs;
-	QList<int> extAttrs;
-	attributes(attrs,extAttrs);
-	for( int y =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; y > 0; y-- )
-	{
-		if ( !originMode() || (originMode() && cursorPos().y() > topMargin() ) )
-		{
-			inherited::doCursorUp();
-		}
-	}
-}
-
-/** cursor down one row. */
-void CEmulationVT102::doCursorDown()
-{
-	QList<int> attrs;
-	QList<int> extAttrs;
-	attributes(attrs,extAttrs);
-	for( int y =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; y > 0; y-- )
-	{
-		if ( !originMode() || (originMode() && cursorPos().y() < bottomMargin() ) )
-		{
-			inherited::doCursorDown();
-		}
-	}
-}
-
-/** cursor left one column  */
-void CEmulationVT102::doCursorLeft()
-{
-	QList<int> attrs;
-	QList<int> extAttrs;
-	attributes(attrs,extAttrs);
-	for( int x =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; x > 0; x-- )
-	{
-		inherited::doCursorLeft();
-	}
-}
-
-/** cursor right one column  */
-void CEmulationVT102::doCursorRight()
-{
-	QList<int> attrs;
-	QList<int> extAttrs;
-	attributes(attrs,extAttrs);
-	for( int x =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; x > 0; x-- )
-	{
-		inherited::doCursorRight();
-	}
-}
-
-/** Set the top margin */
-void CEmulationVT102::setTopMargin(int top)
-{
-	mTopMargin = top;
-}
-
-/** Set the bottom margin */
-void CEmulationVT102::setBottomMargin(int bottom)
-{
-	mBottomMargin = bottom;
-}
-
-/** scroll up */
-void CEmulationVT102::doScrollUp()
-{
-	if ( originMode() )
-	{
-		screen()->cells().scrollGrid(CCellArray::ScrollUp,0,topMargin(),cols(),(bottomMargin()-topMargin())+1);
-	}
-	else
-	{
-		inherited::doScrollUp();
-	}
-}
-
-/** new line */
-void CEmulationVT102::doNewLine()
-{
-	if ( originMode() )
-	{
-		QPoint pos = screen()->cursorPos();
-		if ( pos.y() >= bottomMargin() )
-		{
-			doScrollUp();
-		}
-		else
-		{
-			inherited::doNewLine();
-		}
-	}
-	else
-	{
-		inherited::doNewLine();
-	}
-}
-
-void CEmulationVT102::setGrid(int cols,int rows)
-{
-	setTopMargin(0);
-	setBottomMargin(rows);
-	inherited::setGrid(cols,rows);
-}
 
 

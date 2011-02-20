@@ -18,17 +18,12 @@
 #ifndef KOMPORT_H
 #define KOMPORT_H
 
-#define DEBUG 1
-
 #include <QMainWindow>
 #include <QKeyEvent>
 #include <QTimerEvent>
 #include <QDialog>
 #include <QCloseEvent>
 #include <QColor>
-#ifdef DEBUG
-	#include <QTextBrowser>
-#endif
 
 #include "cscreen.h"
 #include "cserial.h"
@@ -104,11 +99,6 @@ class Komport : public QMainWindow
 		QAction*			settingsAct;
 
 		QAction*			aboutAct;
-
-		#ifdef DEBUG
-		QAction*			debugAct;
-		QTextBrowser*		debugText;
-		#endif
 
 };
 
