@@ -234,8 +234,8 @@ void CEmulationVT102::doSetModes()
 		case 5:		/* reverse video */
 			setReverseVideo(true);
 			break;
-		case 6:		/* relative coordinates */
-			setRelativeCoordinates(true);
+		case 6:		/* origin mode */
+			setOriginMode(true);
 			break;
 		case 7:		/* auto wrap */
 			setAutoWrap(true);
@@ -293,8 +293,8 @@ void CEmulationVT102::doResetModes()
 		case 5:   /* reverse video */
 			setReverseVideo(false);
 			break;
-		case 6:   /* relative coordinates */
-			setRelativeCoordinates(false);
+		case 6:   /* origin mode */
+			setOriginMode(false);
 			break;
 		case 7:   /* auto wrap */
 			setAutoWrap(false);
@@ -317,8 +317,8 @@ void CEmulationVT102::doSetScrollRegion()
 	attributes(attrs,extAttrs);
 	if ( attrs.count() == 2 && attrs.at(0) < attrs.at(1) )
 	{
-		setTopMargin(attrs.at(0));
-		setBottomMargin(attrs.at(1));
+		setTopMargin(attrs.at(0)-1);
+		setBottomMargin(attrs.at(1)-1);
 	}
 	else
 		emit codeNotHandled();
@@ -579,20 +579,20 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 			case Qt::Key_End:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
 			case Qt::Key_PageUp:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
 			case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
-			case Qt::Key_Left:
-				emit sendAsciiChar(ASCII_ESC);
-				if ( !applicationCursorKeys() ) {
-					emit sendAsciiString("[D");
-				} else {
-					emit sendAsciiString("OD");
-				}
-				break;
 			case Qt::Key_Up:
 				emit sendAsciiChar(ASCII_ESC);
 				if ( !applicationCursorKeys() ) {
 					emit sendAsciiString("[A");
 				} else {
 					emit sendAsciiString("OA");
+				}
+				break;
+			case Qt::Key_Down:
+				emit sendAsciiChar(ASCII_ESC);
+				if ( !applicationCursorKeys() ) {
+					emit sendAsciiString("[B");
+				} else {
+					emit sendAsciiString("OB");
 				}
 				break;
 			case Qt::Key_Right:
@@ -602,13 +602,15 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 				} else {
 					emit sendAsciiString("OC");
 				}
-			case Qt::Key_Down:
+				break;
+			case Qt::Key_Left:
 				emit sendAsciiChar(ASCII_ESC);
 				if ( !applicationCursorKeys() ) {
-					emit sendAsciiString("[B");
+					emit sendAsciiString("[D");
 				} else {
-					emit sendAsciiString("OB");
+					emit sendAsciiString("OD");
 				}
+				break;
 			default:
 			{
 				emit sendAsciiString(e->text().toAscii().data());
@@ -680,6 +682,60 @@ void CEmulationVT102::doCursorTo(int col, int row)
 	else
 	{
 		inherited::doCursorTo(col,row);
+	}
+}
+
+/** cursor up one row */
+void CEmulationVT102::doCursorUp()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	for( int y =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; y > 0; y-- )
+	{
+		if ( !originMode() || (originMode() && cursorPos().y() > topMargin() ) )
+		{
+			inherited::doCursorUp();
+		}
+	}
+}
+
+/** cursor down one row. */
+void CEmulationVT102::doCursorDown()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	for( int y =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; y > 0; y-- )
+	{
+		if ( !originMode() || (originMode() && cursorPos().y() < bottomMargin() ) )
+		{
+			inherited::doCursorDown();
+		}
+	}
+}
+
+/** cursor left one column  */
+void CEmulationVT102::doCursorLeft()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	for( int x =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; x > 0; x-- )
+	{
+		inherited::doCursorLeft();
+	}
+}
+
+/** cursor right one column  */
+void CEmulationVT102::doCursorRight()
+{
+	QList<int> attrs;
+	QList<int> extAttrs;
+	attributes(attrs,extAttrs);
+	for( int x =  ( attrs.count() && attrs.at(0) > 0 ) ? attrs.at(0) : 1; x > 0; x-- )
+	{
+		inherited::doCursorRight();
 	}
 }
 

@@ -175,13 +175,16 @@ void CCellArray::scrollGrid(CCellArray::ScrollMode mode, int col, int row, int w
 	if ( mode == ScrollUp )
 	{
 		/** copy region up... */
-		for(int y=row; y < (row+height)-1; y++)
+		for(int y=row; y < (row+height); y++)
 		{
 			for(int x=col; x < width; x++)
 			{
-				CCharCell& from = (CCharCell&)cell(x,y+1);
-				CCharCell& to = (CCharCell&)cell(x,y);
-				to = from;
+				if ( isValidCell(x,y+1) && isValidCell(x,y) )
+				{
+					CCharCell& from = (CCharCell&)cell(x,y+1);
+					CCharCell& to = (CCharCell&)cell(x,y);
+					to = from;
+				}
 			}
 		}
 		/** new up the bottom row... */
@@ -198,9 +201,12 @@ void CCellArray::scrollGrid(CCellArray::ScrollMode mode, int col, int row, int w
 		{
 			for(int x=col; x < width; x++)
 			{
-				CCharCell& from = (CCharCell&)cell(x,y);
-				CCharCell& to = (CCharCell&)cell(x,y-1);
-				to = from;
+				if ( isValidCell(x,y-1) && isValidCell(x,y) )
+				{
+					CCharCell& from = (CCharCell&)cell(x,y);
+					CCharCell& to = (CCharCell&)cell(x,y-1);
+					to = from;
+				}
 			}
 		}
 		/** new up the top row... */

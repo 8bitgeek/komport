@@ -537,6 +537,10 @@ class CEmulationVT102 : public CEmulation
 
 	protected:
 		virtual void		doCursorTo(int col, int row);			/** cursor to absolute x,y */
+		virtual void		doCursorUp();							/** cursor up one row */
+		virtual void		doCursorDown();							/** cursor down one row. */
+		virtual void		doCursorLeft();							/** cursor left one column  */
+		virtual void		doCursorRight();						/** cursor right one column  */
 		virtual void		doGraphics();							/** do graphics attributes bold, blink, color, etc... */
 		virtual void		doResetModes();							/** reset terminal modes */
 		virtual void		doSetModes();							/** set terminal modes */

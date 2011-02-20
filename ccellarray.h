@@ -39,14 +39,15 @@ class CCellArray : public QObject
 		CCellArray();
 		virtual ~CCellArray();
 
-		CScreen*			screen()					{return mScreen;}
-		inline QRect&		rect()						{return mRect;}
-		inline int			cols()						{return mCols;}
-		inline int			rows()						{return mRows;}
-		QList<CCharCell>	cells()						{return mCells;}
-		inline const CCharCell&	cell(int col,int row)	{return mCells.at(indexOf(col,row));}
-		inline int			indexOf(int col,int row)	{return (row*cols())+col;}
-		inline int			count()						{return mCells.count();}
+		CScreen*			screen()						{return mScreen;}
+		inline QRect&		rect()							{return mRect;}
+		inline int			cols()							{return mCols;}
+		inline int			rows()							{return mRows;}
+		QList<CCharCell>	cells()							{return mCells;}
+		inline const CCharCell&	cell(int col,int row)		{return mCells.at(indexOf(col,row));}
+		inline int			indexOf(int col,int row)		{return (row*cols())+col;}
+		inline bool			isValidCell(int col,int row)	{return indexOf(col,row) < count();}
+		inline int			count()							{return mCells.count();}
 		void				selectCells(QRect r);
 		void				deselectCells();
 
