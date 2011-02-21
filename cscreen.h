@@ -75,6 +75,7 @@ class CScreen : public QWidget
 		void			setCursorPos(QPoint& pt);
 		void			setCursorPos(int col,int row);
 		void			scrollUp();
+		void			scrollDown();
 
 		void			clear();
 		void			clearEOL();

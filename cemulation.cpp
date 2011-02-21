@@ -19,20 +19,12 @@
 #include <QString>
 #include <QApplication>
 
-CScreen*			mScreen;								/** the screen */
-bool				mVisualBell;							/** do we do a visual bell? */
-bool				mLocalEcho;								/** do we do local echo? */
-QPoint				mSaveCursorPos;							/** save cursor position */
-bool				mAutoWrap;								/** automatic line wrap */
-bool				mAutoNewLine;							/** automatic new line on carriage return */
-
-
 CEmulation::CEmulation(CScreen* screen)
 : mScreen(screen)
 , mVisualBell(true)
 , mLocalEcho(false)
 , mSaveCursorPos(0,0)
-, mAutoWrap(true)
+, mAutoWrap(false)
 , mAutoNewLine(false)
 , mAutoInsert(false)
 , mCursorOn(true)
@@ -202,6 +194,12 @@ void CEmulation::doScrollUp()
 	screen()->scrollUp();
 }
 
+/** scroll down */
+void CEmulation::doScrollDown()
+{
+	screen()->scrollDown();
+}
+
 /** new line */
 void CEmulation::doNewLine()
 {
@@ -213,6 +211,20 @@ void CEmulation::doNewLine()
 	else
 	{
 		screen()->setCursorPos(pos.x(),pos.y()+1);
+	}
+}
+
+/** reverse new line */
+void CEmulation::doReverseNewLine()
+{
+	QPoint pos = screen()->cursorPos();
+	if ( pos.y() < 1 )
+	{
+		doScrollDown();
+	}
+	else
+	{
+		screen()->setCursorPos(pos.x(),pos.y()-1);
 	}
 }
 

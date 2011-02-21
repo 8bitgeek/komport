@@ -261,4 +261,12 @@ void CScreen::scrollUp()
 	setCursorPos(pos);
 }
 
+/** scroll characters down */
+void CScreen::scrollDown()
+{
+	QPoint pos = cursorPos();
+	cells().scrollGrid(CCellArray::ScrollDown,0,0,cols(),rows());
+	setCursorPos(pos);
+}
+
 

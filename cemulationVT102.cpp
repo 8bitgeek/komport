@@ -203,6 +203,19 @@ void CEmulationVT102::doScrollUp()
 	}
 }
 
+/** scroll down */
+void CEmulationVT102::doScrollDown()
+{
+	if ( originMode() )
+	{
+		screen()->cells().scrollGrid(CCellArray::ScrollDown,0,topMargin(),cols(),(bottomMargin()-topMargin())+1);
+	}
+	else
+	{
+		inherited::doScrollDown();
+	}
+}
+
 /** new line */
 void CEmulationVT102::doNewLine()
 {
@@ -221,6 +234,27 @@ void CEmulationVT102::doNewLine()
 	else
 	{
 		inherited::doNewLine();
+	}
+}
+
+/** do reverse new line */
+void CEmulationVT102::doReverseNewLine()
+{
+	if ( originMode() )
+	{
+		QPoint pos = screen()->cursorPos();
+		if ( pos.y() <= topMargin() )
+		{
+			doScrollDown();
+		}
+		else
+		{
+			inherited::doReverseNewLine();
+		}
+	}
+	else
+	{
+		inherited::doReverseNewLine();
 	}
 }
 
@@ -692,10 +726,10 @@ char CEmulationVT102::doLeadIn(unsigned char ch)
 				mControlCode.append(ch);
 				return ASCII_NUL;
 				break;
-			case 'M':		/* Cursor up. */
-				doCursorUp();
+			case 'M':		/* Reverse Index (Cursor Up) */
+				doReverseNewLine();
 				break;
-			case 'D':		/* Index */
+			case 'D':		/* Index (Cursor Down) */
 				doNewLine();
 				break;
 			case 'E':		/* Next Line. */

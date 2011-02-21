@@ -550,7 +550,9 @@ class CEmulationVT102 : public CEmulation
 		virtual void		doSetScrollRegion();					/** set scroll region */
 		virtual void		doCursorPosition();						/** set the cursor position */
 		virtual void		doScrollUp();							/** scroll screen/region up */
+		virtual void		doScrollDown();							/** scroll screen/region down */
 		virtual void		doNewLine();							/** new line/scroll up */
+		virtual void		doReverseNewLine();						/** reverse new line/scroll down */
 
 		virtual char		doLeadIn(unsigned char ch);				/** process the lead-in sequence */
 
