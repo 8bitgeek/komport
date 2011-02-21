@@ -203,8 +203,8 @@ void CCellArray::scrollGrid(CCellArray::ScrollMode mode, int col, int row, int w
 			{
 				if ( isValidCell(x,y-1) && isValidCell(x,y) )
 				{
-					CCharCell& from = (CCharCell&)cell(x,y);
-					CCharCell& to = (CCharCell&)cell(x,y-1);
+					CCharCell& from = (CCharCell&)cell(x,y-1);
+					CCharCell& to = (CCharCell&)cell(x,y);
 					to = from;
 				}
 			}
