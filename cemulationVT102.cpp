@@ -834,7 +834,7 @@ void CEmulationVT102::receiveChar(unsigned char ch)
 	mChar='\0';
 }
 
-/** simulated key press for pasting from clipboard, etc... */
+/** process key press... */
 void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 {
 	e->accept();
