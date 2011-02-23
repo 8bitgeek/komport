@@ -173,7 +173,7 @@ void CSerial::sendAsciiChar(const char c)
 {
 	if ( isOpen() )
 	{
-		write(&c,1);
+		this->write(&c,1);
 	}
 }
 
@@ -185,7 +185,11 @@ void CSerial::sendAsciiString(const char* s)
 {
 	if ( isOpen() )
 	{
-		write(s,::strlen(s));
+		int len = strlen(s);
+		for(int n=0;n<len;n++)
+		{
+			sendAsciiChar(s[n]);
+		}
 	}
 }
 
