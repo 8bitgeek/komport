@@ -837,6 +837,7 @@ void CEmulationVT102::receiveChar(unsigned char ch)
 /** simulated key press for pasting from clipboard, etc... */
 void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 {
+	e->accept();
 	if ( !keyboardLock() )
 	{
 		if (applicationCursorKeys() )
@@ -854,18 +855,7 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 				case Qt::Key_Right:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OC"); break;
 				case Qt::Key_Left:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OD"); break;
 				default:
-				{
-					emit sendAsciiString(e->text().toAscii().data());
-					if ( localEcho() )
-					{
-						for ( int n=0; n < e->text().length(); n++ )
-						{
-							char c = e->text().toAscii().at(n);
-							receiveChar(c);
-						}
-					}
-					break;
-				}
+				e->ignore();
 			}
 		}
 		else
@@ -883,19 +873,22 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 				case Qt::Key_Right:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C"); break;
 				case Qt::Key_Left:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D"); break;
 				default:
+				e->ignore();
+			}
+		}
+		/** It was not a recognized special function key */
+		if ( !e->isAccepted() && e->text().length() )
+		{
+			emit sendAsciiString(e->text().toAscii().data());
+			if ( localEcho() )
+			{
+				for ( int n=0; n < e->text().length(); n++ )
 				{
-					emit sendAsciiString(e->text().toAscii().data());
-					if ( localEcho() )
-					{
-						for ( int n=0; n < e->text().length(); n++ )
-						{
-							char c = e->text().toAscii().at(n);
-							receiveChar(c);
-						}
-					}
-					break;
+					char c = e->text().toAscii().at(n);
+					receiveChar(c);
 				}
 			}
+			e->accept();
 		}
 	}
 }

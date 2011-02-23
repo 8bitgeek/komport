@@ -32,6 +32,7 @@
 
 #define BANNER tr("Komport ")+QString(KOMPORT_VERSION)+tr(" Serial Communications")
 #define COPYRIGHT "Copyright (c) 2011 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
+#define WEBSITE "http://www.sourceforge.net/komport2"
 
 Komport::Komport(QWidget *parent)
 : QMainWindow(parent)
@@ -307,7 +308,7 @@ void Komport::about()
 				QString ("<br />"
 				"<b>"+QString(BANNER)+"<br />"+QString(COPYRIGHT)+"<br /></b>"
 				"All rights reserved.<br />"
-				"<br /><a href=\"http://sourceforge.net/projects/komport2\">sourceforge.net/projects/komport2</a><br />"
+				"<br /><a href=\""+QString(WEBSITE)+"\">"+QString(WEBSITE)+"</a><br />"
 				"<br />"
 				"This program is free software; you can redistribute it and/or modify<br />"
 				"it under the terms of the GNU General Public License as published by<br />"
