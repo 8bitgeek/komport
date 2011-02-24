@@ -16,8 +16,8 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
 **************************************************************************/
 
-#ifndef CCHARCELL_H
-#define CCHARCELL_H
+#ifndef CCELL_H
+#define CCELL_H
 
 #include <QChar>
 #include <QString>

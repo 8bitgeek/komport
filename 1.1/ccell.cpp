@@ -16,7 +16,7 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
 **************************************************************************/
 
-#include "ccharcell.h"
+#include "ccell.h"
 #include "ccellarray.h"
 #include "cscreen.h"
 
