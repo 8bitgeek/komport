@@ -2,6 +2,7 @@ To build:
 
 $ qmake-qt4
 $ make
+$ sudo make install
 
 Release 1.9.5 (beta)
 -------------
