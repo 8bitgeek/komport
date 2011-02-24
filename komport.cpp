@@ -54,6 +54,10 @@ Komport::Komport(QWidget *parent)
 		settingsUi->DeviceComboBox->addItem("COM2:");
 		settingsUi->DeviceComboBox->addItem("COM3:");
 		settingsUi->DeviceComboBox->addItem("COM4:");
+		settingsUi->DeviceComboBox->addItem("COM5:");
+		settingsUi->DeviceComboBox->addItem("COM6:");
+		settingsUi->DeviceComboBox->addItem("COM7:");
+		settingsUi->DeviceComboBox->addItem("COM8:");
 		settingsUi->DeviceComboBox->setCurrentIndex(0);
 	#endif
 
