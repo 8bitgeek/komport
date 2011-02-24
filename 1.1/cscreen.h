@@ -37,8 +37,8 @@ class CScreen : public QWidget
 		virtual ~CScreen();
 
 		CCellArray&		cells()										{return mCells;}
-		inline CCharCell& cell(int col,int row)						{return (CCharCell&)cells().cell(col,row);}
-		inline CCharCell& cell(QPoint pt)							{return cell(pt.x(),pt.y());}
+		inline CCell& cell(int col,int row)							{return (CCell&)cells().cell(col,row);}
+		inline CCell& cell(QPoint pt)								{return cell(pt.x(),pt.y());}
 
 		inline QPoint&	cursorPos()									{return mCursor;}
 

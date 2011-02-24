@@ -67,7 +67,7 @@ void CCellArray::setRect(QRect r)
 				{
 					int i = indexOf(col,row);
 					QRect cellRect((col*cellWidth)+r.left(),(row*cellHeight)+r.top(),cellWidth,cellHeight);
-					CCharCell& cell = (CCharCell&)mCells.at(i);
+					CCell& cell = (CCell&)mCells.at(i);
 					cell.setRect(cellRect);
 				}
 			}
@@ -78,12 +78,13 @@ void CCellArray::setRect(QRect r)
 /**
  * Set the number of columns in the array.
  * @param cols The number of columns.
-  */
+ */
 void CCellArray::setCols(int cols)
 {
 	mCols=cols;
 	sync();
 	setRect(mRect); /* force re-calculate sizes */
+	resetScrolled();
 }
 
 /**
@@ -95,6 +96,21 @@ void CCellArray::setRows(int rows)
 	mRows=rows;
 	sync();
 	setRect(mRect); /* force re-calculate sizes */
+	resetScrolled();
+}
+
+/**
+ * Set the grid array.
+ * @param cols The number of columns.
+ * @param rows The number of rows
+ */
+void CCellArray::setGrid(int cols,int rows)
+{
+	mCols=cols;
+	mRows=rows;
+	sync();
+	setRect(mRect); /* force re-calculate sizes */
+	resetScrolled();
 }
 
 /**
@@ -113,7 +129,7 @@ void CCellArray::sync()
 			{
 				if ( diff > 0 )
 				{
-					CCharCell cell(this);
+					CCell cell(this);
 					mCells.append(cell);
 					--diff;
 				}
@@ -138,7 +154,7 @@ void CCellArray::draw(QPainter& painter, const QRect& rect)
 {
 	for(int n=0; n < cells().count(); n++)
 	{
-		CCharCell& cell = (CCharCell&)cells().at(n);
+		CCell& cell = (CCell&)cells().at(n);
 		if ( cell.rect().intersects(rect))
 		{
 			cell.draw(painter);
@@ -154,7 +170,7 @@ void CCellArray::draw(const QRect& rect)
 {
 	for(int n=0; n < cells().count(); n++)
 	{
-		CCharCell& cell = (CCharCell&)cells().at(n);
+		CCell& cell = (CCell&)cells().at(n);
 		if ( cell.rect().intersects(rect))
 		{
 			cell.draw();
@@ -181,8 +197,12 @@ void CCellArray::scrollGrid(CCellArray::ScrollMode mode, int col, int row, int w
 			{
 				if ( isValidCell(x,y+1) && isValidCell(x,y) )
 				{
-					CCharCell& from = (CCharCell&)cell(x,y+1);
-					CCharCell& to = (CCharCell&)cell(x,y);
+					CCell& from = (CCell&)cell(x,y+1);
+					CCell& to = (CCell&)cell(x,y);
+					if (y==0)
+					{
+						appendScrolled(to); /* preserve the scrolled data in the scroll buffer */
+					}
 					to = from;
 				}
 			}
@@ -190,7 +210,7 @@ void CCellArray::scrollGrid(CCellArray::ScrollMode mode, int col, int row, int w
 		/** new up the bottom row... */
 		for(int x=col; x < width; x++)
 		{
-			CCharCell& c = (CCharCell&)cell(x,(row+height)-1);
+			CCell& c = (CCell&)cell(x,(row+height)-1);
 			c.clear();
 		}
 	}
@@ -203,8 +223,8 @@ void CCellArray::scrollGrid(CCellArray::ScrollMode mode, int col, int row, int w
 			{
 				if ( isValidCell(x,y-1) && isValidCell(x,y) )
 				{
-					CCharCell& from = (CCharCell&)cell(x,y-1);
-					CCharCell& to = (CCharCell&)cell(x,y);
+					CCell& from = (CCell&)cell(x,y-1);
+					CCell& to = (CCell&)cell(x,y);
 					to = from;
 				}
 			}
@@ -212,7 +232,7 @@ void CCellArray::scrollGrid(CCellArray::ScrollMode mode, int col, int row, int w
 		/** new up the top row... */
 		for(int x=col; x < width; x++)
 		{
-			CCharCell& c = (CCharCell&)cell(x,row);
+			CCell& c = (CCell&)cell(x,row);
 			c.clear();
 		}
 	}
@@ -226,7 +246,7 @@ void CCellArray::selectCells(QRect r)
 	{
 		for( int x=0; x < cols(); x++ )
 		{
-			CCharCell& c = (CCharCell&)cell(x,y);
+			CCell& c = (CCell&)cell(x,y);
 			if ( r.intersects(c.rect()) )
 			{
 				c.setSelect(true);
@@ -247,7 +267,7 @@ void CCellArray::deselectCells()
 	{
 		for( int x=0; x < cols(); x++ )
 		{
-			CCharCell& c = (CCharCell&)cell(x,y);
+			CCell& c = (CCell&)cell(x,y);
 			if ( c.select() )
 			{
 				c.setSelect(false);
@@ -257,4 +277,21 @@ void CCellArray::deselectCells()
 	screen()->update();
 }
 
+/* Append a character to the scroll buffer */
+void CCellArray::appendScrolled(CCell cell)
+{
+	mScrollBuffer.append(cell);
+	trimScrolled();
+}
+
+/* Reset scrolled buffer */
+void CCellArray::resetScrolled()
+{
+	mScrollBuffer.clear();
+}
+
+/* Trim the scroll buffer */
+void CCellArray::trimScrolled()
+{
+}
 

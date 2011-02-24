@@ -167,7 +167,7 @@ void CEmulation::doVisualBell()
 		{
 			for (int x=0; x < screen()->cols();x++ )
 			{
-				CCharCell& c = screen()->cell(x,y);
+				CCell& c = screen()->cell(x,y);
 				c.setReverse( !c.reverse() );
 			}
 		}

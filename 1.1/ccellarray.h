@@ -24,6 +24,8 @@
 #include <QObject>
 #include <QWidget>
 
+#define CCells	QList<CCell>
+
 class CScreen;
 class CCellArray : public QObject
 {
@@ -39,12 +41,12 @@ class CCellArray : public QObject
 		CCellArray();
 		virtual ~CCellArray();
 
-		CScreen*			screen()						{return mScreen;}
+		inline CScreen*	screen()						{return mScreen;}
 		inline QRect&		rect()							{return mRect;}
 		inline int			cols()							{return mCols;}
 		inline int			rows()							{return mRows;}
-		QList<CCharCell>	cells()							{return mCells;}
-		inline const CCharCell&	cell(int col,int row)		{return mCells.at(indexOf(col,row));}
+		inline CCells		cells()							{return mCells;}
+		inline const CCell& cell(int col,int row)			{return mCells.at(indexOf(col,row));}
 		inline int			indexOf(int col,int row)		{return (row*cols())+col;}
 		inline bool			isValidCell(int col,int row)	{return indexOf(col,row) < count();}
 		inline int			count()							{return mCells.count();}
@@ -54,7 +56,7 @@ class CCellArray : public QObject
 	public slots:
 		void				setScreen(CScreen* screen);
 		void				setRect(QRect r);
-		void				setGrid(int cols,int rows)	{ setCols(cols); setRows(rows); }
+		void				setGrid(int cols,int rows);
 		void				setCols(int cols);
 		void				setRows(int rows);
 		void				draw(QPainter& painter, const QRect& rect);
@@ -62,13 +64,20 @@ class CCellArray : public QObject
 		void				scrollGrid(CCellArray::ScrollMode mode, int x, int y, int width, int height);
 		void				sync();
 
+	protected slots:
+		void				appendScrolled(CCell cell);	/* Append a cell to the scroll buffer */
+		void				resetScrolled();			/* Reset the scroll buffer */
+		void				trimScrolled();				/* Trim the scroll buffer */
+
 	private:
-		CScreen*			mScreen;
+		CScreen*			mScreen;					/* The screen associated with this cell array */
 		QRect				mRect;
-		int					mCols;
-		int					mRows;
-		QList<CCharCell>	mCells;
-		bool				mSyncBusy;
+		int					mCols;						/* Number of Columns */
+		int					mRows;						/* Number of Rows */
+		CCells				mCells;						/* The screen cells */
+		CCells				mScrollBuffer;				/* The scroll buffer */
+		int					mScrollLimit;				/* The scroll back limit */
+		bool				mSyncBusy;					/* Sychronizing is busy. */
 };
 
 #endif // CCELLARRAY_H

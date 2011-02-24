@@ -16,7 +16,7 @@ SOURCES += main.cpp \
     komport.cpp \
     cserial.cpp \
     cdevicelock.cpp \
-    ccharcell.cpp \
+	ccell.cpp \
     ccellarray.cpp \
     cscreen.cpp \
     cemulation.cpp \
@@ -26,7 +26,7 @@ unix:SOURCES -= Win32Serial.cpp
 HEADERS += komport.h \
     cserial.h \
     cdevicelock.h \
-    ccharcell.h \
+	ccell.h \
     ccellarray.h \
     cscreen.h \
     cemulation.h \

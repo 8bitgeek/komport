@@ -134,8 +134,8 @@ void CScreen::setCursorPos(int col,int row)
 {
 	if ( cells().indexOf(col,row) < cells().count() )
 	{
-		CCharCell& oldCell = cell(mCursor.x(),mCursor.y());
-		CCharCell& newCell = cell(col,row);
+		CCell& oldCell = cell(mCursor.x(),mCursor.y());
+		CCell& newCell = cell(col,row);
 		oldCell.setCursor(false);
 		newCell.setCursor(true);
 		mCursor.setX(col);
@@ -202,7 +202,7 @@ void CScreen::delChars(int num)
 	{
 		for( int x=cursorPos().x(); x < cols()-1; x++ )
 		{
-			CCharCell& from = cell(x+1,cursorPos().y());
+			CCell& from = cell(x+1,cursorPos().y());
 			cell(x,cursorPos().y()).copy(from);
 		}
 		cell(cols()-1,cursorPos().y()).clear();
@@ -219,7 +219,7 @@ void CScreen::insLines(int num)
 		{
 			for( int x=0; x < cols(); x++ )
 			{
-				CCharCell& from = cell(x,y-1);
+				CCell& from = cell(x,y-1);
 				cell(x,y).copy(from);
 			}
 		}
