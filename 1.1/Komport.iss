@@ -1,14 +1,14 @@
 ; Komport2 Inno Installer Script
 [Setup]
 AppName=Komport
-AppVersion=0.9.3
+AppVersion=1.0.0
 DefaultDirName={pf}\Komport
 DefaultGroupName=Pike Aero
 UninstallDisplayIcon={app}\komport.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=userdocs:komport2
-OutputBaseFilename=komport2-0.9.3
+OutputBaseFilename=komport2-1.0.0
 
 
 [Files]
