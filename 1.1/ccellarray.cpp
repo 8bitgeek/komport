@@ -17,7 +17,7 @@
 **************************************************************************/
 
 #include "ccellarray.h"
-#include "ccharcell.h"
+#include "ccell.h"
 #include "cscreen.h"
 
 #define inherited QObject

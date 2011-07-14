@@ -41,6 +41,8 @@ Komport::Komport(QWidget *parent)
 , mEmulation(NULL)
 , ui(new Ui::Komport)
 , settingsUi(new Ui::SettingsDialog)
+, mRxLED(NULL)
+, mTxLED(NULL)
 {
 	ui->setupUi(this);
 	settingsUi->setupUi(&settingsDialog);
@@ -69,6 +71,9 @@ Komport::Komport(QWidget *parent)
 	readSettings();
 
 	this->setWindowIcon(QIcon(":/images/terminal.png"));
+
+	statusBar()->addPermanentWidget((mRxLED = new CLed()));
+	statusBar()->addPermanentWidget((mTxLED = new CLed()));
 }
 
 Komport::~Komport()
@@ -153,6 +158,10 @@ void Komport::readSettings()
 	{
 		QMessageBox::warning(this, "No Emulation", "Emulation '"+emulation+"' not supported.");
 	}
+	QObject::connect(mSerial,SIGNAL(beginRx()),this,SLOT(rxLedOn()));
+	QObject::connect(mSerial,SIGNAL(endRx()),this,SLOT(rxLedOff()));
+	QObject::connect(mSerial,SIGNAL(beginTx()),this,SLOT(txLedOn()));
+	QObject::connect(mSerial,SIGNAL(endTx()),this,SLOT(txLedOff()));
 	screen()->setCursorPos(0,0);
 
 	if ( openSerial() )

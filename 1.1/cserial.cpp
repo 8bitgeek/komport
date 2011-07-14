@@ -138,6 +138,7 @@ void CSerial::readActivated(int handle)
 {
 	if ( handle >=0 )
 	{
+		emit beginRx();
 		emit readyRead();
 		if ( emitChars() )
 		{
@@ -147,6 +148,7 @@ void CSerial::readActivated(int handle)
 				emit rx((unsigned char)c);
 			}
 		}
+		emit endRx();
 	}
 }
 
@@ -158,11 +160,15 @@ void CSerial::readActivated(int handle)
 ******************************************************************************/
 int CSerial::write(const void* buf, int count)
 {
+	int rc=0;
+	emit beginTx();
 #ifdef Q_OS_WIN32
-	return mWin32Serial->SendData((const char*)buf,count);
+	rc = mWin32Serial->SendData((const char*)buf,count);
 #else
-	return ::write( mHandle, buf, count);
+	rc = ::write( mHandle, buf, count);
 #endif
+	emit endTx();
+	return rc;
 }
 
 /** ***************************************************************************
@@ -426,6 +432,7 @@ void CSerial::timerEvent(QTimerEvent* e)
 	{
 		if ( mWin32Serial->ReadDataWaiting() )
 		{
+			emit beginRx();
 			emit readyRead();
 			if ( emitChars() )
 			{
@@ -435,6 +442,7 @@ void CSerial::timerEvent(QTimerEvent* e)
 					emit rx((unsigned char)c);
 				}
 			}
+			emit endRx();
 		}
 	}
 }

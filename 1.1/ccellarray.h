@@ -19,7 +19,7 @@
 #ifndef CCELLARRAY_H
 #define CCELLARRAY_H
 
-#include "ccharcell.h"
+#include "ccell.h"
 
 #include <QObject>
 #include <QWidget>

@@ -69,6 +69,10 @@ class CSerial : public QObject
 		void				statusMessage( void* sender, int level, QString msg);
 		void				readyRead();
 		void				rx(unsigned char c);
+		void				beginRx();
+		void				endRx();
+		void				beginTx();
+		void				endTx();
 
 	private slots:
 		void				readActivated(int handle);

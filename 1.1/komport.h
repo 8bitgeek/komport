@@ -28,8 +28,9 @@
 #include "cscreen.h"
 #include "cserial.h"
 #include "cemulation.h"
+#include "cled.h"
 
-#define KOMPORT_VERSION "V1.1.0"
+#define KOMPORT_VERSION "V1.1.1"
 
 namespace Ui
 {
@@ -61,6 +62,10 @@ class Komport : public QMainWindow
 		void				openBackgroundColorDialog();
 		void				openForegroundColorDialog();
 		void				settingsHelp();
+		void				rxLedOn()				{mRxLED->on();}
+		void				rxLedOff()				{mRxLED->off();}
+		void				txLedOn()				{mTxLED->on(true);}
+		void				txLedOff()				{mTxLED->off(true);}
 		#ifdef DEBUG
 		void				debug();
 		#endif
@@ -92,13 +97,13 @@ class Komport : public QMainWindow
 		QToolBar*			configToolBar;
 
 		QAction*			exitAct;
-
 		QAction*			copyAct;
 		QAction*			pasteAct;
-
 		QAction*			settingsAct;
-
 		QAction*			aboutAct;
+
+		CLed*				mRxLED;
+		CLed*				mTxLED;
 
 };
 
