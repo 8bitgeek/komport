@@ -26,8 +26,8 @@ CLed::CLed(QWidget *parent)
 : inherited(parent)
 , mState(false)
 {
-	setMinimumWidth(12);
-	setMinimumHeight(12);
+	setMinimumWidth(8);
+	setMinimumHeight(8);
 }
 
 CLed::~CLed()
@@ -63,6 +63,6 @@ void CLed::paintEvent(QPaintEvent* e)
 {
 	QPainter painter(this);
 	QPixmap pixmap(mState ? ":/images/ledgreen.png" : ":/images/ledoff.png");
-	pixmap.scaled(size(),Qt::KeepAspectRatio);
-	painter.drawPixmap(0,0,width(),height(),pixmap);
+	pixmap = pixmap.scaled(size(),Qt::KeepAspectRatio);
+	painter.drawPixmap(0,0,pixmap.width(),pixmap.height(),pixmap);
 }
