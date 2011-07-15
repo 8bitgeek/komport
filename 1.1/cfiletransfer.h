@@ -19,18 +19,27 @@
 #define CFILETRANSFER_H
 
 #include <QObject>
+#include <QString>
 
 class CFileTransfer : public QObject
 {
 	Q_OBJECT
 	public:
+
 		CFileTransfer(QObject *parent = 0);
 		virtual ~CFileTransfer();
 
+	public slots:
+		virtual void			setFileName(QString fileName);
+		virtual void			setDownloadPath(QString downloadPath);
+		virtual void			setUploadPath(QString uploadPath);
+
 	signals:
 
-	public slots:
-
+	private:
+		QString					mFileName;
+		QString					mDownloadPath;
+		QString					mUploadPath;
 };
 
 #endif // CFILETRANSFER_H

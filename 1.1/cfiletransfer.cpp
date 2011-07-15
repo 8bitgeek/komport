@@ -26,3 +26,18 @@ CFileTransfer::~CFileTransfer()
 {
 }
 
+void setFileName(QString fileName)
+{
+	mFileName = fileName;
+}
+
+void setDownloadPath(QString downloadPath)
+{
+	mDownloadPath = downloadPath;
+}
+
+void setUploadPath(QString uploadPath)
+{
+	mUploadPath = uploadPath;
+}
+
