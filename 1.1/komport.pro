@@ -22,9 +22,7 @@ SOURCES += main.cpp \
     cemulation.cpp \
     cemulationVT102.cpp \
     Win32Serial.cpp \
-    cled.cpp \
-    cfiletransfer.cpp \
-    cfiletransferhelper.cpp
+    cled.cpp
 unix:SOURCES -= Win32Serial.cpp
 HEADERS += komport.h \
     cserial.h \
@@ -36,9 +34,7 @@ HEADERS += komport.h \
     cemulationVT102.h \
     cemulationVT102.h \
     Win32Serial.h \
-    cled.h \
-    cfiletransfer.h \
-    cfiletransferhelper.h
+    cled.h
 unix:HEADERS -= Win32Serial.h
 FORMS += komport.ui \
     settingsdialog.ui
