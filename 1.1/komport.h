@@ -129,8 +129,10 @@ class Komport : public QMainWindow
 		#endif
 
 	private:
-		void				setDefaultUpDownAct();
 		bool				openSerial();
+		void				disconnectSerialFromEmulation();
+		void				connectSerialToEmulation();
+		void				setDefaultUpDownAct();
 		void				createActions();
 		void				createMenus();
 		void				createToolBars();

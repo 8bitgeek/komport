@@ -25,5 +25,5 @@ int main(int argc, char *argv[])
 	Komport w;
 	w.show();
 
-	return a.exec();
+			return a.exec();
 }
