@@ -29,17 +29,25 @@ class CFileTransfer : public QObject
 		CFileTransfer(QObject *parent = 0);
 		virtual ~CFileTransfer();
 
+		QString					fileName();
+		QString					downloadPath();
+		QString					uploadPath();
+		QString					command();
+		bool					needsDialog();
+
 	public slots:
 		virtual void			setFileName(QString fileName);
 		virtual void			setDownloadPath(QString downloadPath);
 		virtual void			setUploadPath(QString uploadPath);
-
-	signals:
+		virtual void			setCommand(QString command);
+		virtual void			setNeedsDialog(bool needsDialog);
 
 	private:
 		QString					mFileName;
 		QString					mDownloadPath;
 		QString					mUploadPath;
+		QString					mCommand;
+		bool					mNeedsDialog;
 };
 
 #endif // CFILETRANSFER_H

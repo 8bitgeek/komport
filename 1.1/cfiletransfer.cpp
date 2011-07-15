@@ -26,18 +26,53 @@ CFileTransfer::~CFileTransfer()
 {
 }
 
-void setFileName(QString fileName)
+QString CFileTransfer::fileName()
+{
+	return mFileName;
+}
+
+QString CFileTransfer::downloadPath()
+{
+	return mDownloadPath;
+}
+
+QString CFileTransfer::uploadPath()
+{
+	return mUploadPath;
+}
+
+QString CFileTransfer::command()
+{
+	return mCommand;
+}
+
+bool CFileTransfer::needsDialog()
+{
+	return mNeedsDialog;
+}
+
+void CFileTransfer::setFileName(QString fileName)
 {
 	mFileName = fileName;
 }
 
-void setDownloadPath(QString downloadPath)
+void CFileTransfer::setDownloadPath(QString downloadPath)
 {
 	mDownloadPath = downloadPath;
 }
 
-void setUploadPath(QString uploadPath)
+void CFileTransfer::setUploadPath(QString uploadPath)
 {
 	mUploadPath = uploadPath;
+}
+
+void CFileTransfer::setCommand(QString command)
+{
+	mCommand = command;
+}
+
+void CFileTransfer::setNeedsDialog(bool needsDialog)
+{
+	mNeedsDialog=needsDialog;
 }
 
