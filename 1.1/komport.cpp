@@ -744,6 +744,7 @@ void Komport::uploadXModem()
 			QString command = settingsUi->xmodemUpload->text()+" "+fileName;
 			disconnectSerialFromEmulation();
 			proc.start(command,QIODevice::ReadWrite);
+			clearLog();
 			if ( proc.waitForStarted() )
 			{
 				progress.setWindowModality(Qt::WindowModal);
@@ -751,15 +752,7 @@ void Komport::uploadXModem()
 				{
 					char ch;
 					loop.processEvents();
-					QByteArray error = proc.readAllStandardError();
-					if ( error.count())
-					{
-						QMessageBox::information(this,"Notice",QString(error));
-					}
-					while( serial()->getChar(&ch) )
-					{
-						proc.write(&ch,1);
-					}
+					/** send serial... */
 					QByteArray in = proc.readAllStandardOutput();
 					if ( in.count() )
 					{
@@ -768,6 +761,17 @@ void Komport::uploadXModem()
 							serial()->sendAsciiChar(in[n]);
 							progress.setValue(++sent);
 						}
+					}
+					/** receive serial... */
+					while( serial()->getChar(&ch) )
+					{
+						proc.write(&ch,1);
+					}
+					/** stderr messages... */
+					QByteArray msg = proc.readAllStandardError();
+					if ( msg.count())
+					{
+						log(msg);
 					}
 				}
 			}
@@ -865,6 +869,20 @@ void Komport::msleep(int msec)
 	{
 		loop.processEvents();
 	}
+}
+
+/**
+  * @brief clear the log
+  */
+void Komport::clearLog()
+{
+	settingsUi->log->clear();
+}
+
+void Komport::log(QString msg)
+{
+	settingsUi->log->append(msg);
+	statusBar()->showMessage(msg);
 }
 
 
