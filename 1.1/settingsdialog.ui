@@ -8,7 +8,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>489</width>
+    <width>496</width>
     <height>285</height>
    </rect>
   </property>
@@ -1266,7 +1266,7 @@ p, li { white-space: pre-wrap; }
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>277</width>
+               <width>284</width>
                <height>20</height>
               </size>
              </property>

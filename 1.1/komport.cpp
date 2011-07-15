@@ -72,17 +72,17 @@ Komport::Komport(QWidget *parent)
 		settingsUi->DeviceComboBox->setCurrentIndex(0);
 	#endif
 
+	statusBar()->addPermanentWidget((mRxLED = new CLed()));
+	statusBar()->addPermanentWidget((mTxLED = new CLed()));
+
 	createActions();
 	createMenus();
 	createToolBars();
 	createStatusBar();
 
-	readSettings();
-
 	this->setWindowIcon(QIcon(":/images/terminal.png"));
 
-	statusBar()->addPermanentWidget((mRxLED = new CLed()));
-	statusBar()->addPermanentWidget((mTxLED = new CLed()));
+	readSettings();
 }
 
 Komport::~Komport()
@@ -138,6 +138,21 @@ void Komport::readSettings()
 
 		settingsUi->kermitDownload->setText(settings.value("kermitDownload",DEFAULT_KERMIT_DOWNLOAD).toString());
 		settingsUi->kermitUpload->setText(settings.value("kermitUpload",DEFAULT_KERMIT_UPLOAD).toString());
+
+		settingsUi->defaultUploadAscii->setChecked(settings.value("defaultUploadAscii",true).toBool());
+		settingsUi->defaultUploadKermit->setChecked(settings.value("defaultUploadKermit",false).toBool());
+		settingsUi->defaultUploadXModem->setChecked(settings.value("defaultUploadXModem",false).toBool());
+		settingsUi->defaultUploadYModem->setChecked(settings.value("defaultUploadYModem",false).toBool());
+		settingsUi->defaultUploadZModem->setChecked(settings.value("defaultUploadZModem",false).toBool());
+
+		settingsUi->defaultDownloadAscii->setChecked(settings.value("defaultDownloadAscii",false).toBool());
+		settingsUi->defaultDownloadKermit->setChecked(settings.value("defaultDownloadKermit",false).toBool());
+		settingsUi->defaultDownloadXModem->setChecked(settings.value("defaultDownloadXModem",false).toBool());
+		settingsUi->defaultDownloadYModem->setChecked(settings.value("defaultDownloadYModem",false).toBool());
+		settingsUi->defaultDownloadZModem->setChecked(settings.value("defaultDownloadZModem",false).toBool());
+
+		setDefaultUpDownAct();
+
 	settings.endGroup();
 
 	if ( mScreen != NULL ) delete mScreen;
@@ -249,6 +264,19 @@ void Komport::writeSettings()
 
 		settings.setValue("kermitDownload",	settingsUi->kermitDownload->text());
 		settings.setValue("kermitUpload",	settingsUi->kermitUpload->text());
+
+		settings.setValue("defaultUploadAscii",	settingsUi->defaultUploadAscii->isChecked());
+		settings.setValue("defaultUploadKermit",	settingsUi->defaultUploadKermit->isChecked());
+		settings.setValue("defaultUploadXModem",	settingsUi->defaultUploadXModem->isChecked());
+		settings.setValue("defaultUploadYModem",	settingsUi->defaultUploadYModem->isChecked());
+		settings.setValue("defaultUploadZModem",	settingsUi->defaultUploadZModem->isChecked());
+
+		settings.setValue("defaultDownloadAscii",	settingsUi->defaultDownloadAscii->isChecked());
+		settings.setValue("defaultDownloadKermit",	settingsUi->defaultDownloadKermit->isChecked());
+		settings.setValue("defaultDownloadXModem",	settingsUi->defaultDownloadXModem->isChecked());
+		settings.setValue("defaultDownloadYModem",	settingsUi->defaultDownloadYModem->isChecked());
+		settings.setValue("defaultDownloadZModem",	settingsUi->defaultDownloadZModem->isChecked());
+
 	settings.endGroup();
 
 }
@@ -553,15 +581,88 @@ QString Komport::colorToHex(QColor c)
 }
 
 /**
+  * brief set the visuals of the default up/down actions to look appropriately based on the default value.
+  */
+void Komport::setDefaultUpDownAct()
+{
+	if ( settingsUi->defaultUploadAscii->isChecked() )
+	{
+		uploadAct->setIcon(uploadAsciiAct->icon());
+		uploadAct->setText(uploadAsciiAct->text());
+		uploadAct->setToolTip(uploadAsciiAct->toolTip());
+	}
+	else if ( settingsUi->defaultUploadKermit->isChecked() )
+	{
+		uploadAct->setIcon(uploadKermitAct->icon());
+		uploadAct->setText(uploadKermitAct->text());
+		uploadAct->setToolTip(uploadKermitAct->toolTip());
+	}
+	else if ( settingsUi->defaultUploadXModem->isChecked() )
+	{
+		uploadAct->setIcon(uploadXModemAct->icon());
+		uploadAct->setText(uploadXModemAct->text());
+		uploadAct->setToolTip(uploadXModemAct->toolTip());
+	}
+	else if ( settingsUi->defaultUploadYModem->isChecked() )
+	{
+		uploadAct->setIcon(uploadYModemAct->icon());
+		uploadAct->setText(uploadYModemAct->text());
+		uploadAct->setToolTip(uploadYModemAct->toolTip());
+	}
+	else if ( settingsUi->defaultUploadZModem->isChecked() )
+	{
+		uploadAct->setIcon(uploadZModemAct->icon());
+		uploadAct->setText(uploadZModemAct->text());
+		uploadAct->setToolTip(uploadZModemAct->toolTip());
+	}
+
+	if ( settingsUi->defaultDownloadAscii->isChecked() )
+	{
+		downloadAct->setIcon(downloadAsciiAct->icon());
+		downloadAct->setText(downloadAsciiAct->text());
+		downloadAct->setToolTip(downloadAsciiAct->toolTip());
+	}
+	else if ( settingsUi->defaultDownloadKermit->isChecked() )
+	{
+		downloadAct->setIcon(downloadKermitAct->icon());
+		downloadAct->setText(downloadKermitAct->text());
+		downloadAct->setToolTip(downloadKermitAct->toolTip());
+	}
+	else if ( settingsUi->defaultDownloadXModem->isChecked() )
+	{
+		downloadAct->setIcon(downloadXModemAct->icon());
+		downloadAct->setText(downloadXModemAct->text());
+		downloadAct->setToolTip(downloadXModemAct->toolTip());
+	}
+	else if ( settingsUi->defaultDownloadYModem->isChecked() )
+	{
+		downloadAct->setIcon(downloadYModemAct->icon());
+		downloadAct->setText(downloadYModemAct->text());
+		downloadAct->setToolTip(downloadYModemAct->toolTip());
+	}
+	else if ( settingsUi->defaultDownloadZModem->isChecked() )
+	{
+		downloadAct->setIcon(downloadZModemAct->icon());
+		downloadAct->setText(downloadZModemAct->text());
+		downloadAct->setToolTip(downloadZModemAct->toolTip());
+	}
+}
+
+/**
   * upload a file using default upload protocol
   */
 void Komport::upload()
 {
+	if ( settingsUi->defaultUploadAscii->isChecked() )			uploadAscii();
+	else if ( settingsUi->defaultUploadKermit->isChecked() )	uploadKermit();
+	else if ( settingsUi->defaultUploadXModem->isChecked() )	uploadXModem();
+	else if ( settingsUi->defaultUploadYModem->isChecked() )	uploadYModem();
+	else if ( settingsUi->defaultUploadZModem->isChecked() )	uploadZModem();
 }
 
 void Komport::uploadAscii()
 {
-	QString fileName = QFileDialog::getOpenFileName(this,tr("Upload File"),settingsUi->uploadPath->text());
+	QString fileName = QFileDialog::getOpenFileName(this,tr("Upload Ascii File"),settingsUi->uploadPath->text());
 	if ( !fileName.isEmpty() )
 	{
 		QFile file(fileName);
@@ -614,6 +715,11 @@ void Komport::uploadZModem()
   */
 void Komport::download()
 {
+	if ( settingsUi->defaultDownloadAscii->isChecked() )		downloadAscii();
+	else if ( settingsUi->defaultDownloadKermit->isChecked() )	downloadKermit();
+	else if ( settingsUi->defaultDownloadXModem->isChecked() )	downloadXModem();
+	else if ( settingsUi->defaultDownloadYModem->isChecked() )	downloadYModem();
+	else if ( settingsUi->defaultDownloadZModem->isChecked() )	downloadZModem();
 }
 
 void Komport::downloadAscii()

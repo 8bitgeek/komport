@@ -129,6 +129,7 @@ class Komport : public QMainWindow
 		#endif
 
 	private:
+		void				setDefaultUpDownAct();
 		bool				openSerial();
 		void				createActions();
 		void				createMenus();
