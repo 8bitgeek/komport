@@ -25,6 +25,11 @@
 #include <QSettings>
 #include <QColorDialog>
 #include <QClipboard>
+#include <QFileDialog>
+#include <QFile>
+#include <QByteArray>
+#include <QProgressDialog>
+#include <QTime>
 
 #ifdef Q_OS_WIN32
 	#include <QWindowsStyle>
@@ -33,6 +38,8 @@
 #define BANNER tr("Komport ")+QString(KOMPORT_VERSION)+tr(" Serial Communications")
 #define COPYRIGHT "Copyright (c) 2011 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
 #define WEBSITE "http://www.sourceforge.net/komport2"
+
+
 
 Komport::Komport(QWidget *parent)
 : QMainWindow(parent)
@@ -49,6 +56,8 @@ Komport::Komport(QWidget *parent)
 	QObject::connect(settingsUi->BackgroundColorButton,SIGNAL(clicked()),this,SLOT(openBackgroundColorDialog()));
 	QObject::connect(settingsUi->ForegroundColorButton,SIGNAL(clicked()),this,SLOT(openForegroundColorDialog()));
 	QObject::connect(settingsUi->buttonHelp,SIGNAL(clicked()),this,SLOT(settingsHelp()));
+	QObject::connect(settingsUi->uploadPathButton,SIGNAL(clicked()),this,SLOT(uploadPathSelect()));
+	QObject::connect(settingsUi->downloadPathButton,SIGNAL(clicked()),this,SLOT(downloadPathSelect()));
 
 	#ifdef Q_OS_WIN32
 		settingsUi->DeviceComboBox->clear();
@@ -108,6 +117,27 @@ void Komport::readSettings()
 		bool	localecho		= settings.value("localecho",	settingsUi->LocalEchoCheckBox->isChecked()).toBool();
 		QRgb	backgroundColor = settings.value("background",	settingsUi->BackgroundColorButton->palette().color(QPalette::Button).rgb()).toUInt();
 		QRgb	foregroundColor = settings.value("foreground",	settingsUi->ForegroundColorButton->palette().color(QPalette::Button).rgb()).toUInt();
+	settings.endGroup();
+
+	settings.beginGroup("fileTransfer");
+		settingsUi->characterDelay->setValue(settings.value("characterDelay",DEFAULT_CH_DELAY).toInt());
+		settingsUi->newlineDelay->setValue(settings.value("newlineDelay",DEFAULT_LF_DELAY).toInt());
+		settingsUi->carriageReturnDelay->setValue(settings.value("carriageReturn",DEFAULT_CR_DELAY).toInt());
+
+		settingsUi->uploadPath->setText(settings.value("uploadPath",DEFAULT_UPLOAD_PATH).toString());
+		settingsUi->downloadPath->setText(settings.value("downloadPath",DEFAULT_DOWNLOAD_PATH).toString());
+
+		settingsUi->xmodemDownload->setText(settings.value("xmodemDownload",DEFAULT_XMODEM_DOWNLOAD).toString());
+		settingsUi->xmodemUpload->setText(settings.value("xmodemUpload",DEFAULT_XMODEM_UPLOAD).toString());
+
+		settingsUi->ymodemDownload->setText(settings.value("ymodemDownload",DEFAULT_YMODEM_DOWNLOAD).toString());
+		settingsUi->ymodemUpload->setText(settings.value("ymodemUpload",DEFAULT_YMODEM_UPLOAD).toString());
+
+		settingsUi->zmodemDownload->setText(settings.value("zmodemDownload",DEFAULT_ZMODEM_DOWNLOAD).toString());
+		settingsUi->zmodemUpload->setText(settings.value("zmodemUpload",DEFAULT_ZMODEM_UPLOAD).toString());
+
+		settingsUi->kermitDownload->setText(settings.value("kermitDownload",DEFAULT_KERMIT_DOWNLOAD).toString());
+		settingsUi->kermitUpload->setText(settings.value("kermitUpload",DEFAULT_KERMIT_UPLOAD).toString());
 	settings.endGroup();
 
 	if ( mScreen != NULL ) delete mScreen;
@@ -199,6 +229,28 @@ void Komport::writeSettings()
 		settings.setValue("foreground", screen()->foregroundColor().rgb());
 		settings.setValue("background", screen()->backgroundColor().rgb());
 	settings.endGroup();
+
+	settings.beginGroup("fileTransfer");
+		settings.setValue("characterDelay",	settingsUi->characterDelay->value() );
+		settings.setValue("newlineDelay",	settingsUi->newlineDelay->value() );
+		settings.setValue("carriageReturn",	settingsUi->carriageReturnDelay->value() );
+
+		settings.setValue("uploadPath",		settingsUi->uploadPath->text());
+		settings.setValue("downloadPath",	settingsUi->downloadPath->text());
+
+		settings.setValue("xmodemDownload",	settingsUi->xmodemDownload->text());
+		settings.setValue("xmodemUpload",	settingsUi->xmodemUpload->text());
+
+		settings.setValue("ymodemDownload",	settingsUi->ymodemDownload->text());
+		settings.setValue("ymodemUpload",	settingsUi->ymodemUpload->text());
+
+		settings.setValue("zmodemDownload",	settingsUi->zmodemDownload->text());
+		settings.setValue("zmodemUpload",	settingsUi->zmodemUpload->text());
+
+		settings.setValue("kermitDownload",	settingsUi->kermitDownload->text());
+		settings.setValue("kermitUpload",	settingsUi->kermitUpload->text());
+	settings.endGroup();
+
 }
 
 /** Open the serial port and notify of there was any trouble */
@@ -243,6 +295,69 @@ void Komport::createActions()
 	exitAct->setStatusTip(tr("Exit Komport"));
 	QObject::connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
+
+	uploadAct = new QAction(QIcon(":/images/upload.png"),tr("&Upload"), this);
+	uploadAct->setShortcut(tr("Ctrl+Shift+U"));
+	uploadAct->setStatusTip(tr("Upload a File"));
+	QObject::connect(uploadAct, SIGNAL(triggered()), this, SLOT(upload()));
+
+	uploadAsciiAct = new QAction(QIcon(":/images/uploadascii.png"),tr("Upload &Ascii"), this);
+	uploadAsciiAct->setShortcut(tr("Ctrl+Shift+A"));
+	uploadAsciiAct->setStatusTip(tr("Upload a File using Ascii protocol"));
+	QObject::connect(uploadAsciiAct, SIGNAL(triggered()), this, SLOT(uploadAscii()));
+
+	uploadKermitAct = new QAction(QIcon(":/images/uploadkermit.png"),tr("Upload &Kermit"), this);
+	uploadKermitAct->setShortcut(tr("Ctrl+Shift+K"));
+	uploadKermitAct->setStatusTip(tr("Upload a File using Kermit protocol"));
+	QObject::connect(uploadKermitAct, SIGNAL(triggered()), this, SLOT(uploadKermit()));
+
+	uploadXModemAct = new QAction(QIcon(":/images/uploadxmodem.png"),tr("Upload &X-Modem"), this);
+	uploadXModemAct->setShortcut(tr("Ctrl+Shift+X"));
+	uploadXModemAct->setStatusTip(tr("Upload a File using X-Modem protocol"));
+	QObject::connect(uploadXModemAct, SIGNAL(triggered()), this, SLOT(uploadXModem()));
+
+	uploadYModemAct = new QAction(QIcon(":/images/uploadymodem.png"),tr("Upload &Y-Modem"), this);
+	uploadYModemAct->setShortcut(tr("Ctrl+Shift+Y"));
+	uploadYModemAct->setStatusTip(tr("Upload a File using Y-Modem protocol"));
+	QObject::connect(uploadYModemAct, SIGNAL(triggered()), this, SLOT(uploadYModem()));
+
+	uploadZModemAct = new QAction(QIcon(":/images/uploadzmodem.png"),tr("Upload &Z-Modem"), this);
+	uploadZModemAct->setShortcut(tr("Ctrl+Shift+X"));
+	uploadZModemAct->setStatusTip(tr("Upload a File using Z-Modem protocol"));
+	QObject::connect(uploadZModemAct, SIGNAL(triggered()), this, SLOT(uploadZModem()));
+
+
+	downloadAct = new QAction(QIcon(":/images/download.png"),tr("&Download"), this);
+	downloadAct->setShortcut(tr("Ctrl+Alt+D"));
+	downloadAct->setStatusTip(tr("Download a File"));
+	QObject::connect(downloadAct, SIGNAL(triggered()), this, SLOT(download()));
+
+	downloadAsciiAct = new QAction(QIcon(":/images/downloadascii.png"),tr("Download &Ascii"), this);
+	downloadAsciiAct->setShortcut(tr("Ctrl+Alt+A"));
+	downloadAsciiAct->setStatusTip(tr("Download a File unsing Ascii Protocol"));
+	QObject::connect(downloadAsciiAct, SIGNAL(triggered()), this, SLOT(downloadAscii()));
+
+	downloadKermitAct = new QAction(QIcon(":/images/downloadkermit.png"),tr("Download &Kermit"), this);
+	downloadKermitAct->setShortcut(tr("Ctrl+Alt+K"));
+	downloadKermitAct->setStatusTip(tr("Download a File unsing Kermit Protocol"));
+	QObject::connect(downloadKermitAct, SIGNAL(triggered()), this, SLOT(downloadKermit()));
+
+	downloadXModemAct = new QAction(QIcon(":/images/downloadxmodem.png"),tr("Download &X-Modem"), this);
+	downloadXModemAct->setShortcut(tr("Ctrl+Alt+X"));
+	downloadXModemAct->setStatusTip(tr("Download a File unsing X-Modem Protocol"));
+	QObject::connect(downloadXModemAct, SIGNAL(triggered()), this, SLOT(downloadXModem()));
+
+	downloadYModemAct = new QAction(QIcon(":/images/downloadymodem.png"),tr("Download &Y-Modem"), this);
+	downloadYModemAct->setShortcut(tr("Ctrl+Alt+Y"));
+	downloadYModemAct->setStatusTip(tr("Download a File unsing Y-Modem Protocol"));
+	QObject::connect(downloadYModemAct, SIGNAL(triggered()), this, SLOT(downloadYModem()));
+
+	downloadZModemAct = new QAction(QIcon(":/images/downloadzmodem.png"),tr("Download &Z-Modem"), this);
+	downloadZModemAct->setShortcut(tr("Ctrl+Alt+Z"));
+	downloadZModemAct->setStatusTip(tr("Download a File unsing Z-Modem Protocol"));
+	QObject::connect(downloadZModemAct, SIGNAL(triggered()), this, SLOT(downloadZModem()));
+
+
 	copyAct = new QAction(QIcon(":/images/editcopy.png"), tr("&Copy"), this);
 	copyAct->setShortcut(tr("Ctrl+Shift+C"));
 	copyAct->setStatusTip(tr("Copy the current selection's contents to the clipboard."));
@@ -269,6 +384,20 @@ void Komport::createActions()
 void Komport::createMenus()
 {
 	fileMenu = menuBar()->addMenu(tr("&File"));
+	uploadMenu = fileMenu->addMenu(QIcon(":/images/upload.png"),tr("&Upload"));
+	uploadMenu->addAction(uploadAsciiAct);
+	uploadMenu->addAction(uploadKermitAct);
+	uploadMenu->addAction(uploadXModemAct);
+	uploadMenu->addAction(uploadYModemAct);
+	uploadMenu->addAction(uploadZModemAct);
+	downloadMenu = fileMenu->addMenu(QIcon(":/images/download.png"),tr("&Download"));
+	downloadMenu->addAction(downloadAsciiAct);
+	downloadMenu->addAction(downloadKermitAct);
+	downloadMenu->addAction(downloadXModemAct);
+	downloadMenu->addAction(downloadYModemAct);
+	downloadMenu->addAction(downloadZModemAct);
+
+	fileMenu->addSeparator();
 	fileMenu->addAction(exitAct);
 
 	editMenu = menuBar()->addMenu(tr("&Edit"));
@@ -289,6 +418,9 @@ void Komport::createToolBars()
 	fileToolBar = addToolBar(tr("File"));
 	fileToolBar->setObjectName("FileToolBar");
 	fileToolBar->addAction(exitAct);
+	fileToolBar->addSeparator();
+	fileToolBar->addAction(uploadAct);
+	fileToolBar->addAction(downloadAct);
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->setObjectName("EditToolBar");
@@ -410,12 +542,127 @@ void Komport::openForegroundColorDialog()
 	}
 }
 
-/* Convert a QColor to a hex ascii string suitable for style sheet */
+/**
+  * Convert a QColor to a hex ascii string suitable for style sheet
+  */
 QString Komport::colorToHex(QColor c)
 {
 	QString hex;
 	hex.sprintf("%02x%02x%02x", c.red(), c.green(), c.blue() );
 	return hex;
+}
+
+/**
+  * upload a file using default upload protocol
+  */
+void Komport::upload()
+{
+}
+
+void Komport::uploadAscii()
+{
+	QString fileName = QFileDialog::getOpenFileName(this,tr("Upload File"),settingsUi->uploadPath->text());
+	if ( !fileName.isEmpty() )
+	{
+		QFile file(fileName);
+		if (file.open(QIODevice::ReadOnly))
+		{
+			int sent=0;
+			QProgressDialog progress(tr("Uploading..."),tr("Abort"), 0, file.size(), this);
+			progress.setWindowModality(Qt::WindowModal);
+			while(!file.atEnd() && !progress.wasCanceled())
+			{
+				QByteArray bytes = file.read(1024);
+				for(int n=0; n < bytes.count() && !progress.wasCanceled();n++)
+				{
+					char ch = bytes[n];
+					progress.setValue(++sent);
+					serial()->sendAsciiChar(ch);
+					msleep(settingsUi->characterDelay->value());
+					if ( ch == 0x0D ) msleep(settingsUi->carriageReturnDelay->value());
+					if ( ch == 0x0A ) msleep(settingsUi->newlineDelay->value());
+				}
+			}
+			progress.setValue(file.size());
+			file.close();
+		}
+		else
+		{
+			QMessageBox::warning(this,"Open Failed",tr("Failed to open '")+fileName+"'");
+		}
+	}
+}
+
+void Komport::uploadKermit()
+{
+}
+
+void Komport::uploadXModem()
+{
+}
+
+void Komport::uploadYModem()
+{
+}
+
+void Komport::uploadZModem()
+{
+}
+
+/**
+  * download a file
+  */
+void Komport::download()
+{
+}
+
+void Komport::downloadAscii()
+{
+}
+
+void Komport::downloadKermit()
+{
+}
+
+void Komport::downloadXModem()
+{
+}
+
+void Komport::downloadYModem()
+{
+}
+
+void Komport::downloadZModem()
+{
+}
+
+/**
+  * @brief use a file dialog to select the default upload path.
+  */
+void Komport::uploadPathSelect()
+{
+	settingsUi->uploadPath->setText(QFileDialog::getExistingDirectory(this,tr("Upload Path"),settingsUi->uploadPath->text()));
+}
+
+/**
+  * @brief use a file dialog to select the default download path.
+  */
+void Komport::downloadPathSelect()
+{
+	settingsUi->downloadPath->setText(QFileDialog::getExistingDirectory(this,tr("Download Path"),settingsUi->downloadPath->text()));
+}
+
+/**
+  * @brief Sleep for a given milliseconds.
+  */
+void Komport::msleep(int msec)
+{
+	QEventLoop loop;
+	QTime timer;
+	for(timer.start(); timer.elapsed() < msec;)
+	{
+		loop.processEvents();
+	}
 }
 
 

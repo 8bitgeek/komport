@@ -12,5 +12,16 @@
         <file>images/terminal.png</file>
         <file>images/exit.png</file>
         <file>images/about.png</file>
+        <file>images/download.png</file>
+        <file>images/uploadascii.png</file>
+        <file>images/uploadkermit.png</file>
+        <file>images/uploadxmodem.png</file>
+        <file>images/uploadymodem.png</file>
+        <file>images/uploadzmodem.png</file>
+        <file>images/downloadascii.png</file>
+        <file>images/downloadkermit.png</file>
+        <file>images/downloadxmodem.png</file>
+        <file>images/downloadymodem.png</file>
+        <file>images/downloadzmodem.png</file>
     </qresource>
 </RCC>

@@ -32,6 +32,47 @@
 
 #define KOMPORT_VERSION "V1.1.1"
 
+#define DEFAULT_CH_DELAY 8			/** ascii upload default delay between characters in msec */
+#define DEFAULT_LF_DELAY 25			/** ascii upload default delay beteeen line feeds characters in msec */
+#define DEFAULT_CR_DELAY 25			/** ascii upload default delay between carriage return characters in msec */
+
+#ifdef Q_OS_WIN32
+
+#define DEFAULT_UPLOAD_PATH			""
+#define DEFAULT_DOWNLOAD_PATH		""
+
+#define DEFAULT_XMODEM_DOWNLOAD		"rx.exe -vv"
+#define DEFAULT_XMODEM_UPLOAD		"sx.exe -vv"
+
+#define DEFAULT_YMODEM_DOWNLOAD		"rb.exe -vv"
+#define DEFAULT_YMODEM_UPLOAD		"sb.exe -vv"
+
+#define DEFAULT_ZMODEM_DOWNLOAD		"rz.exe -vv -b -E"
+#define DEFAULT_ZMODEM_UPLOAD		"sz.exe -vv -b"
+
+#define DEFAULT_KERMIT_DOWNLOAD		"kermit.exe -i -l %l -b %"
+#define DEFAULT_KERMIT_UPLOAD		"kermit.exe -i -l %l -b %b"
+
+#else
+
+#define DEFAULT_UPLOAD_PATH			""
+#define DEFAULT_DOWNLOAD_PATH		""
+
+#define DEFAULT_XMODEM_DOWNLOAD		"/usr/bin/rx -vv"
+#define DEFAULT_XMODEM_UPLOAD		"/usr/bin/sx -vv"
+
+#define DEFAULT_YMODEM_DOWNLOAD		"/usr/bin/rb -vv"
+#define DEFAULT_YMODEM_UPLOAD		"/usr/bin/sb -vv"
+
+#define DEFAULT_ZMODEM_DOWNLOAD		"/usr/bin/rz -vv -b -E"
+#define DEFAULT_ZMODEM_UPLOAD		"/usr/bin/sz -vv -b"
+
+#define DEFAULT_KERMIT_DOWNLOAD		"/usr/bin/kermit -i -l %l -b %"
+#define DEFAULT_KERMIT_UPLOAD		"/usr/bin/kermit -i -l %l -b %b"
+
+#endif // Q_OS_WIN32
+
+
 namespace Ui
 {
     class Komport;
@@ -53,8 +94,23 @@ class Komport : public QMainWindow
 	protected:
 		void				keyPressEvent(QKeyEvent *);
 		void				closeEvent(QCloseEvent *event);
+		void				msleep(int msec);
 
 	private slots:
+		void				upload();
+		void				uploadAscii();
+		void				uploadKermit();
+		void				uploadXModem();
+		void				uploadYModem();
+		void				uploadZModem();
+
+		void				download();
+		void				downloadAscii();
+		void				downloadKermit();
+		void				downloadXModem();
+		void				downloadYModem();
+		void				downloadZModem();
+
 		void				about();
 		void				editSettings();
 		void				doCopy();
@@ -66,6 +122,8 @@ class Komport : public QMainWindow
 		void				rxLedOff()				{mRxLED->off();}
 		void				txLedOn()				{mTxLED->on(true);}
 		void				txLedOff()				{mTxLED->off(true);}
+		void				uploadPathSelect();
+		void				downloadPathSelect();
 		#ifdef DEBUG
 		void				debug();
 		#endif
@@ -88,6 +146,16 @@ class Komport : public QMainWindow
 		QDialog				settingsDialog;
 
 		QMenu*				fileMenu;
+		QMenu*				uploadMenu;
+		QMenu*				uploadXModemMenu;
+		QMenu*				uploadYModemMenu;
+		QMenu*				uploadZModemMenu;
+		QMenu*				uploadKermitMenu;
+		QMenu*				downloadMenu;
+		QMenu*				downloadXModemMenu;
+		QMenu*				downloadYModemMenu;
+		QMenu*				downloadZModemMenu;
+		QMenu*				downloadKermitMenu;
 		QMenu*				editMenu;
 		QMenu*				configMenu;
 		QMenu*				helpMenu;
@@ -97,6 +165,18 @@ class Komport : public QMainWindow
 		QToolBar*			configToolBar;
 
 		QAction*			exitAct;
+		QAction*			uploadAct;
+		QAction*			uploadAsciiAct;
+		QAction*			uploadKermitAct;
+		QAction*			uploadXModemAct;
+		QAction*			uploadYModemAct;
+		QAction*			uploadZModemAct;
+		QAction*			downloadAct;
+		QAction*			downloadAsciiAct;
+		QAction*			downloadKermitAct;
+		QAction*			downloadXModemAct;
+		QAction*			downloadYModemAct;
+		QAction*			downloadZModemAct;
 		QAction*			copyAct;
 		QAction*			pasteAct;
 		QAction*			settingsAct;
@@ -104,7 +184,6 @@ class Komport : public QMainWindow
 
 		CLed*				mRxLED;
 		CLed*				mTxLED;
-
 };
 
 #endif // KOMPORT_H
