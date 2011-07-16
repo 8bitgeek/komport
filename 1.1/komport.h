@@ -24,6 +24,7 @@
 #include <QDialog>
 #include <QCloseEvent>
 #include <QColor>
+#include <QFile>
 
 #include "cscreen.h"
 #include "cserial.h"
@@ -98,6 +99,7 @@ class Komport : public QMainWindow
 
 	private slots:
 		void				upload();
+		void				upload(QFile& file, QString command);
 		void				uploadAscii();
 		void				uploadKermit();
 		void				uploadXModem();

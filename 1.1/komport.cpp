@@ -140,16 +140,16 @@ void Komport::readSettings()
 		settingsUi->kermitDownload->setText(settings.value("kermitDownload",DEFAULT_KERMIT_DOWNLOAD).toString());
 		settingsUi->kermitUpload->setText(settings.value("kermitUpload",DEFAULT_KERMIT_UPLOAD).toString());
 
-		settingsUi->defaultUploadAscii->setChecked(settings.value("defaultUploadAscii",true).toBool());
+		settingsUi->defaultUploadAscii->setChecked(settings.value("defaultUploadAscii",false).toBool());
 		settingsUi->defaultUploadKermit->setChecked(settings.value("defaultUploadKermit",false).toBool());
 		settingsUi->defaultUploadXModem->setChecked(settings.value("defaultUploadXModem",false).toBool());
-		settingsUi->defaultUploadYModem->setChecked(settings.value("defaultUploadYModem",false).toBool());
+		settingsUi->defaultUploadYModem->setChecked(settings.value("defaultUploadYModem",true).toBool());
 		settingsUi->defaultUploadZModem->setChecked(settings.value("defaultUploadZModem",false).toBool());
 
 		settingsUi->defaultDownloadAscii->setChecked(settings.value("defaultDownloadAscii",false).toBool());
 		settingsUi->defaultDownloadKermit->setChecked(settings.value("defaultDownloadKermit",false).toBool());
 		settingsUi->defaultDownloadXModem->setChecked(settings.value("defaultDownloadXModem",false).toBool());
-		settingsUi->defaultDownloadYModem->setChecked(settings.value("defaultDownloadYModem",false).toBool());
+		settingsUi->defaultDownloadYModem->setChecked(settings.value("defaultDownloadYModem",true).toBool());
 		settingsUi->defaultDownloadZModem->setChecked(settings.value("defaultDownloadZModem",false).toBool());
 
 		setDefaultUpDownAct();
@@ -682,6 +682,60 @@ void Komport::connectSerialToEmulation()
 }
 
 /**
+  * @brief upload using an external protocol
+  */
+void Komport::upload(QFile& file, QString command)
+{
+	int sent=0;
+	int size = file.size();
+	QEventLoop loop;
+	QProgressDialog progress(tr("Uploading..."),tr("Abort"),0,size,this);
+	QProcess proc;
+	disconnectSerialFromEmulation();
+	proc.start(command,QIODevice::ReadWrite);
+	clearLog();
+	if ( proc.waitForStarted() )
+	{
+		progress.setWindowModality(Qt::WindowModal);
+		while(proc.state() == QProcess::Running && !progress.wasCanceled())
+		{
+			char ch;
+			loop.processEvents();
+			/** send serial... */
+			QByteArray in = proc.readAllStandardOutput();
+			if ( in.count() )
+			{
+				serial()->write(in.data(),in.count());
+				sent+=in.count();
+				progress.setValue(sent);
+			}
+			/** receive serial... */
+			while( serial()->getChar(&ch) && !progress.wasCanceled() )
+			{
+				proc.write(&ch,1);
+			}
+			/** stderr messages... */
+			QByteArray msg = proc.readAllStandardError();
+			if ( msg.count())
+			{
+				log(msg);
+			}
+		}
+		proc.kill();
+	}
+	else
+	{
+		QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
+	}
+	if ( proc.exitCode() != 0 )
+	{
+		QMessageBox::warning(this,"Upload failed",tr("Failed to start '")+command+"' exit code="+QString::number(proc.exitCode()));
+	}
+	progress.setValue(file.size());
+	connectSerialToEmulation();
+}
+
+/**
   * @brief upload and ASCII file
   */
 void Komport::uploadAscii()
@@ -737,55 +791,8 @@ void Komport::uploadXModem()
 		QFile file(fileName);
 		if (file.open(QIODevice::ReadOnly))
 		{
-			int sent=0;
-			QEventLoop loop;
-			QProgressDialog progress(tr("Uploading..."),tr("Abort"), 0, file.size(), this);
-			QProcess proc;
-			QString command = settingsUi->xmodemUpload->text()+" "+fileName;
-			disconnectSerialFromEmulation();
-			proc.start(command,QIODevice::ReadWrite);
-			clearLog();
-			if ( proc.waitForStarted() )
-			{
-				progress.setWindowModality(Qt::WindowModal);
-				while(proc.state() == QProcess::Running && !progress.wasCanceled())
-				{
-					char ch;
-					loop.processEvents();
-					/** send serial... */
-					QByteArray in = proc.readAllStandardOutput();
-					if ( in.count() )
-					{
-						for(int n=0; n < in.count(); n++)
-						{
-							serial()->sendAsciiChar(in[n]);
-							progress.setValue(++sent);
-						}
-					}
-					/** receive serial... */
-					while( serial()->getChar(&ch) )
-					{
-						proc.write(&ch,1);
-					}
-					/** stderr messages... */
-					QByteArray msg = proc.readAllStandardError();
-					if ( msg.count())
-					{
-						log(msg);
-					}
-				}
-			}
-			else
-			{
-				QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
-			}
-			if ( proc.exitCode() != 0 )
-			{
-				QMessageBox::warning(this,"Upload failed",tr("Failed to start '")+command+"' exit code="+QString::number(proc.exitCode()));
-			}
-			progress.setValue(file.size());
+			upload(file,settingsUi->xmodemUpload->text()+" "+fileName);
 			file.close();
-			connectSerialToEmulation();
 		}
 		else
 		{
@@ -799,6 +806,16 @@ void Komport::uploadYModem()
 	QString fileName = QFileDialog::getOpenFileName(this,tr("Upload by Y-Modem"),settingsUi->uploadPath->text());
 	if ( !fileName.isEmpty() )
 	{
+		QFile file(fileName);
+		if (file.open(QIODevice::ReadOnly))
+		{
+			upload(file,settingsUi->ymodemUpload->text()+" "+fileName);
+			file.close();
+		}
+		else
+		{
+			QMessageBox::warning(this,"Open Failed",tr("Failed to open '")+fileName+"'");
+		}
 	}
 }
 
@@ -807,6 +824,16 @@ void Komport::uploadZModem()
 	QString fileName = QFileDialog::getOpenFileName(this,tr("Upload by Z-Modem"),settingsUi->uploadPath->text());
 	if ( !fileName.isEmpty() )
 	{
+		QFile file(fileName);
+		if (file.open(QIODevice::ReadOnly))
+		{
+			upload(file,settingsUi->zmodemUpload->text()+" "+fileName);
+			file.close();
+		}
+		else
+		{
+			QMessageBox::warning(this,"Open Failed",tr("Failed to open '")+fileName+"'");
+		}
 	}
 }
 
@@ -836,6 +863,53 @@ void Komport::downloadXModem()
 
 void Komport::downloadYModem()
 {
+#if 0
+	int received=0;
+	QEventLoop loop;
+	QProgressDialog progress(tr("Uploading..."),tr("Abort"),0,size,this);
+	QProcess proc;
+	disconnectSerialFromEmulation();
+	proc.start(command,QIODevice::ReadWrite);
+	clearLog();
+	if ( proc.waitForStarted() )
+	{
+		progress.setWindowModality(Qt::WindowModal);
+		while(proc.state() == QProcess::Running && !progress.wasCanceled())
+		{
+			char ch;
+			loop.processEvents();
+			/** send serial... */
+			QByteArray in = proc.readAllStandardOutput();
+			if ( in.count() )
+			{
+				serial()->write(in.data(),in.count());
+				sent+=in.count();
+				progress.setValue(sent);
+			}
+			/** receive serial... */
+			while( serial()->getChar(&ch) && !progress.wasCanceled() )
+			{
+				proc.write(&ch,1);
+			}
+			/** stderr messages... */
+			QByteArray msg = proc.readAllStandardError();
+			if ( msg.count())
+			{
+				log(msg);
+			}
+		}
+	}
+	else
+	{
+		QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
+	}
+	if ( proc.exitCode() != 0 )
+	{
+		QMessageBox::warning(this,"Upload failed",tr("Failed to start '")+command+"' exit code="+QString::number(proc.exitCode()));
+	}
+	progress.setValue(file.size());
+	connectSerialToEmulation();
+#endif
 }
 
 void Komport::downloadZModem()
