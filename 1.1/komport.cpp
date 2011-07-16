@@ -697,6 +697,8 @@ void Komport::upload(QFile& file, QString command)
 	if ( proc.waitForStarted() )
 	{
 		progress.setWindowModality(Qt::WindowModal);
+		progress.show();
+		progress.raise();
 		while(proc.state() == QProcess::Running && !progress.wasCanceled())
 		{
 			char ch;
@@ -863,53 +865,6 @@ void Komport::downloadXModem()
 
 void Komport::downloadYModem()
 {
-#if 0
-	int received=0;
-	QEventLoop loop;
-	QProgressDialog progress(tr("Uploading..."),tr("Abort"),0,size,this);
-	QProcess proc;
-	disconnectSerialFromEmulation();
-	proc.start(command,QIODevice::ReadWrite);
-	clearLog();
-	if ( proc.waitForStarted() )
-	{
-		progress.setWindowModality(Qt::WindowModal);
-		while(proc.state() == QProcess::Running && !progress.wasCanceled())
-		{
-			char ch;
-			loop.processEvents();
-			/** send serial... */
-			QByteArray in = proc.readAllStandardOutput();
-			if ( in.count() )
-			{
-				serial()->write(in.data(),in.count());
-				sent+=in.count();
-				progress.setValue(sent);
-			}
-			/** receive serial... */
-			while( serial()->getChar(&ch) && !progress.wasCanceled() )
-			{
-				proc.write(&ch,1);
-			}
-			/** stderr messages... */
-			QByteArray msg = proc.readAllStandardError();
-			if ( msg.count())
-			{
-				log(msg);
-			}
-		}
-	}
-	else
-	{
-		QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
-	}
-	if ( proc.exitCode() != 0 )
-	{
-		QMessageBox::warning(this,"Upload failed",tr("Failed to start '")+command+"' exit code="+QString::number(proc.exitCode()));
-	}
-	progress.setValue(file.size());
-	connectSerialToEmulation();
-#endif
 }
 
 void Komport::downloadZModem()
