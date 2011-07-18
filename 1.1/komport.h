@@ -42,11 +42,11 @@
 #define DEFAULT_UPLOAD_PATH			""
 #define DEFAULT_DOWNLOAD_PATH		""
 
-#define DEFAULT_XMODEM_DOWNLOAD		"rx.exe -vv"
-#define DEFAULT_XMODEM_UPLOAD		"sx.exe -vv"
+#define DEFAULT_XMODEM_DOWNLOAD		"rx.exe -vv -b"
+#define DEFAULT_XMODEM_UPLOAD		"sx.exe -vv -b"
 
-#define DEFAULT_YMODEM_DOWNLOAD		"rb.exe -vv"
-#define DEFAULT_YMODEM_UPLOAD		"sb.exe -vv"
+#define DEFAULT_YMODEM_DOWNLOAD		"rb.exe -vv -b"
+#define DEFAULT_YMODEM_UPLOAD		"sb.exe -vv -b"
 
 #define DEFAULT_ZMODEM_DOWNLOAD		"rz.exe -vv -b -E"
 #define DEFAULT_ZMODEM_UPLOAD		"sz.exe -vv -b"
@@ -59,11 +59,11 @@
 #define DEFAULT_UPLOAD_PATH			""
 #define DEFAULT_DOWNLOAD_PATH		""
 
-#define DEFAULT_XMODEM_DOWNLOAD		"/usr/bin/rx -vv"
-#define DEFAULT_XMODEM_UPLOAD		"/usr/bin/sx -vv"
+#define DEFAULT_XMODEM_DOWNLOAD		"/usr/bin/rx -vv -b"
+#define DEFAULT_XMODEM_UPLOAD		"/usr/bin/sx -vv -b"
 
-#define DEFAULT_YMODEM_DOWNLOAD		"/usr/bin/rb -vv"
-#define DEFAULT_YMODEM_UPLOAD		"/usr/bin/sb -vv"
+#define DEFAULT_YMODEM_DOWNLOAD		"/usr/bin/rb -vv -b"
+#define DEFAULT_YMODEM_UPLOAD		"/usr/bin/sb -vv -b"
 
 #define DEFAULT_ZMODEM_DOWNLOAD		"/usr/bin/rz -vv -b -E"
 #define DEFAULT_ZMODEM_UPLOAD		"/usr/bin/sz -vv -b"
@@ -99,7 +99,7 @@ class Komport : public QMainWindow
 
 	private slots:
 		void				upload();
-		void				upload(QFile& file, QString command);
+		void				upload(QString command,QFile& file);
 		void				uploadAscii();
 		void				uploadKermit();
 		void				uploadXModem();
@@ -107,6 +107,7 @@ class Komport : public QMainWindow
 		void				uploadZModem();
 
 		void				download();
+		void				download(QString command,QString dir);
 		void				downloadAscii();
 		void				downloadKermit();
 		void				downloadXModem();

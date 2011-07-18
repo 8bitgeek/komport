@@ -95,7 +95,7 @@ Komport::~Komport()
 
 void Komport::readSettings()
 {
-	QSettings settings( QSettings::IniFormat, QSettings::UserScope, "pikeaero.com", "komport-0.9" );
+	QSettings settings( QSettings::IniFormat, QSettings::UserScope, "8bit.zapto.org", "komport-1.1" );
 	settings.beginGroup("main");
 		restoreGeometry(settings.value("geometry").toByteArray());
 		restoreState(settings.value("windowState").toByteArray());
@@ -221,7 +221,7 @@ void Komport::readSettings()
 
 void Komport::writeSettings()
 {
-	QSettings settings( QSettings::IniFormat, QSettings::UserScope, "pikeaero.com", "komport-0.9" );
+	QSettings settings( QSettings::IniFormat, QSettings::UserScope, "8bit.zapto.org", "komport-1.1" );
 	settings.beginGroup("main");
 		settings.setValue("geometry", saveGeometry());
 		settings.setValue("windowState", saveState());
@@ -684,7 +684,7 @@ void Komport::connectSerialToEmulation()
 /**
   * @brief upload using an external protocol
   */
-void Komport::upload(QFile& file, QString command)
+void Komport::upload(QString command,QFile& file)
 {
 	int sent=0;
 	int size = file.size();
@@ -731,7 +731,7 @@ void Komport::upload(QFile& file, QString command)
 	}
 	if ( proc.exitCode() != 0 )
 	{
-		QMessageBox::warning(this,"Upload failed",tr("Failed to start '")+command+"' exit code="+QString::number(proc.exitCode()));
+		QMessageBox::warning(this,"Upload failed",tr("Upload failed '")+command+"' exit code="+QString::number(proc.exitCode()));
 	}
 	progress.setValue(file.size());
 	connectSerialToEmulation();
@@ -793,7 +793,7 @@ void Komport::uploadXModem()
 		QFile file(fileName);
 		if (file.open(QIODevice::ReadOnly))
 		{
-			upload(file,settingsUi->xmodemUpload->text()+" "+fileName);
+			upload(settingsUi->xmodemUpload->text()+" "+fileName,file);
 			file.close();
 		}
 		else
@@ -811,7 +811,7 @@ void Komport::uploadYModem()
 		QFile file(fileName);
 		if (file.open(QIODevice::ReadOnly))
 		{
-			upload(file,settingsUi->ymodemUpload->text()+" "+fileName);
+			upload(settingsUi->ymodemUpload->text()+" "+fileName,file);
 			file.close();
 		}
 		else
@@ -829,7 +829,7 @@ void Komport::uploadZModem()
 		QFile file(fileName);
 		if (file.open(QIODevice::ReadOnly))
 		{
-			upload(file,settingsUi->zmodemUpload->text()+" "+fileName);
+			upload(settingsUi->zmodemUpload->text()+" "+fileName,file);
 			file.close();
 		}
 		else
@@ -851,6 +851,58 @@ void Komport::download()
 	else if ( settingsUi->defaultDownloadZModem->isChecked() )	downloadZModem();
 }
 
+/**
+  * @download a file
+  */
+void Komport::download(QString command,QString dir)
+{
+	int received=0;
+	QEventLoop loop;
+	QProgressDialog progress(tr("Download..."),tr("Abort"),0,0,this);
+	QProcess proc;
+	disconnectSerialFromEmulation();
+	proc.setWorkingDirectory(dir);
+	proc.start(command,QIODevice::ReadWrite);
+	clearLog();
+	if ( proc.waitForStarted() )
+	{
+		progress.setWindowModality(Qt::WindowModal);
+		while(proc.state() == QProcess::Running && !progress.wasCanceled())
+		{
+			char ch;
+			loop.processEvents();
+			/** receive serial... */
+			while( serial()->getChar(&ch) && !progress.wasCanceled() )
+			{
+				proc.write(&ch,1);
+			}
+			/** send serial... */
+			QByteArray in = proc.readAllStandardOutput();
+			if ( in.count() )
+			{
+				serial()->write(in.data(),in.count());
+				received+=in.count();
+				progress.setValue(received);
+			}
+			/** stderr messages... */
+			QByteArray msg = proc.readAllStandardError();
+			if ( msg.count())
+			{
+				log(msg);
+			}
+		}
+	}
+	else
+	{
+		QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
+	}
+	if ( proc.exitCode() != 0 )
+	{
+		QMessageBox::warning(this,"Download failed",tr("Download failed '")+command+"' exit code="+QString::number(proc.exitCode()));
+	}
+	connectSerialToEmulation();
+}
+
 void Komport::downloadAscii()
 {
 }
@@ -865,10 +917,12 @@ void Komport::downloadXModem()
 
 void Komport::downloadYModem()
 {
+	download(settingsUi->ymodemDownload->text(),settingsUi->downloadPath->text());
 }
 
 void Komport::downloadZModem()
 {
+	download(settingsUi->zmodemDownload->text(),settingsUi->downloadPath->text());
 }
 
 /**
