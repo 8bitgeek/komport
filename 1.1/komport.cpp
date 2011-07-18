@@ -707,6 +707,7 @@ void Komport::upload(QString command,QFile& file)
 			QByteArray in = proc.readAllStandardOutput();
 			if ( in.count() )
 			{
+				loop.processEvents();
 				serial()->write(in.data(),in.count());
 				sent+=in.count();
 				progress.setValue(sent);
@@ -875,14 +876,16 @@ void Komport::download(QString command,QString dir)
 			while( serial()->getChar(&ch) && !progress.wasCanceled() )
 			{
 				proc.write(&ch,1);
+				++received;
+				progress.setValue(received);
+				statusBar()->showMessage(QString::number((int)ch,16));
 			}
 			/** send serial... */
 			QByteArray in = proc.readAllStandardOutput();
 			if ( in.count() )
 			{
+				loop.processEvents();
 				serial()->write(in.data(),in.count());
-				received+=in.count();
-				progress.setValue(received);
 			}
 			/** stderr messages... */
 			QByteArray msg = proc.readAllStandardError();
