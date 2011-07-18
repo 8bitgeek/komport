@@ -861,10 +861,10 @@ void Komport::download(QString command,QString dir)
 	QEventLoop loop;
 	QProgressDialog progress(tr("Download..."),tr("Abort"),0,0,this);
 	QProcess proc;
+	clearLog();
 	disconnectSerialFromEmulation();
 	proc.setWorkingDirectory(dir);
 	proc.start(command,QIODevice::ReadWrite);
-	clearLog();
 	if ( proc.waitForStarted() )
 	{
 		progress.setWindowModality(Qt::WindowModal);
@@ -878,7 +878,6 @@ void Komport::download(QString command,QString dir)
 				proc.write(&ch,1);
 				++received;
 				progress.setValue(received);
-				statusBar()->showMessage(QString::number((int)ch,16));
 			}
 			/** send serial... */
 			QByteArray in = proc.readAllStandardOutput();
