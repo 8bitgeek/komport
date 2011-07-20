@@ -57,7 +57,7 @@ class CSerial : public QObject
 		bool				isOpen();
 		void				setLineControl(int ispeed=2400, int dataBits=8, int stopBits=1, QString parity="NONE", QString flow="NONE" );
 		int					write(const void* buf, int count);
-		bool				getChar(char* ch, int msec=100);
+		bool				getChar(char* ch, int msec=20);
 		bool				emitChars() {return mEmitChars;}
 
 	public slots:
@@ -96,7 +96,7 @@ class CSerial : public QObject
 		QSocketNotifier*	mSocketNotifier;
 		bool				mReadTimeout;
 		bool				mInGetChar;
-		CDeviceLock         mDeviceLock;
+		CDeviceLock			mDeviceLock;
 		bool				mEmitChars;
 };
 

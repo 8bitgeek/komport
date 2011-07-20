@@ -131,7 +131,7 @@ class Komport : public QMainWindow
 		void				debug();
 		#endif
 		void				clearLog();
-		void				log(QString msg);
+		void				log(QString msg,bool show=false);
 
 	private:
 		bool				openSerial();

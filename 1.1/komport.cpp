@@ -40,7 +40,7 @@
 #define COPYRIGHT "Copyright (c) 2011 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
 #define WEBSITE "http://www.sourceforge.net/komport2"
 
-
+#define CHUNK_SIZE	64
 
 Komport::Komport(QWidget *parent)
 : QMainWindow(parent)
@@ -681,62 +681,6 @@ void Komport::connectSerialToEmulation()
 	QObject::connect(serial(),SIGNAL(rx(unsigned char)),emulation(),SLOT(receiveChar(unsigned char)));
 }
 
-/**
-  * @brief upload using an external protocol
-  */
-void Komport::upload(QString command,QFile& file)
-{
-	int sent=0;
-	int size = file.size();
-	QEventLoop loop;
-	QProgressDialog progress(tr("Uploading..."),tr("Abort"),0,size,this);
-	QProcess proc;
-	disconnectSerialFromEmulation();
-	proc.start(command,QIODevice::ReadWrite);
-	clearLog();
-	if ( proc.waitForStarted() )
-	{
-		progress.setWindowModality(Qt::WindowModal);
-		progress.show();
-		progress.raise();
-		while(proc.state() == QProcess::Running && !progress.wasCanceled())
-		{
-			char ch;
-			loop.processEvents();
-			/** send serial... */
-			QByteArray in = proc.readAllStandardOutput();
-			if ( in.count() )
-			{
-				loop.processEvents();
-				serial()->write(in.data(),in.count());
-				sent+=in.count();
-				progress.setValue(sent);
-			}
-			/** receive serial... */
-			while( serial()->getChar(&ch) && !progress.wasCanceled() )
-			{
-				proc.write(&ch,1);
-			}
-			/** stderr messages... */
-			QByteArray msg = proc.readAllStandardError();
-			if ( msg.count())
-			{
-				log(msg);
-			}
-		}
-		proc.kill();
-	}
-	else
-	{
-		QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
-	}
-	if ( proc.exitCode() != 0 )
-	{
-		QMessageBox::warning(this,"Upload failed",tr("Upload failed '")+command+"' exit code="+QString::number(proc.exitCode()));
-	}
-	progress.setValue(file.size());
-	connectSerialToEmulation();
-}
 
 /**
   * @brief upload and ASCII file
@@ -852,58 +796,6 @@ void Komport::download()
 	else if ( settingsUi->defaultDownloadZModem->isChecked() )	downloadZModem();
 }
 
-/**
-  * @download a file
-  */
-void Komport::download(QString command,QString dir)
-{
-	int received=0;
-	QEventLoop loop;
-	QProgressDialog progress(tr("Download..."),tr("Abort"),0,0,this);
-	QProcess proc;
-	clearLog();
-	disconnectSerialFromEmulation();
-	proc.setWorkingDirectory(dir);
-	proc.start(command,QIODevice::ReadWrite);
-	if ( proc.waitForStarted() )
-	{
-		progress.setWindowModality(Qt::WindowModal);
-		while(proc.state() == QProcess::Running && !progress.wasCanceled())
-		{
-			char ch;
-			loop.processEvents();
-			/** receive serial... */
-			while( serial()->getChar(&ch) && !progress.wasCanceled() )
-			{
-				proc.write(&ch,1);
-				++received;
-				progress.setValue(received);
-			}
-			/** send serial... */
-			QByteArray in = proc.readAllStandardOutput();
-			if ( in.count() )
-			{
-				loop.processEvents();
-				serial()->write(in.data(),in.count());
-			}
-			/** stderr messages... */
-			QByteArray msg = proc.readAllStandardError();
-			if ( msg.count())
-			{
-				log(msg);
-			}
-		}
-	}
-	else
-	{
-		QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
-	}
-	if ( proc.exitCode() != 0 )
-	{
-		QMessageBox::warning(this,"Download failed",tr("Download failed '")+command+"' exit code="+QString::number(proc.exitCode()));
-	}
-	connectSerialToEmulation();
-}
 
 void Komport::downloadAscii()
 {
@@ -964,10 +856,137 @@ void Komport::clearLog()
 	settingsUi->log->clear();
 }
 
-void Komport::log(QString msg)
+void Komport::log(QString msg,bool show)
 {
+	msg = msg.trimmed();
+	for(int n=0; n < msg.length(); n++)
+	{
+		if ( msg[n] == '\n' || msg[n] == '\r' )
+		{
+			msg.resize(n);
+			break;
+		}
+	}
 	settingsUi->log->append(msg);
-	statusBar()->showMessage(msg);
+	if ( show )
+	{
+		statusBar()->showMessage(msg);
+	}
 }
 
+
+/**
+  * @brief upload using an external protocol
+  */
+void Komport::upload(QString command,QFile& file)
+{
+	int sent=0;
+	int size = file.size();
+	QEventLoop loop;
+	QProgressDialog progress(tr("Uploading..."),tr("Abort"),0,size,this);
+	QProcess proc;
+	QTime start = QTime::currentTime();
+	disconnectSerialFromEmulation();
+	proc.start(command,QIODevice::ReadWrite);
+	clearLog();
+	if ( proc.waitForStarted() )
+	{
+		progress.setWindowModality(Qt::WindowModal);
+		progress.show();
+		progress.raise();
+		while(proc.state() == QProcess::Running && !progress.wasCanceled())
+		{
+			QByteArray out;
+			char ch;
+			loop.processEvents();
+			/** receive serial... */
+			for( out.clear(); serial()->getChar(&ch) && !progress.wasCanceled(); out += ch );
+			proc.write(out.data(),out.count());
+			/** send serial... */
+			QByteArray in = proc.readAllStandardOutput();
+			if ( in.count() )
+			{
+				for( int n=0; n < in.count(); n+=CHUNK_SIZE )
+				{
+					sent += serial()->write( &(in.data()[n]), in.count()>CHUNK_SIZE ? CHUNK_SIZE : in.count() );
+					progress.setValue( sent < size ? sent : size);
+					/** receive serial... */
+					for( out.clear(); serial()->getChar(&ch) && !progress.wasCanceled(); out += ch );
+					proc.write(out.data(),out.count());
+				}
+			}
+			/** stderr messages... */
+			QByteArray msg = proc.readAllStandardError();
+			if ( msg.count())
+			{
+				log(msg,true);
+			}
+		}
+		proc.kill();
+	}
+	else
+	{
+		QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
+	}
+	if ( proc.exitCode() != 0 )
+	{
+		QMessageBox::warning(this,"Upload failed",tr("Upload failed '")+command+"' exit code="+QString::number(proc.exitCode()));
+	}
+	progress.setValue(file.size());
+	connectSerialToEmulation();
+}
+
+/**
+  * @download a file
+  */
+void Komport::download(QString command,QString dir)
+{
+	int received=0;
+	QEventLoop loop;
+	QProgressDialog progress(tr("Download..."),tr("Abort"),0,0,this);
+	QProcess proc;
+	clearLog();
+	command += " < /dev/tty > /dev/tty";
+	disconnectSerialFromEmulation();
+	proc.setWorkingDirectory(dir);
+	proc.start(command,QIODevice::ReadWrite);
+	if ( proc.waitForStarted() )
+	{
+		progress.setWindowModality(Qt::WindowModal);
+		while(proc.state() == QProcess::Running && !progress.wasCanceled())
+		{
+			char ch;
+			loop.processEvents();
+			/** receive serial... */
+			while( serial()->getChar(&ch) && !progress.wasCanceled() )
+			{
+				proc.write(&ch,1);
+				++received;
+				progress.setValue(received);
+			}
+			/** send serial... */
+			QByteArray in = proc.readAllStandardOutput();
+			if ( in.count() )
+			{
+				loop.processEvents();
+				serial()->write(in.data(),in.count());
+			}
+			/** stderr messages... */
+			QByteArray msg = proc.readAllStandardError();
+			if ( msg.count())
+			{
+				log(msg);
+			}
+		}
+	}
+	else
+	{
+		QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
+	}
+	if ( proc.exitCode() != 0 )
+	{
+		QMessageBox::warning(this,"Download failed",tr("Download failed '")+command+"' exit code="+QString::number(proc.exitCode()));
+	}
+	connectSerialToEmulation();
+}
 
