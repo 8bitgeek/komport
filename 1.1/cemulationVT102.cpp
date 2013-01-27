@@ -18,17 +18,6 @@
 #include "cemulationVT102.h"
 #include <QString>
 
-#define ASCII_ENQ   0x05
-#define ASCII_NUL   0x00
-#define ASCII_SO    0x0E
-#define ASCII_SI    0x0F
-#define ASCII_CSI   0x9B
-#define ASCII_BEL   0x07
-#define ASCII_BS    0x08
-#define ASCII_LF    0x0A
-#define ASCII_CR    0x0D
-#define ASCII_ESC   0x1B
-
 //#define DEBUG_RX 1
 
 #define inherited CEmulation
@@ -808,29 +797,7 @@ void CEmulationVT102::receiveChar(unsigned char ch)
 			putchar(ch);
 		fflush(stdout);
 	#endif
-	switch( (ch = doLeadIn(ch)) )
-	{
-		case ASCII_ENQ:
-		case ASCII_SO:
-		case ASCII_SI:
-		case ASCII_NUL:
-			break;
-		case ASCII_BEL:
-			doBell();
-			break;
-		case ASCII_BS:
-			doCursorLeft();
-			break;
-		case ASCII_LF:
-			doNewLine();
-			break;
-		case ASCII_CR:
-			doCarriageReturn();
-			break;
-		default:
-			doChar(ch);
-			break;
-	}
+	inherited::receiveChar((ch = doLeadIn(ch)));
 	mChar='\0';
 }
 

@@ -30,7 +30,7 @@
 CSerial::CSerial(const QString& name)
 : inherited()
 , mName(name)
-#ifndef Q_OS_WIN32
+#if defined(Q_OS_UNIX)
 , mHandle(-1)
 #endif
 , mSocketNotifier(NULL)
@@ -39,7 +39,7 @@ CSerial::CSerial(const QString& name)
 , mDeviceLock(name)
 , mEmitChars(true)
 {
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 	mWin32Serial = new CWin32Serial();
 	mTimer = startTimer(250);
 #endif
@@ -51,10 +51,10 @@ CSerial::CSerial(const QString& name)
 CSerial::~CSerial()
 {
 	close();
-	#ifdef Q_OS_WIN32
+	#if defined(Q_OS_WIN32)
 		delete mWin32Serial;
 	#endif
-	}
+}
 
 /** ***************************************************************************
 * @brief Is the device open?
@@ -62,9 +62,9 @@ CSerial::~CSerial()
 ******************************************************************************/
 bool CSerial::isOpen()
 {
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 	return mWin32Serial->isOpen();
-#else
+#elif defined(Q_OS_UNIX)
 	return handle() < 0 ? false : true;
 #endif
 }
@@ -77,7 +77,7 @@ bool CSerial::open()
 {
 	if (!mDeviceLock.tryLock())
 	{
-	#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 		std::wstring str = name().toStdWString();
 		if ( mWin32Serial->Open(str.data()) )
 		{
@@ -86,7 +86,7 @@ bool CSerial::open()
 			return true;
 		}
 		return false;
-	#else
+#elif defined(Q_OS_UNIX)
 		mHandle = ::open( name().toAscii().data(), O_RDWR | O_NOCTTY | O_NDELAY );
 		if ( mHandle >= 0 )
 		{
@@ -100,7 +100,7 @@ bool CSerial::open()
 			return true;
 		}
 		return false;
-	#endif
+#endif
 	}
 	else
 	{
@@ -118,10 +118,10 @@ void CSerial::close()
 		delete mSocketNotifier;
 		mSocketNotifier = NULL;
 	}
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 	mWin32Serial->Close();
 	mDeviceLock.unlock();
-#else
+#elif defined(Q_OS_UNIX)
 	if ( isOpen() )
 	{
 		::close( mHandle );
@@ -162,10 +162,12 @@ int CSerial::write(const void* buf, int count)
 {
 	int rc=0;
 	emit beginTx();
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 	rc = mWin32Serial->SendData((const char*)buf,count);
-#else
+#elif defined(Q_OS_UNIX)
 	rc = ::write( mHandle, buf, count);
+	if (rc<0)
+		perror("write()");
 #endif
 	emit endTx();
 	return rc;
@@ -216,20 +218,21 @@ bool CSerial::getChar(char* ch,int msec)
 		QObject::connect(timer, SIGNAL(timeout()), this, SLOT(readTimeout()));
 		mReadTimeout=false;
 		timer->start(msec);
-	#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 		while ( (n=mWin32Serial->ReadData(ch,1)) != 1 && !mReadTimeout )
 		{
 			eventLoop.processEvents();
 		}
-	#else
+#elif defined(Q_OS_UNIX)
 		while ( (n=read( mHandle, ch, 1)) != 1 && !mReadTimeout )
 		{
 			eventLoop.processEvents();
 		}
-	#endif
+#endif
 		delete timer;
 		mInGetChar=false;
-		return ( n == 1 ) ? true : false;
+		if ( n == 1 )
+			return true;
 	}
 	return false;
 }
@@ -253,7 +256,7 @@ void CSerial::readTimeout()
 ******************************************************************************/
 void CSerial::setLineControl(int ispeed, int dataBits, int stopBits, QString parity, QString flow )
 {
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 	DCB dcbSerialParams = {0};
 	dcbSerialParams.DCBlength=sizeof(dcbSerialParams);
 	if (::GetCommState(handle(), &dcbSerialParams))
@@ -304,7 +307,7 @@ void CSerial::setLineControl(int ispeed, int dataBits, int stopBits, QString par
 	{
 		windowsEmitLastError();
 	}
-#else
+#elif defined(Q_OS_UNIX)
 	int rc=0;
 	speed_t speed;
 	struct termios tc;
@@ -401,7 +404,7 @@ void CSerial::setLineControl(int ispeed, int dataBits, int stopBits, QString par
 /** ***************************************************************************
 * @brief
 ******************************************************************************/
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 void CSerial::windowsEmitLastError()
 {
 	LPVOID lpMsgBuf;
@@ -425,7 +428,7 @@ void CSerial::windowsEmitLastError()
 /** ***************************************************************************
 * @brief Handle a timer event.
 ******************************************************************************/
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 void CSerial::timerEvent(QTimerEvent* e)
 {
 	if ( mTimer == e->timerId() )

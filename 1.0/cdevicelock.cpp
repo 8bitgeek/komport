@@ -19,6 +19,11 @@
 #include <fcntl.h>
 #include <QFile>
 
+#ifdef Q_OS_UNIX
+    #include <sys/types.h>
+    #include <unistd.h>
+#endif
+
 #define inherited QObject
 
 /** ***************************************************************************
@@ -41,7 +46,7 @@ CDeviceLock::~CDeviceLock()
 /** ***************************************************************************
 * @brief Device lock name.
 ******************************************************************************/
-#ifndef Q_OS_WIN32
+#ifdef Q_OS_UNIX
 QString CDeviceLock::lockName()
 {
     QString deviceLockName = QString("/var/lock/LCK..") + mName.right( mName.length() - (mName.lastIndexOf('/')>=0?(mName.lastIndexOf('/')+1):0) );
@@ -51,20 +56,21 @@ QString CDeviceLock::lockName()
 
 /** ***************************************************************************
 * @brief Test the device lock.
-* @return true if device is locked.
+* @return false if device is locked, true if lock was acquired.
 ******************************************************************************/
 bool CDeviceLock::tryLock()
 {
 #ifdef Q_OS_WIN32
     // ???
-    return false;
-#else
+    return true;
+#endif
+#ifdef Q_OS_UNIX
     QFile fLock( lockName() );
     if ( fLock.exists() )
     {
-        return true;
+        return false;
     }
-    return false;
+    return lock();
 #endif
 }
 
@@ -77,7 +83,8 @@ bool CDeviceLock::lock()
 #ifdef Q_OS_WIN32
     // ???
     return true;
-#else
+#endif
+#ifdef Q_OS_UNIX
     QFile fLock( lockName() );
     if ( fLock.open(QIODevice::ReadWrite|QIODevice::Truncate) )
     {
@@ -96,7 +103,8 @@ void CDeviceLock::unlock()
 {
 #ifdef Q_OS_WIN32
     // ???
-#else
+#endif
+#ifdef Q_OS_UNIX
     QFile fLock( lockName() );
     if ( fLock.exists() )
     {

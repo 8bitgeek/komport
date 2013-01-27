@@ -26,6 +26,19 @@
 #include "cscreen.h"
 #include "cserial.h"
 
+
+#define ASCII_ENQ   0x05
+#define ASCII_NUL   0x00
+#define ASCII_SO    0x0E
+#define ASCII_SI    0x0F
+#define ASCII_CSI   0x9B
+#define ASCII_BEL   0x07
+#define ASCII_BS    0x08
+#define ASCII_LF    0x0A
+#define ASCII_CR    0x0D
+#define ASCII_ESC   0x1B
+#define ASCII_HT    0x09
+
 class CEmulation : public QObject
 {
 	Q_OBJECT
@@ -89,9 +102,10 @@ class CEmulation : public QObject
 		virtual void		doVisualBell();							/** perform visual bell */
 		virtual void		doBell();								/** ring bell or perform visual bell */
 
+		virtual void		doHorizontalTab();						/** advance cursor to next tab stop */
 		virtual void		doAdvanceCursor();						/** advance cursor and wrap if nessesary */
 		virtual void		doChar(unsigned char ch);				/** write a character to the screen */
-		
+
 	signals:
 		void				sendAsciiChar(const char ch);
 		void				sendAsciiString(const char* s);
@@ -99,7 +113,7 @@ class CEmulation : public QObject
 	public slots:
 
 		virtual void		keyPressEvent(QKeyEvent* e)=0;			/** key press input. process and transmit the char. */
-		virtual void		receiveChar(unsigned char _ch)=0;		/** received and process an incoming character */
+		virtual void		receiveChar(unsigned char ch);          /** received and process an incoming character */
 
 		virtual void		setVisualBell(bool b)				{mVisualBell=b;}
 		virtual void		setLocalEcho(bool b)				{mLocalEcho=b;}

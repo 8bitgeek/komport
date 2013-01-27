@@ -16,8 +16,15 @@
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
 **************************************************************************/
 #include "cdevicelock.h"
-#include <fcntl.h>
 #include <QFile>
+
+#if defined(Q_OS_UNIX)
+	#include <sys/types.h>
+	#include <unistd.h>
+	#include <fcntl.h>
+#elif defined(Q_OS_WIN32)
+	#include <fcntl.h>
+#endif
 
 #define inherited QObject
 
@@ -35,17 +42,17 @@ CDeviceLock::CDeviceLock(const QString& name)
 ******************************************************************************/
 CDeviceLock::~CDeviceLock()
 {
-    unlock();
+	unlock();
 }
 
 /** ***************************************************************************
 * @brief Device lock name.
 ******************************************************************************/
-#ifndef Q_OS_WIN32
+#if defined(Q_OS_UNIX)
 QString CDeviceLock::lockName()
 {
-    QString deviceLockName = QString("/var/lock/LCK..") + mName.right( mName.length() - (mName.lastIndexOf('/')>=0?(mName.lastIndexOf('/')+1):0) );
-    return deviceLockName;
+	QString deviceLockName = QString("/var/lock/LCK..") + mName.right( mName.length() - (mName.lastIndexOf('/')>=0?(mName.lastIndexOf('/')+1):0) );
+	return deviceLockName;
 }
 #endif
 
@@ -55,16 +62,16 @@ QString CDeviceLock::lockName()
 ******************************************************************************/
 bool CDeviceLock::tryLock()
 {
-#ifdef Q_OS_WIN32
-    // ???
-    return false;
-#else
-    QFile fLock( lockName() );
-    if ( fLock.exists() )
-    {
-        return true;
-    }
-    return false;
+#if defined(Q_OS_WIN32)
+	// ???
+	return false;
+#elif defined(Q_OS_UNIX)
+	QFile fLock( lockName() );
+	if ( fLock.exists() )
+	{
+		return true;
+	}
+	return false;
 #endif
 }
 
@@ -74,18 +81,18 @@ bool CDeviceLock::tryLock()
 ******************************************************************************/
 bool CDeviceLock::lock()
 {
-#ifdef Q_OS_WIN32
-    // ???
-    return true;
-#else
-    QFile fLock( lockName() );
-    if ( fLock.open(QIODevice::ReadWrite|QIODevice::Truncate) )
-    {
-        fLock.write(QString(QString::number(getpid())+"\n").toAscii().data());
-        fLock.close();
-        return true;
-    }
-    return false;
+#if defined(Q_OS_WIN32)
+	// ???
+	return true;
+#elif defined(Q_OS_UNIX)
+	QFile fLock( lockName() );
+	if ( fLock.open(QIODevice::ReadWrite|QIODevice::Truncate) )
+	{
+		fLock.write(QString(QString::number(getpid())+"\n").toAscii().data());
+		fLock.close();
+		return true;
+	}
+	return false;
 #endif
 }
 
@@ -94,14 +101,14 @@ bool CDeviceLock::lock()
 ******************************************************************************/
 void CDeviceLock::unlock()
 {
-#ifdef Q_OS_WIN32
-    // ???
-#else
-    QFile fLock( lockName() );
-    if ( fLock.exists() )
-    {
-        fLock.remove();
-    }
+#if defined(Q_OS_WIN32)
+	// ???
+#elif defined(Q_OS_UNIX)
+	QFile fLock( lockName() );
+	if ( fLock.exists() )
+	{
+		fLock.remove();
+	}
 #endif
 }
 

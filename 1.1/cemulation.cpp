@@ -239,6 +239,16 @@ void CEmulation::doCarriageReturn()
 	}
 }
 
+/** advance the cursor to the next tab stop */
+void CEmulation::doHorizontalTab()
+{
+	QPoint pos = screen()->cursorPos();
+	int x = pos.x() + (8 - ((pos.x()+1) % 8)); // next tab stop
+	if ( x < 8 )
+		x = 8;
+	screen()->setCursorPos(x,pos.y());
+}
+
 /** advance the cursor */
 void CEmulation::doAdvanceCursor()
 {
@@ -272,3 +282,36 @@ void CEmulation::setGrid(int cols,int rows)
 {
 	screen()->setGrid(cols,rows);
 }
+
+/* received a char */
+void CEmulation::receiveChar(unsigned char ch)
+{
+	switch( ch )
+	{
+		case ASCII_ENQ:
+		case ASCII_SO:
+		case ASCII_SI:
+		case ASCII_NUL:
+			break;
+		case ASCII_BEL:
+			doBell();
+			break;
+		case ASCII_BS:
+			doCursorLeft();
+			break;
+		case ASCII_LF:
+			doNewLine();
+			break;
+		case ASCII_CR:
+			doCarriageReturn();
+			break;
+		case ASCII_HT:
+			doHorizontalTab();
+			break;
+		default:
+			doChar(ch);
+			break;
+	}
+}
+
+

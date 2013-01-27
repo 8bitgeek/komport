@@ -31,7 +31,7 @@
 #include "cemulation.h"
 #include "cled.h"
 
-#define KOMPORT_VERSION "V1.1.1"
+#define KOMPORT_VERSION "V1.1.2"
 
 #define DEFAULT_CH_DELAY 8			/** ascii upload default delay between characters in msec */
 #define DEFAULT_LF_DELAY 25			/** ascii upload default delay beteeen line feeds characters in msec */
@@ -76,13 +76,13 @@
 
 namespace Ui
 {
-    class Komport;
+	class Komport;
 	class SettingsDialog;
 }
 
 class Komport : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 	public:
 		Komport(QWidget *parent = 0);

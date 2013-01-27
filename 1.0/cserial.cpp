@@ -75,7 +75,7 @@ bool CSerial::isOpen()
 ******************************************************************************/
 bool CSerial::open()
 {
-	if (!mDeviceLock.tryLock())
+    if (mDeviceLock.tryLock())
 	{
 	#ifdef Q_OS_WIN32
 		std::wstring str = name().toStdWString();
@@ -84,8 +84,7 @@ bool CSerial::open()
 			mDeviceLock.lock();
 			setLineControl();
 			return true;
-		}
-		return false;
+        }
 	#else
 		mHandle = ::open( name().toAscii().data(), O_RDWR | O_NOCTTY | O_NDELAY );
 		if ( mHandle >= 0 )
@@ -99,13 +98,9 @@ bool CSerial::open()
 			setLineControl();
 			return true;
 		}
-		return false;
-	#endif
+    #endif
 	}
-	else
-	{
-		return false;
-	}
+    return false;
 }
 
 /** ***************************************************************************

@@ -22,11 +22,11 @@
 #include <QByteArray>
 #include <QSocketNotifier>
 
-#ifdef Q_OS_UNIX
+#if defined(Q_OS_UNIX)
 	#include <termios.h>
 	#include <unistd.h>
 #endif
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 	#include "Win32Serial.h"
 	#include <QTimerEvent>
 #endif
@@ -47,9 +47,9 @@ class CSerial : public QObject
 		virtual ~CSerial();
 
 		QString				name()			{return mName;}
-	#ifdef Q_OS_WIN32
+	#if defined(Q_OS_WIN32)
 		HANDLE				handle()		{return mWin32Serial->handle();}
-	#else
+	#elif defined(Q_OS_UNIX)
 		int					handle()		{return mHandle;}
 	#endif
 		bool				open();
@@ -57,7 +57,7 @@ class CSerial : public QObject
 		bool				isOpen();
 		void				setLineControl(int ispeed=2400, int dataBits=8, int stopBits=1, QString parity="NONE", QString flow="NONE" );
 		int					write(const void* buf, int count);
-		bool				getChar(char* ch, int msec=20);
+		bool				getChar(char* ch, int msec=50);
 		bool				emitChars() {return mEmitChars;}
 
 	public slots:
@@ -79,7 +79,7 @@ class CSerial : public QObject
 		void				readActivated(int handle);
 		void				readTimeout();
 
-	#ifdef Q_OS_WIN32
+	#if defined(Q_OS_WIN32)
 	protected:
 		void				windowsEmitLastError();
 		void				timerEvent(QTimerEvent* e);
@@ -87,10 +87,10 @@ class CSerial : public QObject
 
 	private:
 		QString				mName;
-	#ifdef Q_OS_WIN32
+	#if defined(Q_OS_WIN32)
 		int					mTimer;
 		CWin32Serial*		mWin32Serial;
-	#else
+	#elif defined(Q_OS_UNIX)
 		int					mHandle;
 	#endif
 		QSocketNotifier*	mSocketNotifier;

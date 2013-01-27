@@ -23,20 +23,20 @@
 
 class CDeviceLock : public QObject
 {
-    Q_OBJECT
-    public:
-        CDeviceLock(const QString &name);
-        virtual ~CDeviceLock();
+	Q_OBJECT
+	public:
+		CDeviceLock(const QString &name);
+		virtual ~CDeviceLock();
 
-        QString				name()			{return mName;}
-        bool				lock();
-        bool				tryLock();
-        void				unlock();
+		QString				name()			{return mName;}
+		bool				lock();
+		bool				tryLock();
+		void				unlock();
 
-    private:
-        QString				mName;
-#ifndef Q_OS_WIN32
-        QString				lockName();
+	private:
+		QString				mName;
+#if defined(Q_OS_UNIX)
+		QString				lockName();
 #endif
 };
 
