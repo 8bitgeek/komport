@@ -17,6 +17,7 @@
 **************************************************************************/
 #include "cdevicelock.h"
 #include <fcntl.h>
+#include <unistd.h>
 #include <QFile>
 
 #ifdef Q_OS_UNIX
