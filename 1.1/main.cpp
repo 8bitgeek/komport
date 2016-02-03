@@ -15,13 +15,13 @@
 *   You should have received a copy of the GNU General Public License     *
 *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
 **************************************************************************/
-#include <QtGui/QApplication>
+#include <QApplication>
 #include "komport.h"
 
 int main(int argc, char *argv[])
 {
 	Q_INIT_RESOURCE(komport);
-	QApplication a(argc, argv);
+    QApplication a(argc, argv);
 	Komport w;
 	w.show();
 

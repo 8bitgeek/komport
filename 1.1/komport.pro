@@ -2,6 +2,7 @@
 # Project created by QtCreator 2011-02-09T06:45:33
 # -------------------------------------------------
 QT += core \
+    widgets \
     gui
 unix:QMAKE_CXXFLAGS_RELEASE += -g
 unix:QMAKE_CFLAGS_RELEASE += -g

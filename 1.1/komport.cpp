@@ -38,7 +38,7 @@
 
 #define BANNER tr("Komport ")+QString(KOMPORT_VERSION)+tr(" Serial Communications")
 #define COPYRIGHT "Copyright (c) 2011 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
-#define WEBSITE "http://www.sourceforge.net/komport2"
+#define WEBSITE "https://github.com/8bitgeek/komport"
 
 #define CHUNK_SIZE	64
 
@@ -187,7 +187,7 @@ void Komport::readSettings()
 	screen()->setDefaultBackgroundColor(QColor::fromRgb(backgroundColor));
 
 	screen()->setForegroundColor(QColor::fromRgb(foregroundColor));
-	screen()->setBackgroundColor(QColor::fromRgb(backgroundColor));
+    screen()->setBackgroundColor(QColor::fromRgb(backgroundColor));
 
 	setCentralWidget(screen());
 	screen()->setEnabled(true);
@@ -300,7 +300,7 @@ void Komport::doPaste()
 {
 	QClipboard *clipboard = QApplication::clipboard();
 	QString text = clipboard->text();
-	serial()->sendAsciiString(text.toAscii().data());
+    serial()->sendAsciiString(text.toLatin1().data());
 }
 
 void Komport::createActions()

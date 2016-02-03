@@ -87,7 +87,7 @@ bool CSerial::open()
 		}
 		return false;
 #elif defined(Q_OS_UNIX)
-		mHandle = ::open( name().toAscii().data(), O_RDWR | O_NOCTTY | O_NDELAY );
+        mHandle = ::open( name().toLatin1().data(), O_RDWR | O_NOCTTY | O_NDELAY );
 		if ( mHandle >= 0 )
 		{
 			mSocketNotifier = new QSocketNotifier(mHandle,QSocketNotifier::Read);

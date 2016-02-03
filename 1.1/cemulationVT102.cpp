@@ -271,7 +271,7 @@ void CEmulationVT102::doReport()
 				{
 					QString coords;
 					coords.sprintf("[%d;%dR",cursorPos().y()+1,cursorPos().x()+1);
-					emit sendAsciiChar(ASCII_ESC); emit sendAsciiString(coords.toAscii().data());
+                    emit sendAsciiChar(ASCII_ESC); emit sendAsciiString(coords.toLatin1().data());
 				}
 				break;
 			default:
@@ -854,12 +854,12 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 		{
 			unsigned int k = e->key();
 			QString text = e->text();
-			emit sendAsciiString(text.toAscii().data());
+            emit sendAsciiString(text.toLatin1().data());
 			if ( localEcho() )
 			{
 				for ( int n=0; n < text.length(); n++ )
 				{
-					char c = text.toAscii().at(n);
+                    char c = text.toLatin1().at(n);
 					receiveChar(c);
 				}
 			}

@@ -88,7 +88,7 @@ bool CDeviceLock::lock()
 	QFile fLock( lockName() );
 	if ( fLock.open(QIODevice::ReadWrite|QIODevice::Truncate) )
 	{
-		fLock.write(QString(QString::number(getpid())+"\n").toAscii().data());
+        fLock.write(QString(QString::number(getpid())+"\n").toLatin1().data());
 		fLock.close();
 		return true;
 	}
