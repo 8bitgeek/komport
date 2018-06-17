@@ -191,9 +191,9 @@ void CCellArray::scrollGrid(CCellArray::ScrollMode mode, int col, int row, int w
 	if ( mode == ScrollUp )
 	{
 		/** copy region up... */
-		for(int y=row; y < (row+height); y++)
+        for(register int y=row; y < (row+height); y++)
 		{
-			for(int x=col; x < width; x++)
+            for(register int x=col; x < width; x++)
 			{
 				if ( isValidCell(x,y+1) && isValidCell(x,y) )
 				{
@@ -280,7 +280,8 @@ void CCellArray::deselectCells()
 /* Append a character to the scroll buffer */
 void CCellArray::appendScrolled(CCell cell)
 {
-	mScrollBuffer.append(cell);
+    // FIXME - prevent memory leak until implement scroll buffers
+    //mScrollBuffer.append(cell);
 	trimScrolled();
 }
 
@@ -293,5 +294,7 @@ void CCellArray::resetScrolled()
 /* Trim the scroll buffer */
 void CCellArray::trimScrolled()
 {
+    // FIXME - implement scroll buffers
+    // FIXME
 }
 

@@ -41,7 +41,7 @@ class CCellArray : public QObject
 		CCellArray();
 		virtual ~CCellArray();
 
-		inline CScreen*	screen()						{return mScreen;}
+        inline CScreen*	screen()                            {return mScreen;}
 		inline QRect&		rect()							{return mRect;}
 		inline int			cols()							{return mCols;}
 		inline int			rows()							{return mRows;}
