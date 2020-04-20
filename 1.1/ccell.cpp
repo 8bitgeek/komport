@@ -51,6 +51,15 @@ CCell::CCell(CCellArray* cellArray)
 
 CCell::CCell(const CCell & _other)
 : QObject()
+, mAttributes(0)
+, mCharacter(_DEFAULT_CHAR_)
+, mForegroundColor(_DEFAULT_FOREGROUND_)
+, mBackgroundColor(_DEFAULT_BACKGROUND_)
+, mCursorTimer(-1)
+, mBlinkTimer(-1)
+, mCursorState(false)
+, mBlinkState(false)
+, mCursorStyle(BlockInvert)
 {
 	copy((CCell*)(&_other));
 }

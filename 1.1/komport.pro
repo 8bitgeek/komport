@@ -4,6 +4,7 @@
 QT += core \
     widgets \
     gui
+CONFIG+=debug
 unix:QMAKE_CXXFLAGS_RELEASE += -g
 unix:QMAKE_CFLAGS_RELEASE += -g
 unix:QMAKE_CXXFLAGS_RELEASE -= -O2
