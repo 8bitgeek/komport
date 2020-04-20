@@ -37,7 +37,7 @@
 #endif
 
 #define BANNER tr("Komport ")+QString(KOMPORT_VERSION)+tr(" Serial Communications")
-#define COPYRIGHT "Copyright (c) 2011 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
+#define COPYRIGHT "Copyright (c) 2011-2020 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
 #define WEBSITE "https://github.com/8bitgeek/komport"
 
 #define CHUNK_SIZE	64
@@ -57,8 +57,6 @@ Komport::Komport(QWidget *parent)
 	QObject::connect(settingsUi->BackgroundColorButton,SIGNAL(clicked()),this,SLOT(openBackgroundColorDialog()));
 	QObject::connect(settingsUi->ForegroundColorButton,SIGNAL(clicked()),this,SLOT(openForegroundColorDialog()));
 	QObject::connect(settingsUi->buttonHelp,SIGNAL(clicked()),this,SLOT(settingsHelp()));
-	QObject::connect(settingsUi->uploadPathButton,SIGNAL(clicked()),this,SLOT(uploadPathSelect()));
-	QObject::connect(settingsUi->downloadPathButton,SIGNAL(clicked()),this,SLOT(downloadPathSelect()));
 
 	#ifdef Q_OS_WIN32
 		settingsUi->DeviceComboBox->clear();
@@ -118,42 +116,6 @@ void Komport::readSettings()
 		bool	localecho		= settings.value("localecho",	settingsUi->LocalEchoCheckBox->isChecked()).toBool();
 		QRgb	backgroundColor = settings.value("background",	settingsUi->BackgroundColorButton->palette().color(QPalette::Button).rgb()).toUInt();
 		QRgb	foregroundColor = settings.value("foreground",	settingsUi->ForegroundColorButton->palette().color(QPalette::Button).rgb()).toUInt();
-	settings.endGroup();
-
-	settings.beginGroup("fileTransfer");
-		settingsUi->characterDelay->setValue(settings.value("characterDelay",DEFAULT_CH_DELAY).toInt());
-		settingsUi->newlineDelay->setValue(settings.value("newlineDelay",DEFAULT_LF_DELAY).toInt());
-		settingsUi->carriageReturnDelay->setValue(settings.value("carriageReturn",DEFAULT_CR_DELAY).toInt());
-
-		settingsUi->uploadPath->setText(settings.value("uploadPath",DEFAULT_UPLOAD_PATH).toString());
-		settingsUi->downloadPath->setText(settings.value("downloadPath",DEFAULT_DOWNLOAD_PATH).toString());
-
-		settingsUi->xmodemDownload->setText(settings.value("xmodemDownload",DEFAULT_XMODEM_DOWNLOAD).toString());
-		settingsUi->xmodemUpload->setText(settings.value("xmodemUpload",DEFAULT_XMODEM_UPLOAD).toString());
-
-		settingsUi->ymodemDownload->setText(settings.value("ymodemDownload",DEFAULT_YMODEM_DOWNLOAD).toString());
-		settingsUi->ymodemUpload->setText(settings.value("ymodemUpload",DEFAULT_YMODEM_UPLOAD).toString());
-
-		settingsUi->zmodemDownload->setText(settings.value("zmodemDownload",DEFAULT_ZMODEM_DOWNLOAD).toString());
-		settingsUi->zmodemUpload->setText(settings.value("zmodemUpload",DEFAULT_ZMODEM_UPLOAD).toString());
-
-		settingsUi->kermitDownload->setText(settings.value("kermitDownload",DEFAULT_KERMIT_DOWNLOAD).toString());
-		settingsUi->kermitUpload->setText(settings.value("kermitUpload",DEFAULT_KERMIT_UPLOAD).toString());
-
-		settingsUi->defaultUploadAscii->setChecked(settings.value("defaultUploadAscii",false).toBool());
-		settingsUi->defaultUploadKermit->setChecked(settings.value("defaultUploadKermit",false).toBool());
-		settingsUi->defaultUploadXModem->setChecked(settings.value("defaultUploadXModem",false).toBool());
-		settingsUi->defaultUploadYModem->setChecked(settings.value("defaultUploadYModem",true).toBool());
-		settingsUi->defaultUploadZModem->setChecked(settings.value("defaultUploadZModem",false).toBool());
-
-		settingsUi->defaultDownloadAscii->setChecked(settings.value("defaultDownloadAscii",false).toBool());
-		settingsUi->defaultDownloadKermit->setChecked(settings.value("defaultDownloadKermit",false).toBool());
-		settingsUi->defaultDownloadXModem->setChecked(settings.value("defaultDownloadXModem",false).toBool());
-		settingsUi->defaultDownloadYModem->setChecked(settings.value("defaultDownloadYModem",true).toBool());
-		settingsUi->defaultDownloadZModem->setChecked(settings.value("defaultDownloadZModem",false).toBool());
-
-		setDefaultUpDownAct();
-
 	settings.endGroup();
 
 	if ( mScreen != NULL ) delete mScreen;
@@ -246,40 +208,6 @@ void Komport::writeSettings()
 		settings.setValue("background", screen()->backgroundColor().rgb());
 	settings.endGroup();
 
-	settings.beginGroup("fileTransfer");
-		settings.setValue("characterDelay",	settingsUi->characterDelay->value() );
-		settings.setValue("newlineDelay",	settingsUi->newlineDelay->value() );
-		settings.setValue("carriageReturn",	settingsUi->carriageReturnDelay->value() );
-
-		settings.setValue("uploadPath",		settingsUi->uploadPath->text());
-		settings.setValue("downloadPath",	settingsUi->downloadPath->text());
-
-		settings.setValue("xmodemDownload",	settingsUi->xmodemDownload->text());
-		settings.setValue("xmodemUpload",	settingsUi->xmodemUpload->text());
-
-		settings.setValue("ymodemDownload",	settingsUi->ymodemDownload->text());
-		settings.setValue("ymodemUpload",	settingsUi->ymodemUpload->text());
-
-		settings.setValue("zmodemDownload",	settingsUi->zmodemDownload->text());
-		settings.setValue("zmodemUpload",	settingsUi->zmodemUpload->text());
-
-		settings.setValue("kermitDownload",	settingsUi->kermitDownload->text());
-		settings.setValue("kermitUpload",	settingsUi->kermitUpload->text());
-
-		settings.setValue("defaultUploadAscii",	settingsUi->defaultUploadAscii->isChecked());
-		settings.setValue("defaultUploadKermit",	settingsUi->defaultUploadKermit->isChecked());
-		settings.setValue("defaultUploadXModem",	settingsUi->defaultUploadXModem->isChecked());
-		settings.setValue("defaultUploadYModem",	settingsUi->defaultUploadYModem->isChecked());
-		settings.setValue("defaultUploadZModem",	settingsUi->defaultUploadZModem->isChecked());
-
-		settings.setValue("defaultDownloadAscii",	settingsUi->defaultDownloadAscii->isChecked());
-		settings.setValue("defaultDownloadKermit",	settingsUi->defaultDownloadKermit->isChecked());
-		settings.setValue("defaultDownloadXModem",	settingsUi->defaultDownloadXModem->isChecked());
-		settings.setValue("defaultDownloadYModem",	settingsUi->defaultDownloadYModem->isChecked());
-		settings.setValue("defaultDownloadZModem",	settingsUi->defaultDownloadZModem->isChecked());
-
-	settings.endGroup();
-
 }
 
 /** Key press handler */
@@ -310,69 +238,6 @@ void Komport::createActions()
 	exitAct->setStatusTip(tr("Exit Komport"));
 	QObject::connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-
-	uploadAct = new QAction(QIcon(":/images/upload.png"),tr("&Upload"), this);
-	uploadAct->setShortcut(tr("Ctrl+Shift+U"));
-	uploadAct->setStatusTip(tr("Upload a File"));
-	QObject::connect(uploadAct, SIGNAL(triggered()), this, SLOT(upload()));
-
-	uploadAsciiAct = new QAction(QIcon(":/images/uploadascii.png"),tr("Upload &Ascii"), this);
-	uploadAsciiAct->setShortcut(tr("Ctrl+Shift+A"));
-	uploadAsciiAct->setStatusTip(tr("Upload a File using Ascii protocol"));
-	QObject::connect(uploadAsciiAct, SIGNAL(triggered()), this, SLOT(uploadAscii()));
-
-	uploadKermitAct = new QAction(QIcon(":/images/uploadkermit.png"),tr("Upload &Kermit"), this);
-	uploadKermitAct->setShortcut(tr("Ctrl+Shift+K"));
-	uploadKermitAct->setStatusTip(tr("Upload a File using Kermit protocol"));
-	QObject::connect(uploadKermitAct, SIGNAL(triggered()), this, SLOT(uploadKermit()));
-
-	uploadXModemAct = new QAction(QIcon(":/images/uploadxmodem.png"),tr("Upload &X-Modem"), this);
-	uploadXModemAct->setShortcut(tr("Ctrl+Shift+X"));
-	uploadXModemAct->setStatusTip(tr("Upload a File using X-Modem protocol"));
-	QObject::connect(uploadXModemAct, SIGNAL(triggered()), this, SLOT(uploadXModem()));
-
-	uploadYModemAct = new QAction(QIcon(":/images/uploadymodem.png"),tr("Upload &Y-Modem"), this);
-	uploadYModemAct->setShortcut(tr("Ctrl+Shift+Y"));
-	uploadYModemAct->setStatusTip(tr("Upload a File using Y-Modem protocol"));
-	QObject::connect(uploadYModemAct, SIGNAL(triggered()), this, SLOT(uploadYModem()));
-
-	uploadZModemAct = new QAction(QIcon(":/images/uploadzmodem.png"),tr("Upload &Z-Modem"), this);
-	uploadZModemAct->setShortcut(tr("Ctrl+Shift+X"));
-	uploadZModemAct->setStatusTip(tr("Upload a File using Z-Modem protocol"));
-	QObject::connect(uploadZModemAct, SIGNAL(triggered()), this, SLOT(uploadZModem()));
-
-
-	downloadAct = new QAction(QIcon(":/images/download.png"),tr("&Download"), this);
-	downloadAct->setShortcut(tr("Ctrl+Alt+D"));
-	downloadAct->setStatusTip(tr("Download a File"));
-	QObject::connect(downloadAct, SIGNAL(triggered()), this, SLOT(download()));
-
-	downloadAsciiAct = new QAction(QIcon(":/images/downloadascii.png"),tr("Download &Ascii"), this);
-	downloadAsciiAct->setShortcut(tr("Ctrl+Alt+A"));
-	downloadAsciiAct->setStatusTip(tr("Download a File unsing Ascii Protocol"));
-	QObject::connect(downloadAsciiAct, SIGNAL(triggered()), this, SLOT(downloadAscii()));
-
-	downloadKermitAct = new QAction(QIcon(":/images/downloadkermit.png"),tr("Download &Kermit"), this);
-	downloadKermitAct->setShortcut(tr("Ctrl+Alt+K"));
-	downloadKermitAct->setStatusTip(tr("Download a File unsing Kermit Protocol"));
-	QObject::connect(downloadKermitAct, SIGNAL(triggered()), this, SLOT(downloadKermit()));
-
-	downloadXModemAct = new QAction(QIcon(":/images/downloadxmodem.png"),tr("Download &X-Modem"), this);
-	downloadXModemAct->setShortcut(tr("Ctrl+Alt+X"));
-	downloadXModemAct->setStatusTip(tr("Download a File unsing X-Modem Protocol"));
-	QObject::connect(downloadXModemAct, SIGNAL(triggered()), this, SLOT(downloadXModem()));
-
-	downloadYModemAct = new QAction(QIcon(":/images/downloadymodem.png"),tr("Download &Y-Modem"), this);
-	downloadYModemAct->setShortcut(tr("Ctrl+Alt+Y"));
-	downloadYModemAct->setStatusTip(tr("Download a File unsing Y-Modem Protocol"));
-	QObject::connect(downloadYModemAct, SIGNAL(triggered()), this, SLOT(downloadYModem()));
-
-	downloadZModemAct = new QAction(QIcon(":/images/downloadzmodem.png"),tr("Download &Z-Modem"), this);
-	downloadZModemAct->setShortcut(tr("Ctrl+Alt+Z"));
-	downloadZModemAct->setStatusTip(tr("Download a File unsing Z-Modem Protocol"));
-	QObject::connect(downloadZModemAct, SIGNAL(triggered()), this, SLOT(downloadZModem()));
-
-
 	copyAct = new QAction(QIcon(":/images/editcopy.png"), tr("&Copy"), this);
 	copyAct->setShortcut(tr("Ctrl+Shift+C"));
 	copyAct->setStatusTip(tr("Copy the current selection's contents to the clipboard."));
@@ -399,18 +264,6 @@ void Komport::createActions()
 void Komport::createMenus()
 {
 	fileMenu = menuBar()->addMenu(tr("&File"));
-	uploadMenu = fileMenu->addMenu(QIcon(":/images/upload.png"),tr("&Upload"));
-	uploadMenu->addAction(uploadAsciiAct);
-	uploadMenu->addAction(uploadKermitAct);
-	uploadMenu->addAction(uploadXModemAct);
-	uploadMenu->addAction(uploadYModemAct);
-	uploadMenu->addAction(uploadZModemAct);
-	downloadMenu = fileMenu->addMenu(QIcon(":/images/download.png"),tr("&Download"));
-	downloadMenu->addAction(downloadAsciiAct);
-	downloadMenu->addAction(downloadKermitAct);
-	downloadMenu->addAction(downloadXModemAct);
-	downloadMenu->addAction(downloadYModemAct);
-	downloadMenu->addAction(downloadZModemAct);
 
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAct);
@@ -434,8 +287,6 @@ void Komport::createToolBars()
 	fileToolBar->setObjectName("FileToolBar");
 	fileToolBar->addAction(exitAct);
 	fileToolBar->addSeparator();
-	fileToolBar->addAction(uploadAct);
-	fileToolBar->addAction(downloadAct);
 
 	editToolBar = addToolBar(tr("Edit"));
 	editToolBar->setObjectName("EditToolBar");
@@ -568,86 +419,6 @@ QString Komport::colorToHex(QColor c)
 }
 
 /**
-  * brief set the visuals of the default up/down actions to look appropriately based on the default value.
-  */
-void Komport::setDefaultUpDownAct()
-{
-	if ( settingsUi->defaultUploadAscii->isChecked() )
-	{
-		uploadAct->setIcon(uploadAsciiAct->icon());
-		uploadAct->setText(uploadAsciiAct->text());
-		uploadAct->setToolTip(uploadAsciiAct->toolTip());
-	}
-	else if ( settingsUi->defaultUploadKermit->isChecked() )
-	{
-		uploadAct->setIcon(uploadKermitAct->icon());
-		uploadAct->setText(uploadKermitAct->text());
-		uploadAct->setToolTip(uploadKermitAct->toolTip());
-	}
-	else if ( settingsUi->defaultUploadXModem->isChecked() )
-	{
-		uploadAct->setIcon(uploadXModemAct->icon());
-		uploadAct->setText(uploadXModemAct->text());
-		uploadAct->setToolTip(uploadXModemAct->toolTip());
-	}
-	else if ( settingsUi->defaultUploadYModem->isChecked() )
-	{
-		uploadAct->setIcon(uploadYModemAct->icon());
-		uploadAct->setText(uploadYModemAct->text());
-		uploadAct->setToolTip(uploadYModemAct->toolTip());
-	}
-	else if ( settingsUi->defaultUploadZModem->isChecked() )
-	{
-		uploadAct->setIcon(uploadZModemAct->icon());
-		uploadAct->setText(uploadZModemAct->text());
-		uploadAct->setToolTip(uploadZModemAct->toolTip());
-	}
-
-	if ( settingsUi->defaultDownloadAscii->isChecked() )
-	{
-		downloadAct->setIcon(downloadAsciiAct->icon());
-		downloadAct->setText(downloadAsciiAct->text());
-		downloadAct->setToolTip(downloadAsciiAct->toolTip());
-	}
-	else if ( settingsUi->defaultDownloadKermit->isChecked() )
-	{
-		downloadAct->setIcon(downloadKermitAct->icon());
-		downloadAct->setText(downloadKermitAct->text());
-		downloadAct->setToolTip(downloadKermitAct->toolTip());
-	}
-	else if ( settingsUi->defaultDownloadXModem->isChecked() )
-	{
-		downloadAct->setIcon(downloadXModemAct->icon());
-		downloadAct->setText(downloadXModemAct->text());
-		downloadAct->setToolTip(downloadXModemAct->toolTip());
-	}
-	else if ( settingsUi->defaultDownloadYModem->isChecked() )
-	{
-		downloadAct->setIcon(downloadYModemAct->icon());
-		downloadAct->setText(downloadYModemAct->text());
-		downloadAct->setToolTip(downloadYModemAct->toolTip());
-	}
-	else if ( settingsUi->defaultDownloadZModem->isChecked() )
-	{
-		downloadAct->setIcon(downloadZModemAct->icon());
-		downloadAct->setText(downloadZModemAct->text());
-		downloadAct->setToolTip(downloadZModemAct->toolTip());
-	}
-}
-
-/**
-  * upload a file using default upload protocol
-  */
-void Komport::upload()
-{
-	if ( settingsUi->defaultUploadAscii->isChecked() )			uploadAscii();
-	else if ( settingsUi->defaultUploadKermit->isChecked() )	uploadKermit();
-	else if ( settingsUi->defaultUploadXModem->isChecked() )	uploadXModem();
-	else if ( settingsUi->defaultUploadYModem->isChecked() )	uploadYModem();
-	else if ( settingsUi->defaultUploadZModem->isChecked() )	uploadZModem();
-}
-
-/**
   * @brief Open the serial port and notify of there was any trouble
   */
 bool Komport::openSerial()
@@ -679,160 +450,6 @@ void Komport::connectSerialToEmulation()
 	QObject::connect(emulation(),SIGNAL(sendAsciiChar(char)),serial(),SLOT(sendAsciiChar(char)));
 	QObject::connect(emulation(),SIGNAL(sendAsciiString(const char*)),serial(),SLOT(sendAsciiString(const char*)));
 	QObject::connect(serial(),SIGNAL(rx(unsigned char)),emulation(),SLOT(receiveChar(unsigned char)));
-}
-
-
-/**
-  * @brief upload and ASCII file
-  */
-void Komport::uploadAscii()
-{
-	QString fileName = QFileDialog::getOpenFileName(this,tr("Upload Ascii File"),settingsUi->uploadPath->text());
-	if ( !fileName.isEmpty() )
-	{
-		QFile file(fileName);
-		if (file.open(QIODevice::ReadOnly))
-		{
-			int sent=0;
-			QProgressDialog progress(tr("Uploading..."),tr("Abort"), 0, file.size(), this);
-			progress.setWindowModality(Qt::WindowModal);
-			while(!file.atEnd() && !progress.wasCanceled())
-			{
-				QByteArray bytes = file.read(1024);
-				for(int n=0; n < bytes.count() && !progress.wasCanceled();n++)
-				{
-					char ch = bytes[n];
-					progress.setValue(++sent);
-					serial()->sendAsciiChar(ch);
-					msleep(settingsUi->characterDelay->value());
-					if ( ch == 0x0D ) msleep(settingsUi->carriageReturnDelay->value());
-					if ( ch == 0x0A ) msleep(settingsUi->newlineDelay->value());
-				}
-			}
-			progress.setValue(file.size());
-			file.close();
-		}
-		else
-		{
-			QMessageBox::warning(this,"Open Failed",tr("Failed to open '")+fileName+"'");
-		}
-	}
-}
-
-void Komport::uploadKermit()
-{
-	QString fileName = QFileDialog::getOpenFileName(this,tr("Upload by Kermit"),settingsUi->uploadPath->text());
-	if ( !fileName.isEmpty() )
-	{
-	}
-}
-
-/**
-  * @brief uplaod by xmodem
-  */
-void Komport::uploadXModem()
-{
-	QString fileName = QFileDialog::getOpenFileName(this,tr("Upload by X-Modem"),settingsUi->uploadPath->text());
-	if ( !fileName.isEmpty() )
-	{
-		QFile file(fileName);
-		if (file.open(QIODevice::ReadOnly))
-		{
-			upload(settingsUi->xmodemUpload->text()+" "+fileName,file);
-			file.close();
-		}
-		else
-		{
-			QMessageBox::warning(this,"Open Failed",tr("Failed to open '")+fileName+"'");
-		}
-	}
-}
-
-void Komport::uploadYModem()
-{
-	QString fileName = QFileDialog::getOpenFileName(this,tr("Upload by Y-Modem"),settingsUi->uploadPath->text());
-	if ( !fileName.isEmpty() )
-	{
-		QFile file(fileName);
-		if (file.open(QIODevice::ReadOnly))
-		{
-			upload(settingsUi->ymodemUpload->text()+" "+fileName,file);
-			file.close();
-		}
-		else
-		{
-			QMessageBox::warning(this,"Open Failed",tr("Failed to open '")+fileName+"'");
-		}
-	}
-}
-
-void Komport::uploadZModem()
-{
-	QString fileName = QFileDialog::getOpenFileName(this,tr("Upload by Z-Modem"),settingsUi->uploadPath->text());
-	if ( !fileName.isEmpty() )
-	{
-		QFile file(fileName);
-		if (file.open(QIODevice::ReadOnly))
-		{
-			upload(settingsUi->zmodemUpload->text()+" "+fileName,file);
-			file.close();
-		}
-		else
-		{
-			QMessageBox::warning(this,"Open Failed",tr("Failed to open '")+fileName+"'");
-		}
-	}
-}
-
-/**
-  * download a file
-  */
-void Komport::download()
-{
-	if ( settingsUi->defaultDownloadAscii->isChecked() )		downloadAscii();
-	else if ( settingsUi->defaultDownloadKermit->isChecked() )	downloadKermit();
-	else if ( settingsUi->defaultDownloadXModem->isChecked() )	downloadXModem();
-	else if ( settingsUi->defaultDownloadYModem->isChecked() )	downloadYModem();
-	else if ( settingsUi->defaultDownloadZModem->isChecked() )	downloadZModem();
-}
-
-
-void Komport::downloadAscii()
-{
-}
-
-void Komport::downloadKermit()
-{
-}
-
-void Komport::downloadXModem()
-{
-}
-
-void Komport::downloadYModem()
-{
-	download(settingsUi->ymodemDownload->text(),settingsUi->downloadPath->text());
-}
-
-void Komport::downloadZModem()
-{
-	download(settingsUi->zmodemDownload->text(),settingsUi->downloadPath->text());
-}
-
-/**
-  * @brief use a file dialog to select the default upload path.
-  */
-void Komport::uploadPathSelect()
-{
-	settingsUi->uploadPath->setText(QFileDialog::getExistingDirectory(this,tr("Upload Path"),settingsUi->uploadPath->text()));
-}
-
-/**
-  * @brief use a file dialog to select the default download path.
-  */
-void Komport::downloadPathSelect()
-{
-	settingsUi->downloadPath->setText(QFileDialog::getExistingDirectory(this,tr("Download Path"),settingsUi->downloadPath->text()));
 }
 
 /**
@@ -874,118 +491,4 @@ void Komport::log(QString msg,bool show)
 	}
 }
 
-
-/**
-  * @brief upload using an external protocol
-  */
-void Komport::upload(QString command,QFile& file)
-{
-	int sent=0;
-	int size = file.size();
-	QEventLoop loop;
-	QProgressDialog progress(tr("Uploading..."),tr("Abort"),0,size,this);
-	QProcess proc;
-	disconnectSerialFromEmulation();
-	proc.start(command,QIODevice::ReadWrite);
-	clearLog();
-	if ( proc.waitForStarted() )
-	{
-		progress.setWindowModality(Qt::WindowModal);
-		progress.show();
-		progress.raise();
-		while(proc.state() == QProcess::Running && !progress.wasCanceled())
-		{
-			QByteArray out;
-			char ch;
-			loop.processEvents();
-			/** receive serial... */
-			for( out.clear(); serial()->getChar(&ch) && !progress.wasCanceled(); out += ch );
-			proc.write(out.data(),out.count());
-			/** send serial... */
-			QByteArray in = proc.readAllStandardOutput();
-			if ( in.count() )
-			{
-				for( int n=0; n < in.count(); n+=CHUNK_SIZE )
-				{
-					sent += serial()->write( &(in.data()[n]), in.count()>CHUNK_SIZE ? CHUNK_SIZE : in.count() );
-					progress.setValue( sent < size ? sent : size);
-					/** receive serial... */
-					for( out.clear(); serial()->getChar(&ch) && !progress.wasCanceled(); out += ch );
-					proc.write(out.data(),out.count());
-				}
-			}
-			/** stderr messages... */
-			QByteArray msg = proc.readAllStandardError();
-			if ( msg.count())
-			{
-				log(msg,true);
-			}
-		}
-		proc.kill();
-	}
-	else
-	{
-		QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
-	}
-	if ( proc.exitCode() != 0 )
-	{
-		QMessageBox::warning(this,"Upload failed",tr("Upload failed '")+command+"' exit code="+QString::number(proc.exitCode()));
-	}
-	progress.setValue(file.size());
-	connectSerialToEmulation();
-}
-
-/**
-  * @download a file
-  */
-void Komport::download(QString command,QString dir)
-{
-	int received=0;
-	QEventLoop loop;
-	QProgressDialog progress(tr("Download..."),tr("Abort"),0,0,this);
-	QProcess proc;
-	clearLog();
-	command += " < /dev/tty > /dev/tty";
-	disconnectSerialFromEmulation();
-	proc.setWorkingDirectory(dir);
-	proc.start(command,QIODevice::ReadWrite);
-	if ( proc.waitForStarted() )
-	{
-		progress.setWindowModality(Qt::WindowModal);
-		while(proc.state() == QProcess::Running && !progress.wasCanceled())
-		{
-			char ch;
-			loop.processEvents();
-			/** receive serial... */
-			while( serial()->getChar(&ch) && !progress.wasCanceled() )
-			{
-				proc.write(&ch,1);
-				++received;
-				progress.setValue(received);
-			}
-			/** send serial... */
-			QByteArray in = proc.readAllStandardOutput();
-			if ( in.count() )
-			{
-				loop.processEvents();
-				serial()->write(in.data(),in.count());
-			}
-			/** stderr messages... */
-			QByteArray msg = proc.readAllStandardError();
-			if ( msg.count())
-			{
-				log(msg);
-			}
-		}
-	}
-	else
-	{
-		QMessageBox::warning(this,"Start Failed",tr("Failed to start '")+command+"'");
-	}
-	if ( proc.exitCode() != 0 )
-	{
-		QMessageBox::warning(this,"Download failed",tr("Download failed '")+command+"' exit code="+QString::number(proc.exitCode()));
-	}
-	connectSerialToEmulation();
-}
 
