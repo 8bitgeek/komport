@@ -885,7 +885,6 @@ void Komport::upload(QString command,QFile& file)
 	QEventLoop loop;
 	QProgressDialog progress(tr("Uploading..."),tr("Abort"),0,size,this);
 	QProcess proc;
-	QTime start = QTime::currentTime();
 	disconnectSerialFromEmulation();
 	proc.start(command,QIODevice::ReadWrite);
 	clearLog();
