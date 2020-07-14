@@ -23,6 +23,7 @@ SOURCES += main.cpp \
     cscreen.cpp \
     cemulation.cpp \
     cemulationVT102.cpp \
+    cemulationANSI.cpp \
     Win32Serial.cpp \
     cled.cpp
 unix:SOURCES -= Win32Serial.cpp
@@ -34,7 +35,7 @@ HEADERS += komport.h \
     cscreen.h \
     cemulation.h \
     cemulationVT102.h \
-    cemulationVT102.h \
+    cemulationANSI.h \
     Win32Serial.h \
     cled.h
 unix:HEADERS -= Win32Serial.h

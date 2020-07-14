@@ -723,6 +723,11 @@ p, li { white-space: pre-wrap; }
             </property>
             <item>
              <property name="text">
+              <string>ANSI</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>VT102</string>
              </property>
             </item>

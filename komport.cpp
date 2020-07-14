@@ -1,5 +1,5 @@
 /**************************************************************************
-*   Author <mike@pikeaero.com> Mike Sharkey                               *
+*   Author <mike@8bitgeek.net> Mike Sharkey                               *
 *   Copyright (C) 2010 by Pike Aerospace Research Corporation             *
 *                                                                         *
 *   This program is free software: you can redistribute it and/or modify  *
@@ -19,6 +19,7 @@
 #include "ui_komport.h"
 #include "ui_settingsdialog.h"
 
+#include "cemulationANSI.h"
 #include "cemulationVT102.h"
 
 #include <QMessageBox>
@@ -37,7 +38,7 @@
 #endif
 
 #define BANNER tr("Komport ")+QString(KOMPORT_VERSION)+tr(" Serial Communications")
-#define COPYRIGHT "Copyright (c) 2011-2020 by Mike Sharkey &lt;mike@pikeaero.com&gt;"
+#define COPYRIGHT "Copyright (c) 2011-2020 by Mike Sharkey &lt;mike@8bitgeek.net&gt;"
 #define WEBSITE "https://github.com/8bitgeek/komport"
 
 #define CHUNK_SIZE	64
@@ -158,6 +159,14 @@ void Komport::readSettings()
 	if ( emulation == "VT102" )
 	{
 		mEmulation = new CEmulationVT102(screen());
+		mEmulation->setVisualBell(visualbell);
+		mEmulation->setLocalEcho(localecho);
+		mEmulation->setGrid(cols,rows);
+	}
+	else
+	if ( emulation == "ANSI" )
+	{
+		mEmulation = new CEmulationANSI(screen());
 		mEmulation->setVisualBell(visualbell);
 		mEmulation->setLocalEcho(localecho);
 		mEmulation->setGrid(cols,rows);
