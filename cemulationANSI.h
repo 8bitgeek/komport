@@ -1,5 +1,5 @@
 /**************************************************************************
-*   Author <mike@pikeaero.com> Mike Sharkey                               *
+*   Author <mike@8bitgeek.net> Mike Sharkey                               *
 *   Copyright (C) 2020 by Pike Aerospace Research Corporation             *
 *                                                                         *
 *   This program is free software: you can redistribute it and/or modify  *
