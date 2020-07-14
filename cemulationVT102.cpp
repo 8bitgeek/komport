@@ -270,7 +270,7 @@ void CEmulationVT102::doReport()
 			case 6: /* Cursor Position Report */
 				{
 					QString coords;
-					coords.sprintf("[%d;%dR",cursorPos().y()+1,cursorPos().x()+1);
+					coords.asprintf("[%d;%dR",cursorPos().y()+1,cursorPos().x()+1);
                     emit sendAsciiChar(ASCII_ESC); emit sendAsciiString(coords.toLatin1().data());
 				}
 				break;
@@ -815,16 +815,16 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 		{
 			switch( e->key() )
 			{
-				case Qt::Key_Insert:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
-				case Qt::Key_Delete:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
-				case Qt::Key_Home:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OH"); break;
-				case Qt::Key_End:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OF"); break;
-				case Qt::Key_PageUp:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
+				case Qt::Key_Insert:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[1~"); break;
+				case Qt::Key_Delete:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[4~"); break;
+				case Qt::Key_Home:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
+				case Qt::Key_End:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
+				case Qt::Key_PageUp:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
 				case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
-				case Qt::Key_Up:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OA"); break;
-				case Qt::Key_Down:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OB"); break;
-				case Qt::Key_Right:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OC"); break;
-				case Qt::Key_Left:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OD"); break;
+				case Qt::Key_Up:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OA"); break;
+				case Qt::Key_Down:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OB"); break;
+				case Qt::Key_Right:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OC"); break;
+				case Qt::Key_Left:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OD"); break;
 				default:
 					e->ignore();
 					break;
@@ -834,16 +834,16 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 		{
 			switch( e->key() )
 			{
-				case Qt::Key_Insert:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
-				case Qt::Key_Delete:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
-				case Qt::Key_Home:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[H"); break;
-				case Qt::Key_End:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[F"); break;
-				case Qt::Key_PageUp:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
+				case Qt::Key_Insert:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[1~"); break;
+				case Qt::Key_Delete:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[4~"); break;
+				case Qt::Key_Home:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
+				case Qt::Key_End:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
+				case Qt::Key_PageUp:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
 				case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
-				case Qt::Key_Up:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[A"); break;
-				case Qt::Key_Down:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[B"); break;
-				case Qt::Key_Right:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C"); break;
-				case Qt::Key_Left:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D"); break;
+				case Qt::Key_Up:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[A"); break;
+				case Qt::Key_Down:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[B"); break;
+				case Qt::Key_Right:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C"); break;
+				case Qt::Key_Left:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D"); break;
 				default:
 					e->ignore();
 					break;

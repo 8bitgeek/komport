@@ -99,18 +99,11 @@ void CEmulationANSI::doCodeNotHandled()
 /** position cursor */
 void CEmulationANSI::doCursorTo(int col, int row)
 {
-	//if ( originMode() )
-	//{
-	//	row += topMargin();
-	//	if ( row <= bottomMargin() )
-	//	{
-	//		inherited::doCursorTo(col,row);
-	//	}
-	//}
-	//else
-	//{
-		inherited::doCursorTo(col,row);
-	//}
+	if ( col < 0 ) col = 0;
+	if ( row < 0 ) row = 0;
+	if ( col >= screen()->cols() ) col = screen()->cols()-1;
+	if ( row >= screen()->rows() ) row = screen()->rows()-1;
+	screen()->setCursorPos(col,row);
 }
 
 /** cursor up one row */
@@ -270,7 +263,7 @@ void CEmulationANSI::doReport()
 			case 6: /* Cursor Position Report */
 				{
 					QString coords;
-					coords.sprintf("[%d;%dR",cursorPos().y()+1,cursorPos().x()+1);
+					coords.asprintf("[%d;%dR",cursorPos().y()+1,cursorPos().x()+1);
                     emit sendAsciiChar(ASCII_ESC); emit sendAsciiString(coords.toLatin1().data());
 				}
 				break;
@@ -811,50 +804,63 @@ void CEmulationANSI::keyPressEvent(QKeyEvent* e)
 	else
 	{
 		e->accept();
-		if (applicationCursorKeys() )
+		switch( e->key() )
 		{
-			switch( e->key() )
-			{
-				case Qt::Key_Insert:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
-				case Qt::Key_Delete:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
-				case Qt::Key_Home:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OH"); break;
-				case Qt::Key_End:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OF"); break;
-				case Qt::Key_PageUp:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
-				case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
-				case Qt::Key_Up:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OA"); break;
-				case Qt::Key_Down:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OB"); break;
-				case Qt::Key_Right:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OC"); break;
-				case Qt::Key_Left:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OD"); break;
-				default:
-					e->ignore();
-					break;
-			}
-		}
-		else
-		{
-			switch( e->key() )
-			{
-				case Qt::Key_Insert:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
-				case Qt::Key_Delete:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
-				case Qt::Key_Home:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[H"); break;
-				case Qt::Key_End:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[F"); break;
-				case Qt::Key_PageUp:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
-				case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
-				case Qt::Key_Up:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[A"); break;
-				case Qt::Key_Down:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[B"); break;
-				case Qt::Key_Right:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C"); break;
-				case Qt::Key_Left:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D"); break;
-				default:
-					e->ignore();
-					break;
-			}
+			case Qt::Key_Insert:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[2~"); break;
+			case Qt::Key_Delete:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[3~"); break;
+			case Qt::Key_PageUp:		emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[5~"); break;
+			case Qt::Key_PageDown:	emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[6~"); break;
+			case Qt::Key_F1:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OP"); break;
+			case Qt::Key_F2:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OQ"); break;
+			case Qt::Key_F3:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OR"); break;
+			case Qt::Key_F4:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OS"); break;
+			case Qt::Key_F5:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[15~"); break;
+			case Qt::Key_F6:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[17~"); break;
+			case Qt::Key_F7:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[18~"); break;
+			case Qt::Key_F8:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[19~"); break;
+			case Qt::Key_F9:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[20~"); break;
+			case Qt::Key_F10:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[21~"); break;
+			case Qt::Key_F11:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[23~"); break;
+			case Qt::Key_F12:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[24~"); break;
+			default:
+				if (applicationCursorKeys() )
+				{
+					switch( e->key() )
+					{
+						case Qt::Key_Home:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OH"); break;
+						case Qt::Key_End:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OF"); break;
+						case Qt::Key_Up:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OA"); break;
+						case Qt::Key_Down:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OB"); break;
+						case Qt::Key_Right:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OC"); break;
+						case Qt::Key_Left:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("OD"); break;
+						default:
+							e->ignore();
+							break;
+					}
+				}
+				else
+				{
+					switch( e->key() )
+					{
+						case Qt::Key_Home:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[H"); break;
+						case Qt::Key_End:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[F"); break;
+						case Qt::Key_Up:				emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[A"); break;
+						case Qt::Key_Down:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[B"); break;
+						case Qt::Key_Right:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[C"); break;
+						case Qt::Key_Left:			emit sendAsciiChar(ASCII_ESC); emit sendAsciiString("[D"); break;
+						default:
+							e->ignore();
+							break;
+					}
+				}
+			break;
 		}
 		/** It was not a recognized special function key */
 		if ( !e->isAccepted() && e->text().length() )
 		{
-			unsigned int k = e->key();
+			//unsigned int k = e->key();
 			QString text = e->text();
-            emit sendAsciiString(text.toLatin1().data());
+      emit sendAsciiString(text.toLatin1().data());
 			if ( localEcho() )
 			{
 				for ( int n=0; n < text.length(); n++ )

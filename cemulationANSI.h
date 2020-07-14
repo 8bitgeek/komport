@@ -565,7 +565,7 @@ class CEmulationANSI : public CEmulation
 
 	protected slots:
 		virtual void		setApplicationCursorKeys(bool b)	{mApplicationCursorKeys=b;}
-		virtual void		setOriginMode(bool b)				{mOriginMode=b;}
+		virtual void		setOriginMode(bool b)							{mOriginMode=b;}
 		virtual void		setTopMargin(int top);
 		virtual void		setBottomMargin(int bottom);
 		virtual void		setGrid(int cols,int rows);
