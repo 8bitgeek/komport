@@ -1,5 +1,5 @@
 /**************************************************************************
-*   Author <mike@pikeaero.com> Mike Sharkey                               *
+*   Author <mike@8bitgeek.net> Mike Sharkey                               *
 *   Copyright (C) 2010 by Pike Aerospace Research Corporation             *
 *                                                                         *
 *   This program is free software: you can redistribute it and/or modify  *
@@ -37,7 +37,7 @@
  * @brief Implements a serial data class. Currently is intened to implement RS232 style device interface
  * @brief In time though class augt to be used as the generic base class / interface for general serial devices
  * @brief and the RS232 type devices aught to be supported in a class like STSerialRS232 or some such.
- * @author Mike Sharkey <mike@pikeaero.com>
+ * @author Mike Sharkey <mike@8bitgeek.net>
  */
 class CSerial : public QObject
 {

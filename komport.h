@@ -1,5 +1,5 @@
 /**************************************************************************
-*   Author <mike@pikeaero.com> Mike Sharkey                               *
+*   Author <mike@8bitgeek.net> Mike Sharkey                               *
 *   Copyright (C) 2010 by Pike Aerospace Research Corporation             *
 *                                                                         *
 *   This program is free software: you can redistribute it and/or modify  *
@@ -31,7 +31,7 @@
 #include "cemulation.h"
 #include "cled.h"
 
-#define KOMPORT_VERSION "V1.2.1"
+#define KOMPORT_VERSION "V1.2.2"
 
 namespace Ui
 {
