@@ -59,7 +59,7 @@ void CLed::_flush()
 	loop.processEvents();
 }
 
-void CLed::paintEvent(QPaintEvent* e)
+void CLed::paintEvent(QPaintEvent* /* e */)
 {
 	QPainter painter(this);
 	QPixmap pixmap(mState ? ":/images/ledgreen.png" : ":/images/ledoff.png");

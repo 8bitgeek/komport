@@ -1,4 +1,6 @@
 # komport
 
-* Serial Port Terminal Emulator with VT100 terminal emulation.
+* Serial Port Terminal Emulator with ANSI and VT102 terminal emulation.
+* Depends upon Qt5
+
 

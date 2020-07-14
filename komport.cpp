@@ -31,6 +31,7 @@
 #include <QByteArray>
 #include <QProgressDialog>
 #include <QTime>
+#include <QElapsedTimer>
 #include <QProcess>
 
 #ifdef Q_OS_WIN32
@@ -423,7 +424,7 @@ void Komport::openForegroundColorDialog()
 QString Komport::colorToHex(QColor c)
 {
 	QString hex;
-	hex.sprintf("%02x%02x%02x", c.red(), c.green(), c.blue() );
+	hex.asprintf("%02x%02x%02x", c.red(), c.green(), c.blue() );
 	return hex;
 }
 
@@ -467,7 +468,7 @@ void Komport::connectSerialToEmulation()
 void Komport::msleep(int msec)
 {
 	QEventLoop loop;
-	QTime timer;
+	QElapsedTimer timer;
 	for(timer.start(); timer.elapsed() < msec;)
 	{
 		loop.processEvents();

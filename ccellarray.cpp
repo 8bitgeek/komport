@@ -278,7 +278,7 @@ void CCellArray::deselectCells()
 }
 
 /* Append a character to the scroll buffer */
-void CCellArray::appendScrolled(CCell cell)
+void CCellArray::appendScrolled(CCell /* cell */)
 {
     // FIXME - prevent memory leak until implement scroll buffers
     //mScrollBuffer.append(cell);

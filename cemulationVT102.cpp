@@ -852,7 +852,7 @@ void CEmulationVT102::keyPressEvent(QKeyEvent* e)
 		/** It was not a recognized special function key */
 		if ( !e->isAccepted() && e->text().length() )
 		{
-			unsigned int k = e->key();
+			//unsigned int k = e->key();
 			QString text = e->text();
             emit sendAsciiString(text.toLatin1().data());
 			if ( localEcho() )
